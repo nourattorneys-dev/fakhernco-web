@@ -273,6 +273,7 @@ export type Homepage = {
   heroTitle: string | null;
   heroText: string | null;
   heroImage: { src: string; alt: string } | null;
+  sectionImages: { src: string; alt: string }[];
 };
 
 export type SiteSettings = {
@@ -285,6 +286,7 @@ export type SiteSettings = {
 export async function getHomepage(): Promise<Homepage | null> {
   const res = await strapiFetch<{ data: Record<string, any> | null }>('homepage', {
     'populate[heroImage]': 'true',
+    'populate[sectionImages]': 'true',
   });
   const d = res.data;
   if (!d) return null;
@@ -294,6 +296,12 @@ export async function getHomepage(): Promise<Homepage | null> {
     heroTitle: d.heroTitle ?? null,
     heroText: d.heroText ?? null,
     heroImage: src ? { src, alt: d.heroImage?.alternativeText ?? '' } : null,
+    sectionImages: ((d.sectionImages ?? []) as any[])
+      .map((f) => {
+        const url = mediaUrl(f?.url);
+        return url ? { src: url, alt: f?.alternativeText ?? '' } : null;
+      })
+      .filter(Boolean) as { src: string; alt: string }[],
   };
 }
 

@@ -95,7 +95,7 @@ export default async function HomePage() {
         the original's hero carousel, and the hero above already presents
         slide one. Rendering them again would restate it three times.
       */}
-      {home && home.blocks.length > 0 && <HomeSections blocks={home.blocks} skip={3} />}
+      {home && home.blocks.length > 0 && <HomeSections blocks={home.blocks} skip={3} images={hero?.sectionImages ?? []} />}
 
       {posts.length > 0 && (
         <section className="border-t border-line">
@@ -141,25 +141,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Closing CTA — the one full-black block on the page. */}
-      <section className="bg-ink">
-        <div className="site-container flex flex-wrap items-center justify-between gap-8 py-16">
-          <div>
-            <h2 className="max-w-[20ch] text-section text-white">
-              Speak to a lawyer about your matter.
-            </h2>
-            <p className="mt-3 max-w-[52ch] text-white/60">
-              Abu Dhabi · Mansoura · New Delhi. Monday to Friday, 9AM – 6PM.
-            </p>
-          </div>
-          <Link
-            href="/contact-us"
-            className="bg-white px-7 py-3.5 font-display text-sm font-700 text-ink transition-colors hover:bg-white/85"
-          >
-            Contact us
-          </Link>
-        </div>
-      </section>
     </>
   );
 }
