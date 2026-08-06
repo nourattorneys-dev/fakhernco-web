@@ -9,6 +9,17 @@ import {
   type Doc,
 } from '@/lib/content';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
+import { JsonLd } from '@/components/JsonLd';
+import { articleSchema, breadcrumbSchema, faqSchema, graph, serviceSchema } from '@/lib/schema';
+
+/**
+ * Slugs owned by a literal route (src/app/<slug>/page.tsx).
+ *
+ * A literal segment always beats [slug], so prerendering these here would
+ * generate pages that can never be served. Those routes render the same CMS
+ * records themselves.
+ */
+const LITERAL_ROUTES = new Set(['home', 'services', 'contact-us', 'legal-insights']);
 
 export const revalidate = 300;
 
@@ -24,7 +35,7 @@ export async function generateStaticParams() {
     getAllSlugs('case-studies'),
     getAllSlugs('practice-areas'),
   ]);
-  const all = [...areas, ...pages, ...posts, ...caseStudies].filter((s) => s !== 'home');
+  const all = [...areas, ...pages, ...posts, ...caseStudies].filter((s) => !LITERAL_ROUTES.has(s));
   return [...new Set(all)].map((slug) => ({ slug }));
 }
 
@@ -69,17 +80,33 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
 
   const area = doc.kind === 'practice-area' ? await getPracticeArea(doc.slug) : null;
   const label = LABEL[doc.kind];
+  const description = describe(doc);
+
+  const crumbs = [
+    { name: 'Home', path: '/' },
+    ...(doc.practiceArea ? [{ name: doc.practiceArea.title, path: `/${doc.practiceArea.slug}` }] : []),
+    { name: doc.title, path: `/${doc.slug}` },
+  ];
 
   return (
     <article>
+      <JsonLd
+        data={graph(
+          breadcrumbSchema(crumbs),
+          doc.kind === 'post' || doc.kind === 'case-study'
+            ? articleSchema(doc, description)
+            : serviceSchema(doc, description),
+          faqSchema(doc.blocks),
+        )}
+      />
       <header className="border-b border-line bg-surface-alt">
-        <div className="site-container py-14">
+        <div className="site-container py-16 lg:py-20">
           <nav aria-label="Breadcrumb" className="mb-4 text-xs text-muted">
-            <Link href="/" className="hover:text-navy">Home</Link>
+            <Link href="/" className="hover:text-ink">Home</Link>
             {doc.practiceArea && (
               <>
                 <span aria-hidden className="mx-1.5">/</span>
-                <Link href={`/${doc.practiceArea.slug}`} className="hover:text-navy">
+                <Link href={`/${doc.practiceArea.slug}`} className="hover:text-ink">
                   {doc.practiceArea.title}
                 </Link>
               </>
@@ -88,12 +115,10 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
             <span className="text-body">{doc.title}</span>
           </nav>
 
-          {label && (
-            <p className="text-2xs font-semibold uppercase tracking-[0.16em] text-brass">{label}</p>
-          )}
+          {label && <p className="eyebrow">{label}</p>}
 
           {/* The one and only H1 on the page. */}
-          <h1 className="mt-3 max-w-4xl text-3xl leading-[1.15] lg:text-4xl">{doc.title}</h1>
+          <h1 className="mt-4 max-w-[22ch] text-display">{doc.title}</h1>
 
           {(doc.excerpt || doc.summary) && (
             <p className="mt-4 max-w-2xl text-lg text-body">{doc.excerpt ?? doc.summary}</p>
@@ -135,14 +160,14 @@ async function PracticeAreaChildren({ slug }: { slug: string }) {
 
   return (
     <section className="border-t border-line bg-surface-alt">
-      <div className="site-container py-14">
-        <h2 className="text-2xl">Services in this practice area</h2>
-        <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="site-container py-16 lg:py-20">
+        <h2 className="text-section">Services in this practice area</h2>
+        <div className="mt-10 grid border-t border-l border-line sm:grid-cols-2 lg:grid-cols-3">
           {children.map((child) => (
             <Link
               key={child.slug}
               href={`/${child.slug}`}
-              className="rounded-md border border-line bg-surface p-5 transition-colors hover:border-brass"
+              className="border border-line bg-surface p-5 transition-colors hover:border-ink"
             >
               <h3 className="text-base leading-snug">{child.title}</h3>
             </Link>

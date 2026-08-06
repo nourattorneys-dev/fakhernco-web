@@ -1,26 +1,44 @@
 @import "tailwindcss";
 
 /**
- * Design tokens.
+ * Design tokens, taken from the live site and tightened.
  *
- * Tailwind v4 is CSS-first — there is no tailwind.config.js. Everything here
- * becomes a utility: --color-ink gives text-ink, bg-ink, border-ink.
+ * MONOCHROME BY DESIGN. The interface is black, white and greys only —
+ * every trace of colour on a page comes from photography. That is how the
+ * original reads (black chrome, colourful geometric hero art), and holding
+ * the rule strictly makes the images carry more weight than they did.
+ *
+ * Consequences worth knowing: hierarchy has to come from weight, scale and
+ * space rather than hue, and state (hover, focus, active) is expressed with
+ * value shifts and underlines. There is no accent colour to fall back on.
+ *
+ * Note there is NO grayscale filter on images anywhere — an earlier attempt
+ * at this site applied `img { filter: grayscale(100%) }` globally, which also
+ * desaturated the logo and every photograph.
  */
 @theme {
-  --color-ink: #10161c;
-  --color-ink-soft: #33404b;
-  --color-body: #4b5a66;
-  --color-muted: #74838f;
-  --color-line: #e2e7ea;
-  --color-line-soft: #eef1f3;
+  /* A real neutral ramp, replacing the single flat #808080 of the original. */
+  --color-ink: #141414;
+  --color-ink-2: #2b2b2b;
+  --color-body: #545454;
+  --color-muted: #7d7d7d;
+  --color-faint: #a3a3a3;
+  --color-line: #e3e3e3;
+  --color-line-soft: #efefef;
   --color-surface: #ffffff;
-  --color-surface-alt: #f6f8f9;
-  --color-brass: #9a7b3f;
-  --color-brass-soft: #f2ece0;
-  --color-navy: #16334d;
+  --color-surface-alt: #f5f5f5;
+  --color-bar: #101010;
 
-  --font-display: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: var(--font-roboto-condensed), "Roboto Condensed", Arial, sans-serif;
+  --font-sans: var(--font-sarabun), Sarabun, Arial, Helvetica, sans-serif;
+
+  /* Display scale — condensed type takes tight leading. */
+  --text-hero: clamp(2.75rem, 6.2vw, 5rem);
+  --text-hero--line-height: 0.96;
+  --text-display: clamp(2.125rem, 4.4vw, 3.5rem);
+  --text-display--line-height: 1.02;
+  --text-section: clamp(1.75rem, 2.8vw, 2.5rem);
+  --text-section--line-height: 1.08;
 
   --text-2xs: 0.6875rem;
 }
@@ -28,13 +46,13 @@
 /**
  * Base element styles MUST stay inside @layer base.
  *
- * In Tailwind v4 utilities live in their own layer, and any UNLAYERED rule
- * beats every layered one — an unlayered `h2 { color: ... }` would silently
- * defeat `text-white` on a heading.
+ * Tailwind v4 puts utilities in their own layer, and any UNLAYERED rule beats
+ * every layered one — an unlayered `h2 { color }` would silently defeat
+ * `text-white` on a heading.
  */
 @layer base {
   html {
-    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
   }
 
@@ -42,42 +60,69 @@
     background: var(--color-surface);
     color: var(--color-body);
     font-family: var(--font-sans);
-    line-height: 1.65;
+    font-size: 1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     color: var(--color-ink);
-    font-weight: 600;
-    letter-spacing: -0.015em;
+    font-weight: 700;
+    letter-spacing: -0.005em;
     text-wrap: balance;
   }
 
-  a {
-    color: inherit;
+  a { color: inherit; }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
   }
+
+  /* Photography keeps its colour — it is the only colour on the page. */
+  img { color-scheme: only light; }
 }
 
 .site-container {
   width: 100%;
-  max-width: 74rem;
+  max-width: 78rem;
   margin-inline: auto;
-  padding-inline: 1.5rem;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 640px) {
+  .site-container { padding-inline: 2rem; }
 }
 
-/** Imported WordPress prose, rendered through dangerouslySetInnerHTML. */
-.prose-body :where(a) {
-  color: var(--color-navy);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-.prose-body :where(a):hover {
-  color: var(--color-brass);
-}
-.prose-body :where(strong) {
+/** Small uppercase label that sits above every display heading. */
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
   color: var(--color-ink);
-  font-weight: 640;
 }
+
+/**
+ * Imported WordPress prose, rendered through dangerouslySetInnerHTML.
+ * Scoped rather than global so it cannot leak into UI chrome.
+ */
+.prose-body { color: var(--color-body); }
+/* No accent colour to lean on, so links are marked by weight + underline. */
+.prose-body :where(a) {
+  color: var(--color-ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--color-faint);
+  transition: text-decoration-color 0.15s ease;
+}
+.prose-body :where(a):hover { text-decoration-color: var(--color-ink); }
+.prose-body :where(strong) { color: var(--color-ink); font-weight: 600; }
+.prose-body :where(em) { font-style: italic; }
+.prose-body :where(p) + :where(p) { margin-top: 1rem; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

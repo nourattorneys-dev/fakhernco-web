@@ -39,7 +39,7 @@ function BlockItem({ block }: { block: Block }) {
       const Tag = block.ordered ? 'ol' : 'ul';
       return (
         <Tag
-          className={`${block.ordered ? 'list-decimal' : 'list-disc'} prose-body flex flex-col gap-2 pl-5 marker:text-brass`}
+          className={`${block.ordered ? 'list-decimal' : 'list-disc'} prose-body flex flex-col gap-2 pl-5 marker:text-muted`}
         >
           {block.items.map((item, i) => (
             <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
@@ -52,7 +52,7 @@ function BlockItem({ block }: { block: Block }) {
       return (
         // Wide tables scroll inside their own container so the page body never
         // scrolls sideways.
-        <div className="overflow-x-auto rounded-md border border-line">
+        <div className="overflow-x-auto border border-line">
           <table className="w-full min-w-[34rem] border-collapse text-sm">
             {block.headers.length > 0 && (
               <thead>
@@ -91,11 +91,11 @@ function BlockItem({ block }: { block: Block }) {
           {block.items.map((item, i) => (
             <details
               key={i}
-              className="group rounded-md border border-line bg-surface-alt px-4 py-3 open:bg-surface"
+              className="group border border-line bg-surface-alt px-4 py-3 open:bg-surface"
             >
               <summary className="cursor-pointer list-none font-medium text-ink marker:hidden">
-                <span className="mr-2 text-brass group-open:hidden">+</span>
-                <span className="mr-2 hidden text-brass group-open:inline">–</span>
+                <span className="mr-2 text-muted group-open:hidden">+</span>
+                <span className="mr-2 hidden text-muted group-open:inline">–</span>
                 {item.question}
               </summary>
               <p className="mt-2 pl-5 text-body">{item.answer}</p>
@@ -108,11 +108,11 @@ function BlockItem({ block }: { block: Block }) {
       return (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {block.items.map((card, i) => (
-            <div key={i} className="rounded-md border border-line bg-surface-alt p-5">
+            <div key={i} className="border border-line bg-surface-alt p-5">
               <h3 className="text-base font-semibold">{card.title}</h3>
               {card.text && <p className="mt-2 text-sm text-body">{card.text}</p>}
               {card.href && (
-                <a href={card.href} className="mt-3 inline-block text-sm text-navy underline">
+                <a href={card.href} className="mt-3 inline-block text-sm text-ink underline">
                   Read more
                 </a>
               )}
@@ -123,7 +123,7 @@ function BlockItem({ block }: { block: Block }) {
 
     case 'image':
       return (
-        <figure className="overflow-hidden rounded-md">
+        <figure className="overflow-hidden ">
           <Image
             src={block.src}
             alt={block.alt}
@@ -140,7 +140,7 @@ function BlockItem({ block }: { block: Block }) {
         <div>
           <a
             href={block.href}
-            className="inline-block rounded-sm bg-ink px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass"
+            className="inline-block bg-ink px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-ink-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             {block.text}
           </a>
@@ -149,7 +149,7 @@ function BlockItem({ block }: { block: Block }) {
 
     case 'quote':
       return (
-        <blockquote className="border-l-2 border-brass pl-5">
+        <blockquote className="border-l-2 border-ink pl-5">
           <div className="prose-body italic" dangerouslySetInnerHTML={{ __html: block.html }} />
           {block.attribution && (
             <cite className="mt-2 block text-sm not-italic text-muted">— {block.attribution}</cite>

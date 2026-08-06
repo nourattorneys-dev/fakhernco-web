@@ -230,6 +230,56 @@ export async function getPracticeAreas(): Promise<(Summary & { children: Summary
   }));
 }
 
+export type Homepage = {
+  heroEyebrow: string | null;
+  heroTitle: string | null;
+  heroText: string | null;
+  heroImage: { src: string; alt: string } | null;
+};
+
+export type SiteSettings = {
+  siteName: string;
+  tagline: string | null;
+  logo: { src: string; alt: string; width: number; height: number } | null;
+  footerText: string | null;
+};
+
+export async function getHomepage(): Promise<Homepage | null> {
+  const res = await strapiFetch<{ data: Record<string, any> | null }>('homepage', {
+    'populate[heroImage]': 'true',
+  });
+  const d = res.data;
+  if (!d) return null;
+  const src = mediaUrl(d.heroImage?.url);
+  return {
+    heroEyebrow: d.heroEyebrow ?? null,
+    heroTitle: d.heroTitle ?? null,
+    heroText: d.heroText ?? null,
+    heroImage: src ? { src, alt: d.heroImage?.alternativeText ?? '' } : null,
+  };
+}
+
+export async function getSiteSettings(): Promise<SiteSettings> {
+  const res = await strapiFetch<{ data: Record<string, any> | null }>('site-setting', {
+    'populate[logo]': 'true',
+  });
+  const d = res.data ?? {};
+  const src = mediaUrl(d.logo?.url);
+  return {
+    siteName: d.siteName ?? 'Fakher & Co',
+    tagline: d.tagline ?? null,
+    logo: src
+      ? {
+          src,
+          alt: d.logo?.alternativeText || d.siteName || 'Fakher & Co',
+          width: d.logo?.width ?? 640,
+          height: d.logo?.height ?? 171,
+        }
+      : null,
+    footerText: d.footerText ?? null,
+  };
+}
+
 export async function getAllSlugs(collection: string): Promise<string[]> {
   const rows = await strapiFetchAll<{ slug: string }>(collection, { 'fields[0]': 'slug' });
   return rows.map((r) => r.slug).filter(Boolean);

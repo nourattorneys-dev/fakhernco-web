@@ -25,7 +25,7 @@ export async function Footer() {
           <ul className="mt-3 flex flex-col gap-1.5 text-sm">
             {areas.map((a) => (
               <li key={a.slug}>
-                <Link href={`/${a.slug}`} className="hover:text-navy">{a.title}</Link>
+                <Link href={`/${a.slug}`} className="hover:text-ink">{a.title}</Link>
               </li>
             ))}
           </ul>
@@ -34,11 +34,11 @@ export async function Footer() {
         <div>
           <h2 className="text-2xs font-semibold uppercase tracking-[0.12em] text-muted">Firm</h2>
           <ul className="mt-3 flex flex-col gap-1.5 text-sm">
-            <li><Link href="/about-us" className="hover:text-navy">About us</Link></li>
-            <li><Link href="/meet-your-advocates" className="hover:text-navy">Meet your advocates</Link></li>
-            <li><Link href="/our-unwavering-principles" className="hover:text-navy">Our principles</Link></li>
-            <li><Link href="/legal-insights" className="hover:text-navy">Legal insights</Link></li>
-            <li><Link href="/contact-us" className="hover:text-navy">Contact</Link></li>
+            <li><Link href="/about-us" className="hover:text-ink">About us</Link></li>
+            <li><Link href="/meet-your-advocates" className="hover:text-ink">Meet your advocates</Link></li>
+            <li><Link href="/our-unwavering-principles" className="hover:text-ink">Our principles</Link></li>
+            <li><Link href="/legal-insights" className="hover:text-ink">Legal insights</Link></li>
+            <li><Link href="/contact-us" className="hover:text-ink">Contact</Link></li>
           </ul>
         </div>
 
@@ -48,7 +48,7 @@ export async function Footer() {
             {OFFICES.map((o) => (
               <li key={o.city}>
                 <span className="block text-ink">{o.city}, {o.country}</span>
-                <a href={`tel:${o.phone.replace(/\s/g, '')}`} className="text-body hover:text-navy">
+                <a href={`tel:${o.phone.replace(/\s/g, '')}`} className="text-body hover:text-ink">
                   {o.phone}
                 </a>
               </li>
@@ -60,7 +60,7 @@ export async function Footer() {
       <div className="border-t border-line">
         <div className="site-container flex flex-wrap items-center justify-between gap-3 py-5 text-xs text-muted">
           <p>© {new Date().getFullYear()} Fakher &amp; Co. All rights reserved.</p>
-          <Link href="/privacy-policy-2" className="hover:text-navy">Privacy policy</Link>
+          <Link href="/privacy-policy-2" className="hover:text-ink">Privacy policy</Link>
         </div>
       </div>
     </footer>
