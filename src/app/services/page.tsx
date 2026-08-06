@@ -30,7 +30,7 @@ export default async function ServicesPage() {
     <>
       <header className="border-b border-line">
         <div className="site-container py-16 lg:py-20">
-          <p className="eyebrow">Our Services</p>
+          <p className="eyebrow text-ink">Our Services</p>
           <h1 className="mt-4 max-w-[20ch] text-display">{page?.title ?? 'Legal Services'}</h1>
           <p className="mt-5 max-w-[56ch] text-lg text-body">
             {total} services across {areas.length} practice areas, for businesses, investors and

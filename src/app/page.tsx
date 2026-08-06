@@ -21,62 +21,73 @@ export default async function HomePage() {
   return (
     <>
       {/*
-        Hero: copy on the left, full-bleed photograph on the right.
-        The photograph is the only colour in the composition — everything
-        around it is black, white and grey, which is what makes it carry.
+        Hero: full-bleed photograph with the copy set over it.
+        The photograph is the only colour on the page — everything around it
+        is black, white and grey, which is what lets it carry the composition.
+
+        The scrim is a left-to-right gradient rather than a flat overlay, so
+        the right side of the image stays fully saturated while the text side
+        holds contrast. Text sits at roughly 15:1 against the darkened area.
       */}
-      <section className="border-b border-line">
-        <div className="grid lg:grid-cols-[1.05fr_1fr]">
-          <div className="flex items-center">
-            <div className="w-full py-16 pl-5 pr-5 sm:pl-8 lg:py-24 lg:pl-[max(2rem,calc((100vw-78rem)/2+2rem))] lg:pr-14">
-              <p className="eyebrow">{hero?.heroEyebrow ?? 'Trusted Law Firm in Abu Dhabi & Dubai'}</p>
+      <section className="relative flex min-h-[clamp(30rem,78vh,46rem)] items-center overflow-hidden bg-ink">
+        {/*
+          Positive z-indices, layered explicitly.
 
-              {/* The page's single H1. Content blocks can only emit h2-h4. */}
-              <h1 className="mt-5 text-hero">
-                {titleHead}
-                {titleTail.length > 0 && (
-                  <span className="text-muted"> in {titleTail.join(' in ')}</span>
-                )}
-              </h1>
+          A negative z-index here does NOT work: the section establishes a
+          stacking context, so the image would sit behind the section's own
+          background and be painted over entirely.
+        */}
+        {hero?.heroImage && (
+          <Image
+            src={hero.heroImage.src}
+            alt={hero.heroImage.alt}
+            fill
+            priority
+            sizes="100vw"
+            className="z-0 object-cover object-[62%_center]"
+          />
+        )}
+        <div
+          aria-hidden
+          className="absolute inset-0 z-10 bg-gradient-to-r from-black/92 via-black/70 to-black/30 lg:via-black/55 lg:to-black/10"
+        />
 
-              <p className="mt-7 max-w-[52ch] text-lg leading-relaxed text-body">
-                {hero?.heroText}
-              </p>
+        <div className="site-container relative z-20 py-20">
+          <p className="eyebrow max-w-[46ch] text-white/75">
+            {hero?.heroEyebrow ?? 'Trusted Law Firm in Abu Dhabi & Dubai'}
+          </p>
 
-              <div className="mt-10 flex flex-wrap items-center gap-3">
-                <Link
-                  href="/contact-us"
-                  className="bg-ink px-7 py-3.5 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2"
-                >
-                  Request a consultation
-                </Link>
-                <Link
-                  href="/services"
-                  className="border border-ink px-7 py-3.5 font-display text-sm font-700 text-ink transition-colors hover:bg-ink hover:text-white"
-                >
-                  Explore {serviceCount} services
-                </Link>
-              </div>
-            </div>
+          {/* The page's single H1. Content blocks can only emit h2-h4. */}
+          <h1 className="mt-5 text-hero text-white">
+            <span className="block">{titleHead}</span>
+            {titleTail.length > 0 && (
+              <span className="block text-white/55">in {titleTail.join(' in ')}</span>
+            )}
+          </h1>
+
+          <p className="mt-7 max-w-[50ch] text-lg leading-relaxed text-white/80">
+            {hero?.heroText}
+          </p>
+
+          <div className="mt-10 flex flex-wrap items-center gap-3">
+            <Link
+              href="/contact-us"
+              className="bg-white px-7 py-3.5 font-display text-sm font-700 text-ink transition-colors hover:bg-white/85"
+            >
+              Request a consultation
+            </Link>
+            <Link
+              href="/services"
+              className="border border-white/70 px-7 py-3.5 font-display text-sm font-700 text-white transition-colors hover:bg-white hover:text-ink"
+            >
+              Explore {serviceCount} services
+            </Link>
           </div>
-
-          {hero?.heroImage && (
-            <div className="relative min-h-[18rem] lg:min-h-[38rem]">
-              <Image
-                src={hero.heroImage.src}
-                alt={hero.heroImage.alt}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
-            </div>
-          )}
         </div>
       </section>
 
       {/* Credentials strip */}
-      <section className="border-b border-line bg-surface-alt">
+      <section className="border-b border-line">
         <div className="site-container grid grid-cols-2 gap-y-8 py-12 sm:grid-cols-4">
           {[
             ['2011', 'Established'],
@@ -98,7 +109,7 @@ export default async function HomePage() {
 
       {/* Practice areas */}
       <section className="site-container py-20">
-        <p className="eyebrow">Dedicated to your business</p>
+        <p className="eyebrow text-ink">Dedicated to your business</p>
         <h2 className="mt-4 max-w-[20ch] text-display">
           Legal challenges in the UAE require the right partner.
         </h2>
@@ -138,7 +149,7 @@ export default async function HomePage() {
           <div className="site-container py-20">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="eyebrow">Legal Insights</p>
+                <p className="eyebrow text-ink">Legal Insights</p>
                 <h2 className="mt-4 text-display">Guidance on UAE law</h2>
               </div>
               <Link

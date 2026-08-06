@@ -41,7 +41,7 @@ export default async function ContactPage() {
     <>
       <header className="border-b border-line">
         <div className="site-container py-16 lg:py-20">
-          <p className="eyebrow">Contact</p>
+          <p className="eyebrow text-ink">Contact</p>
           <h1 className="mt-4 max-w-[20ch] text-display">{page?.title ?? 'Contact Us'}</h1>
           <p className="mt-5 max-w-[56ch] text-lg text-body">
             Tell us about your matter and a member of our team will respond within one business day.

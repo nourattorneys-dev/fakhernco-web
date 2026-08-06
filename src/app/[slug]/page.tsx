@@ -115,7 +115,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
             <span className="text-body">{doc.title}</span>
           </nav>
 
-          {label && <p className="eyebrow">{label}</p>}
+          {label && <p className="eyebrow text-ink">{label}</p>}
 
           {/* The one and only H1 on the page. */}
           <h1 className="mt-4 max-w-[22ch] text-display">{doc.title}</h1>
