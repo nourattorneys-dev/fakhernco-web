@@ -4,6 +4,7 @@ import { getArabicPaths, getPracticeAreas, getSiteSettings } from '@/lib/content
 import type { Locale } from '@/lib/locale';
 import { href, t } from '@/lib/ui';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { NavGroup } from './NavGroup';
 
 const WHATSAPP = '+971502057209';
 
@@ -70,26 +71,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
             <TopLink href={L("/about-us")}>{s.about}</TopLink>
           )}
 
-          <div className="group relative">
-            <Link
-              href={L("/services")}
-              className="flex items-center gap-1.5 py-6 font-display text-[0.9375rem] font-600 text-ink transition-opacity hover:opacity-60"
-            >
-              {s.services}
-              <span aria-hidden className="text-[0.55rem] text-muted">▼</span>
-            </Link>
-
-            <div className="invisible absolute left-1/2 top-full w-[64rem] max-w-[95vw] -translate-x-1/2 pt-0 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-              {/*
-                Multi-column flow, not grid.
-
-                With a grid, every row is as tall as its tallest cell — and the
-                practice areas are wildly uneven (17 children vs 5). Litigation
-                and Personal & Criminal sat in the same row as Contracts and
-                were stretched to match it, leaving 8 and 12 rows of dead space
-                beneath their lists. Columns pack by height instead, and
-                break-inside-avoid keeps each block whole.
-              */}
+          <NavGroup href={L("/services")} label={s.services} wide>
               <div className="columns-2 gap-x-12 border border-line bg-surface card-p shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)] xl:columns-3">
                 {areas.map((area) => (
                   <div key={area.slug} className="mb-9 break-inside-avoid last:mb-0">
@@ -114,8 +96,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
+          </NavGroup>
 
           <TopLink href={L("/legal-insights")}>{s.insights}</TopLink>
           <TopLink href={L("/contact-us")}>{s.contact}</TopLink>
@@ -155,43 +136,6 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
         <Link href={L("/legal-insights")}>{s.insights}</Link>
       </nav>
     </header>
-  );
-}
-
-/**
- * Hover/focus disclosure shared by both menus.
- *
- * `group-focus-within` as well as `group-hover` so the menu is reachable by
- * keyboard — the original exposes its submenus on hover only.
- */
-function NavGroup({
-  href,
-  label,
-  children,
-  wide = false,
-}: {
-  href: string;
-  label: string;
-  children: React.ReactNode;
-  wide?: boolean;
-}) {
-  return (
-    <div className="group relative">
-      <Link
-        href={href}
-        className="flex items-center gap-1.5 py-6 font-display text-[0.9375rem] font-600 text-ink transition-opacity hover:opacity-60"
-      >
-        {label}
-        <span aria-hidden className="text-[0.55rem] text-muted">▼</span>
-      </Link>
-      <div
-        className={`invisible absolute top-full opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 ${
-          wide ? 'left-1/2 w-[64rem] max-w-[95vw] -translate-x-1/2' : 'left-0'
-        }`}
-      >
-        {children}
-      </div>
-    </div>
   );
 }
 
