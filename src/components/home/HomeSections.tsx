@@ -115,9 +115,24 @@ export function HomeSections({
     }
 
     // A heading whose entire body is call-to-action buttons.
+    //
+    // These arrive in consecutive pairs: the builder authored one CTA as a
+    // long sentence and the next as a short headline, each with its own
+    // button to the same URL. Rendered separately that is two stacked black
+    // bands saying the same thing twice. Collect the run and merge it.
     if (paragraphs(group).length === 0 && buttons(group).length > 0) {
-      rendered.push(<CtaBand key={`cta-${i}`} group={group} />);
-      i += 1;
+      const run = [group];
+      let j = i + 1;
+      while (
+        j < groups.length &&
+        paragraphs(groups[j]).length === 0 &&
+        buttons(groups[j]).length > 0
+      ) {
+        run.push(groups[j]);
+        j += 1;
+      }
+      rendered.push(<CtaBand key={`cta-${i}`} groups={run} />);
+      i = j;
       band += 1;
       continue;
     }
@@ -350,27 +365,53 @@ function Offices({
   );
 }
 
-/** A heading whose whole body is calls to action. Rendered inverted. */
-function CtaBand({ group }: { group: Group }) {
-  const btns = buttons(group);
+/**
+ * The closing call to action, inverted.
+ *
+ * Takes a run of CTA groups rather than one. The shortest heading becomes the
+ * headline — it is the punchy one ("Ready to Protect Your Legal Interests?")
+ * — and the longer sentences become supporting copy beneath it. Buttons are
+ * deduplicated by destination, because both of these pointed at /contact-us
+ * with different labels; the shorter label wins.
+ */
+function CtaBand({ groups }: { groups: Group[] }) {
+  const headings = groups.map((g) => g.heading).sort((a, b) => a.length - b.length);
+  const [headline, ...supporting] = headings;
+
+  const seen = new Map<string, Extract<Block, { type: 'button' }>>();
+  for (const b of groups.flatMap(buttons)) {
+    const key = internal(b.href);
+    const existing = seen.get(key);
+    if (!existing || b.text.length < existing.text.length) seen.set(key, b);
+  }
+  const btns = [...seen.values()];
+
   return (
     <section className="bg-ink">
-      <div className="site-container section-tight flex flex-wrap items-center justify-between gap-8">
-        <h2 className="max-w-[30ch] text-section text-white">{group.heading}</h2>
-        <div className="flex flex-wrap gap-3">
-          {btns.map((b, i) => (
-            <Link
-              key={i}
-              href={internal(b.href)}
-              className={
-                i === 0
-                  ? 'bg-white px-7 py-3.5 font-display text-sm font-700 text-ink transition-colors hover:bg-white/85'
-                  : 'border border-white/70 px-7 py-3.5 font-display text-sm font-700 text-white transition-colors hover:bg-white hover:text-ink'
-              }
-            >
-              {b.text}
-            </Link>
-          ))}
+      <div className="site-container section">
+        <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+          <div className="max-w-[46ch]">
+            <h2 className="text-display text-white">{headline}</h2>
+            {supporting.length > 0 && (
+              <p className="mt-5 text-lead text-white/65">{supporting.join(' ')}</p>
+            )}
+          </div>
+
+          <div className="flex shrink-0 flex-wrap gap-3">
+            {btns.map((b, i) => (
+              <Link
+                key={i}
+                href={internal(b.href)}
+                className={
+                  i === 0
+                    ? 'bg-white px-8 py-4 font-display text-sm font-700 text-ink transition-colors hover:bg-white/85'
+                    : 'border border-white/60 px-8 py-4 font-display text-sm font-700 text-white transition-colors hover:bg-white hover:text-ink'
+                }
+              >
+                {b.text}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>

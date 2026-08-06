@@ -33,7 +33,7 @@ export async function Header() {
               <span aria-hidden className="text-[0.55rem] text-muted">▼</span>
             </Link>
 
-            <div className="invisible absolute left-1/2 top-full w-[58rem] max-w-[94vw] -translate-x-1/2 pt-0 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+            <div className="invisible absolute left-1/2 top-full w-[64rem] max-w-[95vw] -translate-x-1/2 pt-0 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
               {/*
                 Multi-column flow, not grid.
 
@@ -44,21 +44,21 @@ export async function Header() {
                 beneath their lists. Columns pack by height instead, and
                 break-inside-avoid keeps each block whole.
               */}
-              <div className="columns-2 gap-x-10 border border-line bg-surface card-p shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)] xl:columns-3">
+              <div className="columns-2 gap-x-12 border border-line bg-surface card-p shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)] xl:columns-3">
                 {areas.map((area) => (
-                  <div key={area.slug} className="mb-7 break-inside-avoid last:mb-0">
+                  <div key={area.slug} className="mb-9 break-inside-avoid last:mb-0">
                     <Link
                       href={`/${area.slug}`}
-                      className="block border-b border-line pb-2 font-display text-xs font-700 uppercase tracking-[0.08em] text-ink hover:opacity-60"
+                      className="block border-b-2 border-ink pb-2.5 font-display text-[0.9375rem] font-700 uppercase tracking-[0.06em] text-ink transition-opacity hover:opacity-60"
                     >
                       {area.title}
                     </Link>
-                    <ul className="mt-3 flex flex-col gap-1.5">
+                    <ul className="mt-4 flex flex-col gap-2">
                       {area.children.map((child) => (
                         <li key={child.slug}>
                           <Link
                             href={`/${child.slug}`}
-                            className="block text-[0.8125rem] leading-snug text-body transition-colors hover:text-ink"
+                            className="block text-[0.9063rem] leading-snug text-body transition-colors hover:text-ink"
                           >
                             {child.title}
                           </Link>
@@ -91,7 +91,7 @@ export async function Header() {
       {/* Mobile: the original exposes no service links at all below 980px. */}
       <nav
         aria-label="Sections"
-        className="flex gap-5 overflow-x-auto border-t border-line-soft px-5 py-2.5 text-[0.8125rem] whitespace-nowrap lg:hidden"
+        className="flex gap-5 overflow-x-auto border-t border-line-soft px-5 py-3 text-[0.875rem] whitespace-nowrap lg:hidden"
       >
         <Link href="/about-us">About</Link>
         <Link href="/services" className="font-600">Services</Link>
