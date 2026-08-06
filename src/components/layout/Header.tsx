@@ -27,10 +27,21 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur-sm">
-      <div className="site-container flex h-[4.5rem] items-center justify-between gap-8">
-        <Wordmark logo={site.logo} name={site.siteName} homeHref={L("/")} />
+      {/*
+        Three columns, not flex justify-between.
+        
+        The nav must sit in the same place on every page. With justify-between
+        it is the middle flex item, so its position depends on the width of
+        both siblings — and the language switcher only renders where an Arabic
+        version exists, which moved the whole menu 45px between pages. A grid
+        with equal side tracks pins the centre column regardless.
+      */}
+      <div className="site-container grid h-[4.5rem] grid-cols-[1fr_auto_1fr] items-center gap-6">
+        <div className="justify-self-start">
+          <Wordmark logo={site.logo} name={site.siteName} homeHref={L("/")} />
+        </div>
 
-        <nav aria-label={s.mainNav} className="hidden items-center gap-8 lg:flex">
+        <nav aria-label={s.mainNav} className="hidden items-center justify-self-center gap-8 lg:flex">
           {site.aboutLinks.length > 0 ? (
             <NavGroup href={L("/about-us")} label={s.about}>
               <ul className="flex w-64 flex-col border border-line bg-surface p-2 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)]">
@@ -107,20 +118,25 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
 
           <TopLink href={L("/legal-insights")}>{s.insights}</TopLink>
           <TopLink href={L("/contact-us")}>{s.contact}</TopLink>
-          <LanguageSwitcher translated={arabicPaths} />
         </nav>
 
-        <a
-          href={`https://wa.me/${WHATSAPP.replace('+', '')}`}
-          className="hidden items-center gap-2 bg-ink px-5 py-2.5 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2 sm:flex"
-        >
-          <span aria-hidden>✆</span>
-          <span>{WHATSAPP}</span>
-        </a>
+        <div className="flex items-center justify-self-end gap-3">
+          <LanguageSwitcher translated={arabicPaths} />
+          <a
+            href={`https://wa.me/${WHATSAPP.replace('+', '')}`}
+            className="hidden items-center gap-2 bg-ink px-5 py-2.5 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2 sm:flex"
+          >
+            <span aria-hidden>✆</span>
+            <span>{WHATSAPP}</span>
+          </a>
 
-        <Link href={L("/contact-us")} className="font-display text-sm font-700 text-ink sm:hidden">
-          {s.contact}
-        </Link>
+          <Link
+            href={L('/contact-us')}
+            className="font-display text-sm font-700 text-ink sm:hidden"
+          >
+            {s.contact}
+          </Link>
+        </div>
       </div>
 
       {/* Mobile: the original exposes no service links at all below 980px. */}
