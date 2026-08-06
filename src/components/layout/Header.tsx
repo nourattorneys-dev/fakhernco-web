@@ -27,7 +27,32 @@ export async function Header() {
         <Wordmark logo={site.logo} name={site.siteName} />
 
         <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
-          <TopLink href="/about-us">About Us</TopLink>
+          {site.aboutLinks.length > 0 ? (
+            <NavGroup href="/about-us" label="About Us">
+              <ul className="flex w-64 flex-col border border-line bg-surface p-2 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)]">
+                <li>
+                  <Link
+                    href="/about-us"
+                    className="block px-4 py-2.5 font-display text-[0.9063rem] font-600 text-ink hover:bg-surface-alt"
+                  >
+                    About Us
+                  </Link>
+                </li>
+                {site.aboutLinks.map((item) => (
+                  <li key={item.slug}>
+                    <Link
+                      href={`/${item.slug}`}
+                      className="block px-4 py-2.5 text-[0.9063rem] leading-snug text-body transition-colors hover:bg-surface-alt hover:text-ink"
+                    >
+                      {item.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </NavGroup>
+          ) : (
+            <TopLink href="/about-us">About Us</TopLink>
+          )}
 
           <div className="group relative">
             <Link
@@ -109,6 +134,43 @@ export async function Header() {
         <Link href="/legal-insights">Insights</Link>
       </nav>
     </header>
+  );
+}
+
+/**
+ * Hover/focus disclosure shared by both menus.
+ *
+ * `group-focus-within` as well as `group-hover` so the menu is reachable by
+ * keyboard — the original exposes its submenus on hover only.
+ */
+function NavGroup({
+  href,
+  label,
+  children,
+  wide = false,
+}: {
+  href: string;
+  label: string;
+  children: React.ReactNode;
+  wide?: boolean;
+}) {
+  return (
+    <div className="group relative">
+      <Link
+        href={href}
+        className="flex items-center gap-1.5 py-6 font-display text-[0.9375rem] font-600 text-ink transition-opacity hover:opacity-60"
+      >
+        {label}
+        <span aria-hidden className="text-[0.55rem] text-muted">▼</span>
+      </Link>
+      <div
+        className={`invisible absolute top-full opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 ${
+          wide ? 'left-1/2 w-[64rem] max-w-[95vw] -translate-x-1/2' : 'left-0'
+        }`}
+      >
+        {children}
+      </div>
+    </div>
   );
 }
 

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getPracticeAreas } from '@/lib/content';
+import { getPracticeAreas, getSiteSettings } from '@/lib/content';
 
 const OFFICES = [
   { city: 'Abu Dhabi', country: 'UAE', phone: '+971 50 205 7209' },
@@ -8,7 +8,7 @@ const OFFICES = [
 ];
 
 export async function Footer() {
-  const areas = await getPracticeAreas();
+  const [areas, site] = await Promise.all([getPracticeAreas(), getSiteSettings()]);
 
   return (
     <footer className="mt-24 border-t border-line bg-surface-alt">
@@ -35,8 +35,11 @@ export async function Footer() {
           <h2 className="text-2xs font-semibold uppercase tracking-[0.12em] text-muted">Firm</h2>
           <ul className="mt-3 flex flex-col gap-1.5 text-sm">
             <li><Link href="/about-us" className="hover:text-ink">About us</Link></li>
-            <li><Link href="/meet-your-advocates" className="hover:text-ink">Meet your advocates</Link></li>
-            <li><Link href="/our-unwavering-principles" className="hover:text-ink">Our principles</Link></li>
+            {site.aboutLinks.map((item) => (
+              <li key={item.slug}>
+                <Link href={`/${item.slug}`} className="hover:text-ink">{item.title}</Link>
+              </li>
+            ))}
             <li><Link href="/legal-insights" className="hover:text-ink">Legal insights</Link></li>
             <li><Link href="/contact-us" className="hover:text-ink">Contact</Link></li>
           </ul>

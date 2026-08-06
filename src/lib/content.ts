@@ -281,6 +281,7 @@ export type SiteSettings = {
   tagline: string | null;
   logo: { src: string; alt: string; width: number; height: number } | null;
   footerText: string | null;
+  aboutLinks: { title: string; slug: string }[];
 };
 
 export async function getHomepage(): Promise<Homepage | null> {
@@ -323,6 +324,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         }
       : null,
     footerText: d.footerText ?? null,
+    aboutLinks: Array.isArray(d.aboutLinks) ? d.aboutLinks : [],
   };
 }
 
