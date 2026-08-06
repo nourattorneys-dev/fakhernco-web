@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getHomepage, getPage, getPracticeAreas, getPosts } from '@/lib/content';
-import { BlockRenderer } from '@/components/blocks/BlockRenderer';
+import { HomeSections } from '@/components/home/HomeSections';
 
 export const revalidate = 300;
 
@@ -136,13 +136,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {home && home.blocks.length > 0 && (
-        <section className="border-t border-line bg-surface-alt">
-          <div className="site-container max-w-3xl py-20">
-            <BlockRenderer blocks={home.blocks} />
-          </div>
-        </section>
-      )}
+      {/*
+        The migrated homepage copy, as editorial sections rather than one long
+        prose column. `skip={1}` drops the first group, which restates the hero
+        verbatim — the old builder repeated it because the hero was itself a
+        content block.
+      */}
+      {home && home.blocks.length > 0 && <HomeSections blocks={home.blocks} skip={1} />}
 
       {posts.length > 0 && (
         <section className="border-t border-line">
