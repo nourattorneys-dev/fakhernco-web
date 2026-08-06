@@ -102,7 +102,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
       />
 
       <header className="border-b border-line bg-surface-alt">
-        <div className="site-container py-12 lg:py-16">
+        <div className="site-container section-tight">
           <nav aria-label="Breadcrumb" className="text-xs text-muted">
             <Link href="/" className="hover:text-ink">Home</Link>
             {doc.practiceArea && (
@@ -120,7 +120,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
           {label && <p className="eyebrow mt-6 text-muted">{label}</p>}
 
           {/* The one and only H1 on the page. */}
-          <h1 className="mt-3 max-w-[24ch] text-display">{doc.title}</h1>
+          <h1 className="mt-4 max-w-[24ch] text-display">{doc.title}</h1>
 
           {description && (
             <p className="mt-5 max-w-[62ch] text-lg leading-relaxed text-body">{description}</p>
@@ -152,7 +152,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
         each service now links to its siblings, which the WordPress site never
         did from the body of a page.
       */}
-      <div className="site-container grid gap-12 py-14 lg:grid-cols-[minmax(0,44rem)_1fr] lg:gap-16">
+      <div className="site-container section grid gap-12 lg:grid-cols-[minmax(0,44rem)_1fr] lg:gap-16">
         <div>
           {doc.blocks.length > 0 ? (
             <BlockRenderer blocks={doc.blocks} />
@@ -162,7 +162,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
         </div>
 
         <aside className="lg:sticky lg:top-28 lg:self-start">
-          <div className="bg-ink p-7 text-white">
+          <div className="bg-ink card-p text-white">
             <h2 className="text-xl text-white">Speak to a lawyer</h2>
             <p className="mt-3 text-sm leading-relaxed text-white/70">
               Tell us about your matter and a member of our team will respond within one business
@@ -213,7 +213,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
       </div>
 
       <section className="border-t border-line bg-surface-alt">
-        <div className="site-container flex flex-wrap items-center justify-between gap-6 py-14">
+        <div className="site-container section-tight flex flex-wrap items-center justify-between gap-6">
           <h2 className="max-w-[26ch] text-section">Not sure where your matter fits? Ask us.</h2>
           <Link
             href="/contact-us"

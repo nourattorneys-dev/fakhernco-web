@@ -19,7 +19,7 @@ export default async function InsightsPage() {
   return (
     <>
       <header className="border-b border-line">
-        <div className="site-container py-14 lg:py-16">
+        <div className="site-container section">
           <p className="eyebrow text-ink">Legal Insights</p>
           <h1 className="mt-4 text-display">Guidance on UAE law</h1>
           <p className="mt-5 max-w-[58ch] text-lg text-body">
@@ -29,7 +29,7 @@ export default async function InsightsPage() {
         </div>
       </header>
 
-      <div className="site-container py-12">
+      <div className="site-container section-tight">
         <InsightGrid posts={posts.slice(0, PER_PAGE)} />
         <Pagination page={1} pageCount={pageCount} basePath="/legal-insights" />
       </div>

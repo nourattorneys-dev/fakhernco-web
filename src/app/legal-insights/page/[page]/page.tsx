@@ -45,7 +45,7 @@ export default async function InsightsPaged({ params }: { params: Promise<{ page
   return (
     <>
       <header className="border-b border-line">
-        <div className="site-container py-14 lg:py-16">
+        <div className="site-container section">
           <p className="eyebrow text-ink">Legal Insights</p>
           <h1 className="mt-4 text-display">Guidance on UAE law</h1>
           <p className="mt-5 text-lg text-body">
@@ -55,7 +55,7 @@ export default async function InsightsPaged({ params }: { params: Promise<{ page
         </div>
       </header>
 
-      <div className="site-container py-12">
+      <div className="site-container section-tight">
         <InsightGrid posts={posts.slice(start, start + PER_PAGE)} />
         <Pagination page={page} pageCount={pageCount} basePath="/legal-insights" />
       </div>

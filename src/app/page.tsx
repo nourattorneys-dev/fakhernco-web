@@ -99,7 +99,7 @@ export default async function HomePage() {
 
       {posts.length > 0 && (
         <section className="border-t border-line">
-          <div className="site-container py-20">
+          <div className="site-container section">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="eyebrow text-ink">Legal Insights</p>
@@ -113,12 +113,12 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="mt-12 grid gap-px border border-line bg-line md:grid-cols-3">
+            <div className="section-body grid gap-px border border-line bg-line md:grid-cols-3">
               {posts.slice(0, 3).map((post) => (
                 <Link
                   key={post.slug}
                   href={`/${post.slug}`}
-                  className="group flex flex-col bg-surface p-8 transition-colors hover:bg-surface-alt"
+                  className="group flex flex-col bg-surface card-p transition-colors hover:bg-surface-alt"
                 >
                   {post.date && (
                     <time

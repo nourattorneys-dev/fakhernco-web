@@ -40,16 +40,16 @@ export default async function ContactPage() {
   return (
     <>
       <header className="border-b border-line">
-        <div className="site-container py-16 lg:py-20">
+        <div className="site-container section-tight">
           <p className="eyebrow text-ink">Contact</p>
-          <h1 className="mt-4 max-w-[20ch] text-display">{page?.title ?? 'Contact Us'}</h1>
+          <h1 className="mt-4 max-w-[24ch] text-display">{page?.title ?? 'Contact Us'}</h1>
           <p className="mt-5 max-w-[56ch] text-lg text-body">
             Tell us about your matter and a member of our team will respond within one business day.
           </p>
         </div>
       </header>
 
-      <div className="site-container grid gap-16 py-16 lg:grid-cols-[1.15fr_1fr]">
+      <div className="site-container section grid gap-16 lg:grid-cols-[1.15fr_1fr]">
         <div>
           <h2 className="sr-only">Enquiry form</h2>
           <ContactForm />

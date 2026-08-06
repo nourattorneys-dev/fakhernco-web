@@ -29,9 +29,9 @@ export default async function ServicesPage() {
   return (
     <>
       <header className="border-b border-line">
-        <div className="site-container py-16 lg:py-20">
+        <div className="site-container section-tight">
           <p className="eyebrow text-ink">Our Services</p>
-          <h1 className="mt-4 max-w-[20ch] text-display">{page?.title ?? 'Legal Services'}</h1>
+          <h1 className="mt-4 max-w-[24ch] text-display">{page?.title ?? 'Legal Services'}</h1>
           <p className="mt-5 max-w-[56ch] text-lg text-body">
             {total} services across {areas.length} practice areas, for businesses, investors and
             individuals across the UAE.
@@ -41,7 +41,7 @@ export default async function ServicesPage() {
 
       {areas.map((area, i) => (
         <section key={area.slug} className="border-b border-line">
-          <div className="site-container py-14">
+          <div className="site-container section-tight">
             <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
               <span className="font-display text-xs font-700 tabular-nums text-faint">
                 {String(i + 1).padStart(2, '0')}
@@ -71,7 +71,7 @@ export default async function ServicesPage() {
       ))}
 
       {page && page.blocks.length > 0 && (
-        <div className="site-container max-w-3xl py-16">
+        <div className="site-container section-tight max-w-[46rem]">
           <BlockRenderer blocks={page.blocks} />
         </div>
       )}

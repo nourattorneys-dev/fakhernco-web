@@ -44,7 +44,7 @@ export async function Header() {
                 beneath their lists. Columns pack by height instead, and
                 break-inside-avoid keeps each block whole.
               */}
-              <div className="columns-2 gap-x-10 border border-line bg-surface p-8 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)] xl:columns-3">
+              <div className="columns-2 gap-x-10 border border-line bg-surface card-p shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)] xl:columns-3">
                 {areas.map((area) => (
                   <div key={area.slug} className="mb-7 break-inside-avoid last:mb-0">
                     <Link

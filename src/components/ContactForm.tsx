@@ -45,7 +45,7 @@ export function ContactForm() {
   if (state === 'sent') {
     return (
       <div className="border border-ink p-8">
-        <h2 className="text-xl">Thank you — your enquiry has been received.</h2>
+        <h2 className="text-card">Thank you — your enquiry has been received.</h2>
         <p className="mt-3 text-body">
           A member of our team will respond within one business day. We have sent a confirmation to
           your email address. If your matter is urgent, call{' '}

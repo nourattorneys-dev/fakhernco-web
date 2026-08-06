@@ -170,7 +170,7 @@ function Editorial({
   if (!image) {
     return (
       <section className={`border-t border-line ${alt ? 'bg-surface-alt' : ''}`}>
-        <div className="site-container grid gap-8 py-14 lg:grid-cols-[minmax(0,24rem)_1fr] lg:gap-16 lg:py-20">
+        <div className="site-container section grid gap-8 lg:grid-cols-[minmax(0,24rem)_1fr] lg:gap-16">
           <h2 className="text-section lg:sticky lg:top-28 lg:self-start">{group.heading}</h2>
           <div className="flex max-w-[62ch] flex-col gap-5">
             {paras.map((p, i) => <Para key={i} html={p.html} />)}
@@ -183,7 +183,7 @@ function Editorial({
 
   return (
     <section className={`border-t border-line ${alt ? 'bg-surface-alt' : ''}`}>
-      <div className="site-container grid items-center gap-10 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
+      <div className="site-container section grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         <div className={flip ? 'lg:order-2' : ''}>{copy}</div>
         <div className={`relative aspect-[4/3] overflow-hidden ${flip ? 'lg:order-1' : ''}`}>
           <Image
@@ -215,10 +215,10 @@ function CardRow({
 
   return (
     <section className={`border-t border-line ${alt ? 'bg-surface-alt' : ''}`}>
-      <div className="site-container py-14 lg:py-20">
+      <div className="site-container section">
         <h2 className="max-w-[24ch] text-section">{lead.replace(/:$/, '')}</h2>
 
-        <div className={`mt-12 grid gap-px border border-line bg-line sm:grid-cols-2 ${cols}`}>
+        <div className={`section-body grid gap-px border border-line bg-line sm:grid-cols-2 ${cols}`}>
           {cards.map((card, i) => {
             const title = card.heading.replace(STEP, '').trim();
             const step = numbered ? (card.heading.match(STEP)?.[1] ?? String(i + 1)) : null;
@@ -226,7 +226,7 @@ function CardRow({
             const link = buttons(card)[0];
 
             return (
-              <div key={card.heading} className="flex flex-col bg-surface p-7">
+              <div key={card.heading} className="flex flex-col bg-surface card-p">
                 <span className="font-display text-xs font-700 tracking-[0.08em] tabular-nums text-faint">
                   {step ? `STEP ${step.padStart(2, '0')}` : String(i + 1).padStart(2, '0')}
                 </span>
@@ -301,7 +301,7 @@ function Offices({
 
   return (
     <section className={`border-t border-line ${alt ? 'bg-surface-alt' : ''}`}>
-      <div className="site-container py-14 lg:py-20">
+      <div className="site-container section">
         <p className="eyebrow text-muted">Our office locations</p>
         <h2 className="mt-4 text-section">{group.heading}</h2>
         {intro && (
@@ -311,9 +311,9 @@ function Offices({
           />
         )}
 
-        <div className="mt-12 grid gap-px border border-line bg-line lg:grid-cols-3">
+        <div className="section-body grid gap-px border border-line bg-line lg:grid-cols-3">
           {offices.map((office, i) => (
-            <div key={office.name} className="flex flex-col bg-surface p-7">
+            <div key={office.name} className="flex flex-col bg-surface card-p">
               <span className="font-display text-xs font-700 tracking-[0.08em] tabular-nums text-faint">
                 {String(i + 1).padStart(2, '0')}
               </span>
@@ -355,7 +355,7 @@ function CtaBand({ group }: { group: Group }) {
   const btns = buttons(group);
   return (
     <section className="bg-ink">
-      <div className="site-container flex flex-wrap items-center justify-between gap-8 py-14 lg:py-16">
+      <div className="site-container section-tight flex flex-wrap items-center justify-between gap-8">
         <h2 className="max-w-[30ch] text-section text-white">{group.heading}</h2>
         <div className="flex flex-wrap gap-3">
           {btns.map((b, i) => (

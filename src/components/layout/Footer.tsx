@@ -12,7 +12,7 @@ export async function Footer() {
 
   return (
     <footer className="mt-24 border-t border-line bg-surface-alt">
-      <div className="site-container grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="site-container section-tight grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="font-display text-lg font-semibold text-ink">Fakher &amp; Co</p>
           <p className="mt-2 text-sm text-body">
