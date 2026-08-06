@@ -18,6 +18,7 @@ export type Block =
   | { type: 'faq'; items: { question: string; answer: string }[] }
   | { type: 'cards'; items: { title: string; text?: string | null; href?: string | null }[] }
   | { type: 'image'; src: string; alt: string }
+  | { type: 'gallery'; items: { src: string; alt: string }[] }
   | { type: 'button'; text: string; href: string }
   | { type: 'quote'; html: string; attribution?: string | null };
 
@@ -119,6 +120,18 @@ function toBlock(c: StrapiComponent): Block | null {
         alt: altText(String(c.alt ?? file?.alternativeText ?? ''), String(c.legacySrc ?? src)),
       };
     }
+    case 'blocks.gallery': {
+      const items = ((c.items ?? []) as any[])
+        .map((i) => {
+          const file = i.file as { url?: string; alternativeText?: string } | null;
+          const src = mediaUrl(file?.url) ?? (i.legacySrc ? String(i.legacySrc) : null);
+          return src
+            ? { src, alt: altText(String(i.alt ?? file?.alternativeText ?? ''), String(i.legacySrc ?? src)) }
+            : null;
+        })
+        .filter(Boolean) as { src: string; alt: string }[];
+      return items.length ? { type: 'gallery', items } : null;
+    }
     case 'blocks.button':
       return { type: 'button', text: String(c.text ?? ''), href: String(c.href ?? '') };
     case 'blocks.quote':
@@ -144,10 +157,35 @@ const mapDoc = (raw: Record<string, any>, kind: Doc['kind']): Doc => ({
   blocks: ((raw.blocks ?? []) as StrapiComponent[]).map(toBlock).filter(Boolean) as Block[],
 });
 
-const POPULATE = {
-  'populate[blocks][populate]': '*',
+/**
+ * Dynamic-zone population, per component.
+ *
+ * `populate[blocks][populate]=*` only reaches one level, so a gallery's items
+ * come back with `file: null` and every carousel image silently disappears.
+ * The `on` syntax lets each component declare its own depth — but note it is
+ * exhaustive: a component missing from this map is not populated at all, so
+ * adding a block type means adding a line here too.
+ */
+const BLOCK_COMPONENTS = [
+  'blocks.heading',
+  'blocks.paragraph',
+  'blocks.list',
+  'blocks.data-table',
+  'blocks.faq',
+  'blocks.cards',
+  'blocks.image',
+  'blocks.button',
+  'blocks.quote',
+] as const;
+
+const POPULATE: Record<string, string> = {
   'populate[seo]': 'true',
-} as const;
+  // Two levels deep: gallery -> items -> file.
+  'populate[blocks][on][blocks.gallery][populate][items][populate]': '*',
+  ...Object.fromEntries(
+    BLOCK_COMPONENTS.map((c) => [`populate[blocks][on][${c}][populate]`, '*']),
+  ),
+};
 
 // ------------------------------------------------------------------ queries
 

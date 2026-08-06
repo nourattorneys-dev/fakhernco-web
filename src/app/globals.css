@@ -84,51 +84,54 @@
   img { color-scheme: only light; }
 }
 
-.site-container {
-  width: 100%;
-  max-width: 78rem;
-  margin-inline: auto;
-  padding-inline: 1.25rem;
-}
-@media (min-width: 640px) {
-  .site-container { padding-inline: 2rem; }
-}
-
 /**
- * Small uppercase label above every display heading.
+ * Component classes live in @layer components, NOT unlayered.
  *
- * Deliberately sets no colour. This class is unlayered, so a `color` here
- * would beat every Tailwind `text-*` utility (utilities live in their own
- * layer) and silently defeat the white variant used on the dark hero.
- * Colour is applied at each usage site instead.
+ * Tailwind v4 cascade order is theme -> base -> components -> utilities, so
+ * anything in this layer can be overridden by a utility. Unlayered rules beat
+ * EVERY layered one, which bit three times during this build:
+ *   - `.site-container` max-width defeated `max-w-3xl`, so article text ran
+ *     the full 78rem instead of a readable measure
+ *   - `.eyebrow` colour defeated `text-white/75` on the dark hero
+ *   - `.prose-body` colour defeated inherited colour inside dark sections
+ * Keep new component classes in here.
  */
-.eyebrow {
-  font-family: var(--font-display);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
+@layer components {
+  .site-container {
+    width: 100%;
+    max-width: 78rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .site-container { padding-inline: 2rem; }
+  }
 
-/**
- * Imported WordPress prose, rendered through dangerouslySetInnerHTML.
- * Scoped rather than global so it cannot leak into UI chrome.
- */
-.prose-body { color: var(--color-body); }
-/* No accent colour to lean on, so links are marked by weight + underline. */
-.prose-body :where(a) {
-  color: var(--color-ink);
-  font-weight: 500;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-  text-decoration-thickness: 1px;
-  text-decoration-color: var(--color-faint);
-  transition: text-decoration-color 0.15s ease;
+  /** Small uppercase label above every display heading. */
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  /** Imported WordPress prose, rendered through dangerouslySetInnerHTML. */
+  .prose-body { color: var(--color-body); }
+  .prose-body :where(a) {
+    color: var(--color-ink);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--color-faint);
+    transition: text-decoration-color 0.15s ease;
+  }
+  .prose-body :where(a):hover { text-decoration-color: var(--color-ink); }
+  .prose-body :where(strong) { color: var(--color-ink); font-weight: 600; }
+  .prose-body :where(em) { font-style: italic; }
+  .prose-body :where(p) + :where(p) { margin-top: 1rem; }
 }
-.prose-body :where(a):hover { text-decoration-color: var(--color-ink); }
-.prose-body :where(strong) { color: var(--color-ink); font-weight: 600; }
-.prose-body :where(em) { font-style: italic; }
-.prose-body :where(p) + :where(p) { margin-top: 1rem; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

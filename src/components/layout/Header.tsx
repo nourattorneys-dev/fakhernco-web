@@ -34,9 +34,19 @@ export async function Header() {
             </Link>
 
             <div className="invisible absolute left-1/2 top-full w-[58rem] max-w-[94vw] -translate-x-1/2 pt-0 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-              <div className="grid grid-cols-2 gap-x-10 gap-y-7 border border-line bg-surface p-8 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)] xl:grid-cols-3">
+              {/*
+                Multi-column flow, not grid.
+
+                With a grid, every row is as tall as its tallest cell — and the
+                practice areas are wildly uneven (17 children vs 5). Litigation
+                and Personal & Criminal sat in the same row as Contracts and
+                were stretched to match it, leaving 8 and 12 rows of dead space
+                beneath their lists. Columns pack by height instead, and
+                break-inside-avoid keeps each block whole.
+              */}
+              <div className="columns-2 gap-x-10 border border-line bg-surface p-8 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)] xl:columns-3">
                 {areas.map((area) => (
-                  <div key={area.slug}>
+                  <div key={area.slug} className="mb-7 break-inside-avoid last:mb-0">
                     <Link
                       href={`/${area.slug}`}
                       className="block border-b border-line pb-2 font-display text-xs font-700 uppercase tracking-[0.08em] text-ink hover:opacity-60"

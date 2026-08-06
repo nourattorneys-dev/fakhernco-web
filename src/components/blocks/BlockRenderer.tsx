@@ -123,16 +123,36 @@ function BlockItem({ block }: { block: Block }) {
 
     case 'image':
       return (
-        <figure className="overflow-hidden ">
+        <figure className="overflow-hidden bg-surface-alt">
           <Image
             src={block.src}
             alt={block.alt}
             width={1200}
             height={700}
-            className="h-auto w-full object-cover"
+            className="h-auto max-h-[28rem] w-full object-cover"
             sizes="(max-width: 768px) 100vw, 720px"
           />
         </figure>
+      );
+
+    case 'gallery':
+      // A carousel on the WordPress site. Rendered as a grid rather than a
+      // slider: no JavaScript, everything visible at once, and no wall of
+      // stacked full-width figures — which is what flattening it produced.
+      return (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {block.items.map((img, i) => (
+            <figure key={i} className="relative aspect-[4/3] overflow-hidden bg-surface-alt">
+              <Image
+                src={img.src}
+                alt={img.alt}
+                fill
+                sizes="(max-width: 640px) 50vw, 240px"
+                className="object-cover transition-transform duration-300 hover:scale-[1.03]"
+              />
+            </figure>
+          ))}
+        </div>
       );
 
     case 'button':

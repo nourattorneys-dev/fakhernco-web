@@ -139,12 +139,14 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
         </div>
       </header>
 
-      <div className="site-container max-w-3xl py-12">
+      <div className="site-container py-14">
+        <div className="max-w-[46rem]">
         {doc.blocks.length > 0 ? (
           <BlockRenderer blocks={doc.blocks} />
         ) : (
           <p className="text-muted">This page has no content yet.</p>
         )}
+        </div>
       </div>
 
       {area && <PracticeAreaChildren slug={area.slug} />}
