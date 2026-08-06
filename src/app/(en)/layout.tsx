@@ -4,7 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { JsonLd } from '@/components/JsonLd';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
-import './globals.css';
+import '../globals.css';
 
 const SITE = process.env.SITE_URL ?? 'https://fakhernco.com';
 
@@ -47,9 +47,19 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * English root layout.
+ *
+ * There are TWO root layouts — this and (ar) — because <html lang> and
+ * <html dir> can only be set in a root layout, and a layout cannot see the
+ * pathname. Reading the locale from a header via headers() does work, but it
+ * opts the entire route tree into dynamic rendering: every page went from
+ * static to server-rendered on demand, which is the whole performance win
+ * this migration exists for. Route groups keep both locales fully static.
+ */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sarabun.variable} ${robotoCondensed.variable}`}>
+    <html lang="en" dir="ltr" className={`${sarabun.variable} ${robotoCondensed.variable}`}>
       <body>
         <JsonLd data={graph(organizationSchema(), websiteSchema())} />
         <UtilityBar />

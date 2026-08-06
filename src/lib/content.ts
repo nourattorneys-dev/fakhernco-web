@@ -189,42 +189,48 @@ const POPULATE: Record<string, string> = {
 
 // ------------------------------------------------------------------ queries
 
-async function findBySlug(collection: string, slug: string, extra: Record<string, string> = {}) {
+async function findBySlug(
+  collection: string,
+  slug: string,
+  extra: Record<string, string> = {},
+  locale = 'en',
+) {
   const res = await strapiFetch<{ data: Record<string, any>[] }>(collection, {
     'filters[slug][$eq]': slug,
+    locale,
     ...POPULATE,
     ...extra,
   });
   return res.data?.[0] ?? null;
 }
 
-export async function getPage(slug: string): Promise<Doc | null> {
-  const raw = await findBySlug('pages', slug, { 'populate[practiceArea]': 'true' });
+export async function getPage(slug: string, locale = 'en'): Promise<Doc | null> {
+  const raw = await findBySlug('pages', slug, { 'populate[practiceArea]': 'true' }, locale);
   return raw ? mapDoc(raw, 'page') : null;
 }
 
-export async function getPost(slug: string): Promise<Doc | null> {
-  const raw = await findBySlug('posts', slug, { 'populate[categories]': 'true' });
+export async function getPost(slug: string, locale = 'en'): Promise<Doc | null> {
+  const raw = await findBySlug('posts', slug, { 'populate[categories]': 'true' }, locale);
   return raw ? mapDoc(raw, 'post') : null;
 }
 
-export async function getCaseStudy(slug: string): Promise<Doc | null> {
-  const raw = await findBySlug('case-studies', slug);
+export async function getCaseStudy(slug: string, locale = 'en'): Promise<Doc | null> {
+  const raw = await findBySlug('case-studies', slug, {}, locale);
   return raw ? mapDoc(raw, 'case-study') : null;
 }
 
-export async function getPracticeArea(slug: string): Promise<Doc | null> {
-  const raw = await findBySlug('practice-areas', slug);
+export async function getPracticeArea(slug: string, locale = 'en'): Promise<Doc | null> {
+  const raw = await findBySlug('practice-areas', slug, {}, locale);
   return raw ? mapDoc(raw, 'practice-area') : null;
 }
 
 /** Anything reachable at a root-level slug, in resolution order. */
-export async function getDocument(slug: string): Promise<Doc | null> {
+export async function getDocument(slug: string, locale = 'en'): Promise<Doc | null> {
   return (
-    (await getPracticeArea(slug)) ??
-    (await getPage(slug)) ??
-    (await getPost(slug)) ??
-    (await getCaseStudy(slug))
+    (await getPracticeArea(slug, locale)) ??
+    (await getPage(slug, locale)) ??
+    (await getPost(slug, locale)) ??
+    (await getCaseStudy(slug, locale))
   );
 }
 
@@ -377,8 +383,11 @@ export async function getArabicPaths(): Promise<string[]> {
   }
 }
 
-export async function getAllSlugs(collection: string): Promise<string[]> {
-  const rows = await strapiFetchAll<{ slug: string }>(collection, { 'fields[0]': 'slug' });
+export async function getAllSlugs(collection: string, locale = 'en'): Promise<string[]> {
+  const rows = await strapiFetchAll<{ slug: string }>(collection, {
+    'fields[0]': 'slug',
+    locale,
+  });
   return rows.map((r) => r.slug).filter(Boolean);
 }
 
