@@ -5,6 +5,15 @@ import { HomeSections } from '@/components/home/HomeSections';
 
 export const revalidate = 300;
 
+/**
+ * The homepage had no canonical tag — caught by verify:seo. Every other route
+ * sets one in generateMetadata; the homepage has none because it has no
+ * generateMetadata at all, so it inherits the layout's, which omits it.
+ */
+export const metadata = {
+  alternates: { canonical: '/' },
+};
+
 export default async function HomePage() {
   const [hero, home, areas, posts] = await Promise.all([
     getHomepage(),
