@@ -93,6 +93,23 @@ export const UI = {
 
 export const t = (locale: Locale) => UI[locale];
 
-/** Prefix a path for the locale. Arabic lives under /ar. */
-export const href = (locale: Locale, path: string) =>
-  locale === 'ar' ? (path === '/' ? '/ar' : `/ar${path}`) : path;
+/**
+ * Prefix a path for the locale — but only where that page exists.
+ *
+ * Blindly prefixing /ar produced links to pages that were never translated:
+ * /ar/about-us, /ar/legal-insights and /ar/privacy-policy-2 all 404, and the
+ * header and footer linked to all three from every Arabic page. Falling back
+ * to the English URL is the honest behaviour, and it matches how the language
+ * switcher already decides whether to appear at all.
+ *
+ * Pass `available` (the set of real /ar paths) to enable the check; without
+ * it the function assumes the target exists, which is right for links the
+ * caller has already verified.
+ */
+export const href = (locale: Locale, path: string, available?: Set<string> | string[]) => {
+  if (locale !== 'ar') return path;
+  const target = path === '/' ? '/ar' : `/ar${path}`;
+  if (!available) return target;
+  const set = available instanceof Set ? available : new Set(available);
+  return set.has(target) ? target : path;
+};

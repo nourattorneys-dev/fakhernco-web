@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "verify:seo": "node scripts/verify-seo.mjs",
-    "check:cms": "node scripts/check-cms.mjs"
+    "check:cms": "node scripts/check-cms.mjs",
+    "verify:links": "node scripts/verify-links.mjs"
   },
   "dependencies": {
     "next": "16.2.12",

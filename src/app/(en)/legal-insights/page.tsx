@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { getCategories, getPosts } from '@/lib/content';
+import Link from 'next/link';
+import { getCaseStudies, getCategories, getPosts } from '@/lib/content';
 import { CategoryFilter, InsightGrid, Pagination } from '@/components/InsightGrid';
 import { PER_PAGE } from './per-page';
 
@@ -13,7 +14,11 @@ export const metadata: Metadata = {
 };
 
 export default async function InsightsPage() {
-  const [posts, categories] = await Promise.all([getPosts(), getCategories()]);
+  const [posts, categories, caseStudies] = await Promise.all([
+    getPosts(),
+    getCategories(),
+    getCaseStudies(),
+  ]);
   const pageCount = Math.ceil(posts.length / PER_PAGE);
 
   return (
@@ -33,6 +38,40 @@ export default async function InsightsPage() {
         <InsightGrid posts={posts.slice(0, PER_PAGE)} />
         <Pagination page={1} pageCount={pageCount} basePath="/legal-insights" />
       </div>
+
+      {/*
+        Case studies had no listing anywhere and no inbound links — they
+        imported cleanly, returned 200, and were unreachable.
+      */}
+      {caseStudies.length > 0 && (
+        <section className="border-t border-line bg-surface-alt">
+          <div className="site-container section">
+            <p className="eyebrow text-ink">Case studies</p>
+            <h2 className="mt-4 text-display">How we have helped</h2>
+            <p className="mt-4 max-w-[62ch] text-body">
+              Anonymised examples of matters we have handled. All names and identifying details
+              have been changed.
+            </p>
+            <div className="section-body grid gap-px border border-line bg-line md:grid-cols-2">
+              {caseStudies.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/${c.slug}`}
+                  className="group flex flex-col bg-surface card-p transition-colors hover:bg-surface-alt"
+                >
+                  <h3 className="text-card">{c.title}</h3>
+                  {c.excerpt && (
+                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-body">{c.excerpt}</p>
+                  )}
+                  <span className="mt-auto pt-5 font-display text-sm font-600 underline decoration-faint underline-offset-4 group-hover:decoration-ink">
+                    Read the case study
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }

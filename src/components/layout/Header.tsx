@@ -23,7 +23,8 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
     getArabicPaths(),
   ]);
   const s = t(locale);
-  const L = (path: string) => href(locale, path);
+  const arSet = new Set(arabicPaths);
+  const L = (path: string) => href(locale, path, arSet);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur-sm">

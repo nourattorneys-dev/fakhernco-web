@@ -340,6 +340,16 @@ export async function getSiteSettings(locale = 'en'): Promise<SiteSettings> {
 
 export type CategorySummary = { name: string; slug: string; count: number };
 
+export async function getCaseStudies(locale = 'en'): Promise<Summary[]> {
+  const rows = await strapiFetchAll<Record<string, any>>('case-studies', {
+    locale,
+    'fields[0]': 'title',
+    'fields[1]': 'slug',
+    'fields[2]': 'summary',
+  });
+  return rows.map((r) => ({ title: r.title, slug: r.slug, excerpt: r.summary ?? null, date: null }));
+}
+
 export async function getCategories(): Promise<CategorySummary[]> {
   const rows = await strapiFetchAll<Record<string, any>>('categories', {
     'fields[0]': 'name',
