@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getPracticeAreas, getSiteSettings } from '@/lib/content';
+import { getArabicPaths, getPracticeAreas, getSiteSettings } from '@/lib/content';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 const WHATSAPP = '+971502057209';
 
@@ -14,7 +15,11 @@ const WHATSAPP = '+971502057209';
  * exposes the service pages, which the original hides entirely below 980px.
  */
 export async function Header() {
-  const [areas, site] = await Promise.all([getPracticeAreas(), getSiteSettings()]);
+  const [areas, site, arabicPaths] = await Promise.all([
+    getPracticeAreas(),
+    getSiteSettings(),
+    getArabicPaths(),
+  ]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur-sm">
@@ -73,6 +78,7 @@ export async function Header() {
 
           <TopLink href="/legal-insights">Legal Insights</TopLink>
           <TopLink href="/contact-us">Contact Us</TopLink>
+          <LanguageSwitcher translated={arabicPaths} />
         </nav>
 
         <a

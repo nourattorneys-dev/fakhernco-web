@@ -1,7 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { describe, getAllSlugs, getDocument, getPracticeAreas, type Doc } from '@/lib/content';
+import {
+  describe,
+  getAllSlugs,
+  getArabicPaths,
+  getDocument,
+  getPracticeAreas,
+  type Doc,
+} from '@/lib/content';
+import { alternatesFor } from '@/lib/locale';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { JsonLd } from '@/components/JsonLd';
 import { articleSchema, breadcrumbSchema, faqSchema, graph, serviceSchema } from '@/lib/schema';
@@ -43,11 +51,12 @@ export async function generateMetadata({
   if (!doc) return {};
 
   const description = describe(doc);
+  const hasArabic = (await getArabicPaths()).includes(`/ar/${doc.slug}`);
 
   return {
     title: doc.seo?.metaTitle || doc.title,
     description,
-    alternates: { canonical: `/${doc.slug}` },
+    alternates: alternatesFor(`/${doc.slug}`, hasArabic),
     robots: doc.seo?.noIndex ? { index: false, follow: true } : undefined,
     openGraph: {
       title: doc.seo?.metaTitle || doc.title,

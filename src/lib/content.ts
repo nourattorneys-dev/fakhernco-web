@@ -349,6 +349,32 @@ export async function getPostsByCategory(slug: string): Promise<Summary[]> {
   return rows.map(summarise);
 }
 
+/**
+ * Paths that genuinely exist in Arabic.
+ *
+ * Used to decide whether to offer the language switcher at all. Strapi's i18n
+ * plugin returns only the requested locale, so an empty result here means the
+ * Arabic import has not run yet — and the switcher stays hidden rather than
+ * linking into a 404.
+ */
+export async function getArabicPaths(): Promise<string[]> {
+  try {
+    const [pages, posts, areas, caseStudies] = await Promise.all([
+      strapiFetchAll<{ slug: string }>('pages', { 'fields[0]': 'slug', locale: 'ar' }),
+      strapiFetchAll<{ slug: string }>('posts', { 'fields[0]': 'slug', locale: 'ar' }),
+      strapiFetchAll<{ slug: string }>('practice-areas', { 'fields[0]': 'slug', locale: 'ar' }),
+      strapiFetchAll<{ slug: string }>('case-studies', { 'fields[0]': 'slug', locale: 'ar' }),
+    ]);
+    const slugs = [...pages, ...posts, ...areas, ...caseStudies]
+      .map((r) => r.slug)
+      .filter(Boolean);
+    return [...new Set(slugs)].map((s) => (s === 'home' ? '/ar' : `/ar/${s}`));
+  } catch {
+    // A missing locale must not take the header down with it.
+    return [];
+  }
+}
+
 export async function getAllSlugs(collection: string): Promise<string[]> {
   const rows = await strapiFetchAll<{ slug: string }>(collection, { 'fields[0]': 'slug' });
   return rows.map((r) => r.slug).filter(Boolean);
