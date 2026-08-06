@@ -1,21 +1,33 @@
 'use client';
 
 import { useState } from 'react';
-
-const SERVICES = [
-  'Litigation & Dispute Resolution',
-  'Personal & Criminal Legal Services',
-  'Contracts & Legal Document Drafting',
-  'Company Formation & Corporate Services',
-  'Private Notary & Attestation Services',
-  'Other',
-];
+import type { Locale } from '@/lib/locale';
+import { t } from '@/lib/ui';
 
 type State = 'idle' | 'sending' | 'sent' | 'error';
 
-export function ContactForm() {
+/**
+ * The contact form, in either locale.
+ *
+ * `services` comes from the CMS practice areas rather than a hardcoded list,
+ * so the Arabic form offers the firm's own Arabic service names and the
+ * options stay in step if a practice area is renamed.
+ *
+ * The submitted locale is passed through to the CMS, which uses it to decide
+ * which language to send the auto-reply in.
+ */
+export function ContactForm({
+  locale = 'en',
+  services = [],
+}: {
+  locale?: Locale;
+  services?: string[];
+}) {
+  const s = t(locale);
   const [state, setState] = useState<State>('idle');
   const [error, setError] = useState<string | null>(null);
+
+  const options = [...services, s.other];
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -29,26 +41,25 @@ export function ContactForm() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, sourcePage: window.location.pathname, locale: 'en' }),
+        body: JSON.stringify({ ...payload, sourcePage: window.location.pathname, locale }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? 'Something went wrong. Please try again.');
+        throw new Error(body.error ?? s.genericError);
       }
       setState('sent');
     } catch (err) {
       setState('error');
-      setError(err instanceof Error ? err.message : 'Something went wrong.');
+      setError(err instanceof Error ? err.message : s.genericError);
     }
   }
 
   if (state === 'sent') {
     return (
-      <div className="border border-ink p-8">
-        <h2 className="text-card">Thank you — your enquiry has been received.</h2>
+      <div className="border border-ink card-p">
+        <h2 className="text-card">{s.thanksTitle}</h2>
         <p className="mt-3 text-body">
-          A member of our team will respond within one business day. We have sent a confirmation to
-          your email address. If your matter is urgent, call{' '}
+          {s.thanksBody}{' '}
           <a href="tel:+971502057209" className="font-medium text-ink underline underline-offset-2">
             +971 50 205 7209
           </a>
@@ -61,7 +72,7 @@ export function ContactForm() {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       {/*
-        Honeypot. Hidden from people, filled in by bots. Not `display:none` —
+        Honeypot. Hidden from people, filled in by bots. Not display:none —
         some bots skip those — and aria-hidden + tabIndex keep it away from
         screen readers and keyboard users.
       */}
@@ -71,22 +82,22 @@ export function ContactForm() {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Full name" name="name" required autoComplete="name" />
-        <Field label="Email" name="email" type="email" required autoComplete="email" />
-        <Field label="Phone" name="phone" type="tel" autoComplete="tel" />
+        <Field label={s.fullName} name="name" required autoComplete="name" />
+        <Field label={s.email} name="email" type="email" required autoComplete="email" />
+        <Field label={s.phone} name="phone" type="tel" autoComplete="tel" />
         <label className="flex flex-col gap-2">
-          <span className="font-display text-sm font-600 text-ink">How can we help?</span>
+          <span className="font-display text-sm font-600 text-ink">{s.howCanWeHelp}</span>
           <select
             name="service"
             className="border border-line bg-surface px-4 py-3 text-[0.9375rem] focus:border-ink focus:outline-none"
             defaultValue=""
           >
             <option value="" disabled>
-              Select a service
+              {s.selectService}
             </option>
-            {SERVICES.map((s) => (
-              <option key={s} value={s}>
-                {s}
+            {options.map((option) => (
+              <option key={option} value={option}>
+                {option}
               </option>
             ))}
           </select>
@@ -95,27 +106,24 @@ export function ContactForm() {
 
       <label className="flex flex-col gap-2">
         <span className="font-display text-sm font-600 text-ink">
-          Your message <span className="text-muted">*</span>
+          {s.yourMessage} <span className="text-muted">*</span>
         </span>
         <textarea
           name="message"
           required
           rows={6}
           className="border border-line bg-surface px-4 py-3 text-[0.9375rem] focus:border-ink focus:outline-none"
-          placeholder="Tell us briefly about your matter."
+          placeholder={s.messagePlaceholder}
         />
       </label>
 
       <label className="flex items-start gap-3 text-sm text-body">
         <input type="checkbox" name="consent" value="true" className="mt-1 accent-[#141414]" />
-        <span>
-          I consent to Fakher &amp; Co storing this enquiry so they can respond to me. Submitting
-          this form does not create a lawyer–client relationship.
-        </span>
+        <span>{s.consent}</span>
       </label>
 
       {error && (
-        <p role="alert" className="border-l-2 border-ink bg-surface-alt px-4 py-3 text-sm">
+        <p role="alert" className="border-s-2 border-ink bg-surface-alt px-4 py-3 text-sm">
           {error}
         </p>
       )}
@@ -126,7 +134,7 @@ export function ContactForm() {
           disabled={state === 'sending'}
           className="bg-ink px-8 py-3.5 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2 disabled:opacity-50"
         >
-          {state === 'sending' ? 'Sending…' : 'Send enquiry'}
+          {state === 'sending' ? s.sending : s.sendEnquiry}
         </button>
       </div>
     </form>

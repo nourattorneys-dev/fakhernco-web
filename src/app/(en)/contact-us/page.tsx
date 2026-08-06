@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { describe, getPage } from '@/lib/content';
+import { describe, getPage, getPracticeAreas } from '@/lib/content';
 import { ContactForm } from '@/components/ContactForm';
 
 export const revalidate = 300;
@@ -24,7 +24,7 @@ const OFFICES = [
 
 /** Literal route — shadows [slug], so it renders the CMS page's metadata itself. */
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getPage('contact-us');
+  const [page, areas] = await Promise.all([getPage('contact-us'), getPracticeAreas()]);
   return {
     title: page?.seo?.metaTitle || 'Contact Us',
     description: page
@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
-  const page = await getPage('contact-us');
+  const [page, areas] = await Promise.all([getPage('contact-us'), getPracticeAreas()]);
 
   return (
     <>
@@ -52,7 +52,7 @@ export default async function ContactPage() {
       <div className="site-container section grid gap-16 lg:grid-cols-[1.15fr_1fr]">
         <div>
           <h2 className="sr-only">Enquiry form</h2>
-          <ContactForm />
+          <ContactForm locale="en" services={areas.map((a) => a.title)} />
         </div>
 
         <aside className="flex flex-col gap-9">

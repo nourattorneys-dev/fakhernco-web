@@ -50,6 +50,27 @@ export const UI = {
     breadcrumb: 'Breadcrumb',
     mainNav: 'Main',
     sections: 'Sections',
+
+    // Contact form
+    formHeading: 'Enquiry form',
+    fullName: 'Full name',
+    email: 'Email',
+    phone: 'Phone',
+    howCanWeHelp: 'How can we help?',
+    selectService: 'Select a service',
+    other: 'Other',
+    yourMessage: 'Your message',
+    messagePlaceholder: 'Tell us briefly about your matter.',
+    sendEnquiry: 'Send enquiry',
+    sending: 'Sending…',
+    consent:
+      'I consent to Fakher & Co storing this enquiry so they can respond to me. Submitting this form does not create a lawyer–client relationship.',
+    thanksTitle: 'Thank you — your enquiry has been received.',
+    thanksBody:
+      'A member of our team will respond within one business day. We have sent a confirmation to your email address. If your matter is urgent, call',
+    genericError: 'Something went wrong. Please try again.',
+    contactLead:
+      'Tell us about your matter and a member of our team will respond within one business day.',
   },
 
   ar: {
@@ -88,6 +109,26 @@ export const UI = {
     breadcrumb: 'مسار التنقل',
     mainNav: 'التنقل الرئيسي',
     sections: 'الأقسام',
+
+    // Contact form
+    formHeading: 'نموذج التواصل',
+    fullName: 'الاسم الكامل',
+    email: 'البريد الإلكتروني',
+    phone: 'رقم الهاتف',
+    howCanWeHelp: 'كيف يمكننا مساعدتك؟',
+    selectService: 'اختر الخدمة',
+    other: 'أخرى',
+    yourMessage: 'رسالتك',
+    messagePlaceholder: 'أخبرنا باختصار عن قضيتك.',
+    sendEnquiry: 'إرسال الطلب',
+    sending: 'جارٍ الإرسال…',
+    consent:
+      'أوافق على احتفاظ مكتب فاخر ومشاركوه بهذا الطلب للرد عليّ. إرسال هذا النموذج لا يُنشئ علاقة بين المحامي والموكل.',
+    thanksTitle: 'شكراً لك — تم استلام طلبك.',
+    thanksBody:
+      'سيتواصل معك أحد أعضاء فريقنا خلال يوم عمل واحد. وقد أرسلنا تأكيداً إلى بريدك الإلكتروني. إذا كان الأمر عاجلاً، يُرجى الاتصال على',
+    genericError: 'حدث خطأ ما. يُرجى المحاولة مرة أخرى.',
+    contactLead: 'أخبرنا بتفاصيل قضيتك وسيتواصل معك أحد أعضاء فريقنا خلال يوم عمل واحد.',
   },
 } as const;
 
