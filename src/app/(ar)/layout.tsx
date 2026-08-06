@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Sarabun, Roboto_Condensed } from 'next/font/google';
+import { Sarabun, Roboto_Condensed, IBM_Plex_Sans_Arabic } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { JsonLd } from '@/components/JsonLd';
@@ -30,6 +30,25 @@ const robotoCondensed = Roboto_Condensed({
   display: 'swap',
 });
 
+/**
+ * The Arabic face.
+ *
+ * Sarabun and Roboto Condensed carry no Arabic glyphs — with only the `latin`
+ * subset loaded, every Arabic character was falling back to whatever the
+ * system happened to provide, which is inconsistent across platforms and
+ * usually badly matched to the Latin type.
+ *
+ * IBM Plex Sans Arabic is the closest counterpart to the brand's humanist
+ * sans: same generation, similar proportions, and a weight range that covers
+ * the display sizes.
+ */
+const plexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-arabic',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
@@ -57,13 +76,13 @@ export const metadata: Metadata = {
  */
 export default function ArabicRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${sarabun.variable} ${robotoCondensed.variable}`}>
+    <html lang="ar" dir="rtl" className={`${sarabun.variable} ${robotoCondensed.variable} ${plexArabic.variable}`}>
       <body>
         <JsonLd data={graph(organizationSchema(), websiteSchema())} />
         <UtilityBar />
-        <Header />
+        <Header locale="ar" />
         <main>{children}</main>
-        <Footer />
+        <Footer locale="ar" />
       </body>
     </html>
   );
@@ -76,14 +95,14 @@ function UtilityBar() {
       <div className="site-container flex h-9 items-center gap-6 overflow-x-auto text-xs whitespace-nowrap">
         <span className="flex items-center gap-2">
           <span aria-hidden className="text-white/40">◷</span>
-          <span className="font-semibold">Monday – Friday</span>
-          <span className="text-white/55">9AM – 6PM</span>
+          <span className="font-semibold">الإثنين – الجمعة</span>
+          <span className="text-white/55">٩ صباحاً – ٦ مساءً</span>
         </span>
         <span className="hidden items-center gap-2 sm:flex">
           <span aria-hidden className="text-white/40">⌖</span>
-          <span className="font-semibold">Main Office</span>
+          <span className="font-semibold">المقر الرئيسي</span>
           <span className="text-white/55">
-            219 Office, Regus, 2nd Floor Court Marriot Hotel, Airport St, Abu Dhabi, UAE
+            مكتب ٢١٩، ريجس، الطابق الثاني، فندق كورتيارد ماريوت، شارع المطار، أبوظبي
           </span>
         </span>
       </div>

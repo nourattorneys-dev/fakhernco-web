@@ -260,8 +260,11 @@ export async function getPosts(): Promise<Summary[]> {
   return rows.map(summarise);
 }
 
-export async function getPracticeAreas(): Promise<(Summary & { children: Summary[] })[]> {
+export async function getPracticeAreas(
+  locale = 'en',
+): Promise<(Summary & { children: Summary[] })[]> {
   const areas = await strapiFetchAll<Record<string, any>>('practice-areas', {
+    locale,
     'fields[0]': 'title',
     'fields[1]': 'slug',
     'sort[0]': 'order:asc',
@@ -312,8 +315,9 @@ export async function getHomepage(): Promise<Homepage | null> {
   };
 }
 
-export async function getSiteSettings(): Promise<SiteSettings> {
+export async function getSiteSettings(locale = 'en'): Promise<SiteSettings> {
   const res = await strapiFetch<{ data: Record<string, any> | null }>('site-setting', {
+    locale,
     'populate[logo]': 'true',
   });
   const d = res.data ?? {};
