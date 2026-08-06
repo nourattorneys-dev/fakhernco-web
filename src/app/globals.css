@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/**
+ * Design tokens.
+ *
+ * Tailwind v4 is CSS-first — there is no tailwind.config.js. Everything here
+ * becomes a utility: --color-ink gives text-ink, bg-ink, border-ink.
+ */
+@theme {
+  --color-ink: #10161c;
+  --color-ink-soft: #33404b;
+  --color-body: #4b5a66;
+  --color-muted: #74838f;
+  --color-line: #e2e7ea;
+  --color-line-soft: #eef1f3;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f6f8f9;
+  --color-brass: #9a7b3f;
+  --color-brass-soft: #f2ece0;
+  --color-navy: #16334d;
+
+  --font-display: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --text-2xs: 0.6875rem;
+}
+
+/**
+ * Base element styles MUST stay inside @layer base.
+ *
+ * In Tailwind v4 utilities live in their own layer, and any UNLAYERED rule
+ * beats every layered one — an unlayered `h2 { color: ... }` would silently
+ * defeat `text-white` on a heading.
+ */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-surface);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    line-height: 1.65;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+.site-container {
+  width: 100%;
+  max-width: 74rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+/** Imported WordPress prose, rendered through dangerouslySetInnerHTML. */
+.prose-body :where(a) {
+  color: var(--color-navy);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-body :where(a):hover {
+  color: var(--color-brass);
+}
+.prose-body :where(strong) {
+  color: var(--color-ink);
+  font-weight: 640;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

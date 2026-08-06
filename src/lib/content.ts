@@ -1,0 +1,251 @@
+/**
+ * The only module that knows Strapi's shape.
+ *
+ * Everything else in the app consumes the `Block` union and the Page/Post
+ * types defined here. Adding a block type is a three-file change: the Strapi
+ * component, `toBlock()` below, and BlockRenderer.
+ */
+
+import { mediaUrl, strapiFetch, strapiFetchAll } from './strapi';
+
+// ------------------------------------------------------------------- types
+
+export type Block =
+  | { type: 'heading'; level: 2 | 3 | 4; text: string }
+  | { type: 'paragraph'; html: string }
+  | { type: 'list'; ordered: boolean; items: string[] }
+  | { type: 'table'; headers: string[]; rows: string[][] }
+  | { type: 'faq'; items: { question: string; answer: string }[] }
+  | { type: 'cards'; items: { title: string; text?: string | null; href?: string | null }[] }
+  | { type: 'image'; src: string; alt: string }
+  | { type: 'button'; text: string; href: string }
+  | { type: 'quote'; html: string; attribution?: string | null };
+
+export type Seo = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  canonicalUrl?: string | null;
+  noIndex?: boolean | null;
+};
+
+export type Doc = {
+  id: number;
+  documentId: string;
+  title: string;
+  slug: string;
+  legacyUrl?: string | null;
+  excerpt?: string | null;
+  summary?: string | null;
+  publishedDate?: string | null;
+  seo?: Seo | null;
+  blocks: Block[];
+  kind: 'page' | 'post' | 'case-study' | 'practice-area';
+  categories?: { name: string; slug: string }[];
+  practiceArea?: { title: string; slug: string } | null;
+};
+
+type StrapiComponent = Record<string, unknown> & { __component: string };
+
+/**
+ * Usable alt text, or a humanised filename.
+ *
+ * Alt text on the WordPress site is close to unusable: of 107 image blocks
+ * only 5 carry meaningful text, 84 are empty, and 18 contain a raw image URL
+ * (WordPress fills the field with the src when nothing was entered). Shipping
+ * a URL as alt is worse than shipping nothing — a screen reader reads it out
+ * character by character.
+ *
+ * The filename fallback is a floor, not a fix. Real alt text still needs to be
+ * written; this just guarantees nothing user-hostile reaches the page.
+ */
+function altText(raw: string, src: string): string {
+  const value = raw.trim();
+  if (value && !/^https?:\/\//i.test(value)) return value;
+
+  const file = decodeURIComponent(src.split('/').pop() ?? '');
+  return file
+    .replace(/\.[a-z0-9]+$/i, '')
+    .replace(/-?\d{2,4}x\d{2,4}/gi, '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// ----------------------------------------------------------------- mapping
+
+function toBlock(c: StrapiComponent): Block | null {
+  switch (c.__component) {
+    case 'blocks.heading': {
+      const level = Number(c.level ?? 2);
+      return { type: 'heading', level: (level >= 2 && level <= 4 ? level : 2) as 2 | 3 | 4, text: String(c.text ?? '') };
+    }
+    case 'blocks.paragraph':
+      return { type: 'paragraph', html: String(c.html ?? '') };
+    case 'blocks.list':
+      return {
+        type: 'list',
+        ordered: Boolean(c.ordered),
+        items: ((c.items ?? []) as { text?: string }[]).map((i) => String(i.text ?? '')).filter(Boolean),
+      };
+    case 'blocks.data-table':
+      return {
+        type: 'table',
+        headers: (c.headers ?? []) as string[],
+        rows: (c.rows ?? []) as string[][],
+      };
+    case 'blocks.faq':
+      return {
+        type: 'faq',
+        items: ((c.items ?? []) as { question?: string; answer?: string }[])
+          .map((i) => ({ question: String(i.question ?? ''), answer: String(i.answer ?? '') }))
+          .filter((i) => i.question),
+      };
+    case 'blocks.cards':
+      return {
+        type: 'cards',
+        items: ((c.items ?? []) as { title?: string; text?: string; href?: string }[])
+          .map((i) => ({ title: String(i.title ?? ''), text: i.text ?? null, href: i.href ?? null }))
+          .filter((i) => i.title),
+      };
+    case 'blocks.image': {
+      // Prefer the migrated Strapi file; fall back to the legacy WordPress URL
+      // so an unmigrated image still renders rather than disappearing.
+      const file = c.file as { url?: string; alternativeText?: string } | null;
+      const src = mediaUrl(file?.url) ?? (c.legacySrc ? String(c.legacySrc) : null);
+      if (!src) return null;
+      return {
+        type: 'image',
+        src,
+        alt: altText(String(c.alt ?? file?.alternativeText ?? ''), String(c.legacySrc ?? src)),
+      };
+    }
+    case 'blocks.button':
+      return { type: 'button', text: String(c.text ?? ''), href: String(c.href ?? '') };
+    case 'blocks.quote':
+      return { type: 'quote', html: String(c.html ?? ''), attribution: (c.attribution as string) ?? null };
+    default:
+      return null;
+  }
+}
+
+const mapDoc = (raw: Record<string, any>, kind: Doc['kind']): Doc => ({
+  id: raw.id,
+  documentId: raw.documentId,
+  title: raw.title ?? raw.name ?? '',
+  slug: raw.slug,
+  legacyUrl: raw.legacyUrl ?? null,
+  excerpt: raw.excerpt ?? null,
+  summary: raw.summary ?? null,
+  publishedDate: raw.publishedDate ?? null,
+  seo: raw.seo ?? null,
+  kind,
+  categories: (raw.categories ?? []).map((c: any) => ({ name: c.name, slug: c.slug })),
+  practiceArea: raw.practiceArea ? { title: raw.practiceArea.title, slug: raw.practiceArea.slug } : null,
+  blocks: ((raw.blocks ?? []) as StrapiComponent[]).map(toBlock).filter(Boolean) as Block[],
+});
+
+const POPULATE = {
+  'populate[blocks][populate]': '*',
+  'populate[seo]': 'true',
+} as const;
+
+// ------------------------------------------------------------------ queries
+
+async function findBySlug(collection: string, slug: string, extra: Record<string, string> = {}) {
+  const res = await strapiFetch<{ data: Record<string, any>[] }>(collection, {
+    'filters[slug][$eq]': slug,
+    ...POPULATE,
+    ...extra,
+  });
+  return res.data?.[0] ?? null;
+}
+
+export async function getPage(slug: string): Promise<Doc | null> {
+  const raw = await findBySlug('pages', slug, { 'populate[practiceArea]': 'true' });
+  return raw ? mapDoc(raw, 'page') : null;
+}
+
+export async function getPost(slug: string): Promise<Doc | null> {
+  const raw = await findBySlug('posts', slug, { 'populate[categories]': 'true' });
+  return raw ? mapDoc(raw, 'post') : null;
+}
+
+export async function getCaseStudy(slug: string): Promise<Doc | null> {
+  const raw = await findBySlug('case-studies', slug);
+  return raw ? mapDoc(raw, 'case-study') : null;
+}
+
+export async function getPracticeArea(slug: string): Promise<Doc | null> {
+  const raw = await findBySlug('practice-areas', slug);
+  return raw ? mapDoc(raw, 'practice-area') : null;
+}
+
+/** Anything reachable at a root-level slug, in resolution order. */
+export async function getDocument(slug: string): Promise<Doc | null> {
+  return (
+    (await getPracticeArea(slug)) ??
+    (await getPage(slug)) ??
+    (await getPost(slug)) ??
+    (await getCaseStudy(slug))
+  );
+}
+
+export type Summary = { title: string; slug: string; excerpt?: string | null; date?: string | null };
+
+const summarise = (raw: Record<string, any>): Summary => ({
+  title: raw.title,
+  slug: raw.slug,
+  excerpt: raw.excerpt ?? raw.summary ?? raw.seo?.metaDescription ?? null,
+  date: raw.publishedDate ?? null,
+});
+
+/** Light query for listings — never pulls block payloads. */
+const LIGHT = {
+  'fields[0]': 'title',
+  'fields[1]': 'slug',
+  'fields[2]': 'excerpt',
+  'fields[3]': 'publishedDate',
+  'populate[seo][fields][0]': 'metaDescription',
+} as const;
+
+export async function getPosts(): Promise<Summary[]> {
+  const rows = await strapiFetchAll<Record<string, any>>('posts', {
+    ...LIGHT,
+    'sort[0]': 'publishedDate:desc',
+  });
+  return rows.map(summarise);
+}
+
+export async function getPracticeAreas(): Promise<(Summary & { children: Summary[] })[]> {
+  const areas = await strapiFetchAll<Record<string, any>>('practice-areas', {
+    'fields[0]': 'title',
+    'fields[1]': 'slug',
+    'sort[0]': 'order:asc',
+    'populate[pages][fields][0]': 'title',
+    'populate[pages][fields][1]': 'slug',
+  });
+  return areas.map((a) => ({
+    ...summarise(a),
+    children: (a.pages ?? []).map(summarise),
+  }));
+}
+
+export async function getAllSlugs(collection: string): Promise<string[]> {
+  const rows = await strapiFetchAll<{ slug: string }>(collection, { 'fields[0]': 'slug' });
+  return rows.map((r) => r.slug).filter(Boolean);
+}
+
+/** Clamp to roughly what Google renders, on a word boundary. */
+export function clamp(text: string, max = 160): string {
+  const flat = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  if (flat.length <= max) return flat;
+  return `${flat.slice(0, flat.lastIndexOf(' ', max))}…`;
+}
+
+/** Meta description: the CMS value, else the first real prose on the page. */
+export function describe(doc: Doc): string {
+  if (doc.seo?.metaDescription) return doc.seo.metaDescription;
+  if (doc.excerpt) return clamp(doc.excerpt);
+  const para = doc.blocks.find((b) => b.type === 'paragraph');
+  return para ? clamp(para.html) : '';
+}
