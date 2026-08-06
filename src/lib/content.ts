@@ -318,6 +318,29 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   };
 }
 
+export type CategorySummary = { name: string; slug: string; count: number };
+
+export async function getCategories(): Promise<CategorySummary[]> {
+  const rows = await strapiFetchAll<Record<string, any>>('categories', {
+    'fields[0]': 'name',
+    'fields[1]': 'slug',
+    'populate[posts][fields][0]': 'slug',
+    'sort[0]': 'name:asc',
+  });
+  return rows
+    .map((c) => ({ name: c.name, slug: c.slug, count: (c.posts ?? []).length }))
+    .filter((c) => c.count > 0);
+}
+
+export async function getPostsByCategory(slug: string): Promise<Summary[]> {
+  const rows = await strapiFetchAll<Record<string, any>>('posts', {
+    ...LIGHT,
+    'filters[categories][slug][$eq]': slug,
+    'sort[0]': 'publishedDate:desc',
+  });
+  return rows.map(summarise);
+}
+
 export async function getAllSlugs(collection: string): Promise<string[]> {
   const rows = await strapiFetchAll<{ slug: string }>(collection, { 'fields[0]': 'slug' });
   return rows.map((r) => r.slug).filter(Boolean);
