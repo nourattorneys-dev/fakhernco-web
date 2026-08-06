@@ -86,63 +86,16 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Credentials strip */}
-      <section className="border-b border-line">
-        <div className="site-container grid grid-cols-2 gap-y-8 py-12 sm:grid-cols-4">
-          {[
-            ['2011', 'Established'],
-            [String(areas.length), 'Practice areas'],
-            [String(serviceCount), 'Legal services'],
-            ['3', 'Offices'],
-          ].map(([value, label]) => (
-            <div key={label}>
-              <span className="block font-display text-4xl font-700 tabular-nums text-ink">
-                {value}
-              </span>
-              <span className="mt-1 block text-xs uppercase tracking-[0.08em] text-muted">
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Practice areas */}
-      <section className="site-container py-20">
-        <p className="eyebrow text-ink">Dedicated to your business</p>
-        <h2 className="mt-4 max-w-[20ch] text-display">
-          Legal challenges in the UAE require the right partner.
-        </h2>
-
-        <div className="mt-12 grid border-t border-l border-line sm:grid-cols-2 lg:grid-cols-3">
-          {areas.map((area, i) => (
-            <Link
-              key={area.slug}
-              href={`/${area.slug}`}
-              className="group flex flex-col border-b border-r border-line p-8 transition-colors hover:bg-surface-alt"
-            >
-              <span className="font-display text-xs font-700 tabular-nums text-faint">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <h3 className="mt-4 text-xl leading-tight">{area.title}</h3>
-              <p className="mt-3 text-sm text-body">
-                {area.children.length} service{area.children.length === 1 ? '' : 's'}
-              </p>
-              <span className="mt-6 font-display text-sm font-600 text-ink underline decoration-faint underline-offset-4 transition-colors group-hover:decoration-ink">
-                View practice area
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
       {/*
-        The migrated homepage copy, as editorial sections rather than one long
-        prose column. `skip={1}` drops the first group, which restates the hero
-        verbatim — the old builder repeated it because the hero was itself a
-        content block.
+        The migrated homepage copy, composed back into the sections the
+        original actually had: intro, commitments, services, a numbered
+        process, principles and the offices grid.
+
+        skip={3} drops the first three groups — they are the three slides of
+        the original's hero carousel, and the hero above already presents
+        slide one. Rendering them again would restate it three times.
       */}
-      {home && home.blocks.length > 0 && <HomeSections blocks={home.blocks} skip={1} />}
+      {home && home.blocks.length > 0 && <HomeSections blocks={home.blocks} skip={3} />}
 
       {posts.length > 0 && (
         <section className="border-t border-line">
