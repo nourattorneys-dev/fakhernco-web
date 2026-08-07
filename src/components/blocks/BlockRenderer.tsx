@@ -39,7 +39,7 @@ function BlockItem({ block }: { block: Block }) {
       const Tag = block.ordered ? 'ol' : 'ul';
       return (
         <Tag
-          className={`${block.ordered ? 'list-decimal' : 'list-disc'} prose-body flex flex-col gap-2 pl-5 marker:text-muted`}
+          className={`${block.ordered ? 'list-decimal' : 'list-disc'} prose-body flex flex-col gap-2 ps-5 marker:text-muted`}
         >
           {block.items.map((item, i) => (
             <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
@@ -60,7 +60,7 @@ function BlockItem({ block }: { block: Block }) {
                   {block.headers.map((h, i) => (
                     <th
                       key={i}
-                      className="border-b border-line px-4 py-2.5 text-left font-semibold text-ink"
+                      className="border-b border-line px-4 py-2.5 text-start font-semibold text-ink"
                     >
                       {h}
                     </th>
@@ -94,11 +94,11 @@ function BlockItem({ block }: { block: Block }) {
               className="group border border-line bg-surface-alt px-4 py-3 open:bg-surface"
             >
               <summary className="cursor-pointer list-none font-medium text-ink marker:hidden">
-                <span className="mr-2 text-muted group-open:hidden">+</span>
-                <span className="mr-2 hidden text-muted group-open:inline">–</span>
+                <span className="me-2 text-muted group-open:hidden">+</span>
+                <span className="me-2 hidden text-muted group-open:inline">–</span>
                 {item.question}
               </summary>
-              <p className="mt-2 pl-5 text-body">{item.answer}</p>
+              <p className="mt-2 ps-5 text-body">{item.answer}</p>
             </details>
           ))}
         </div>
@@ -169,7 +169,7 @@ function BlockItem({ block }: { block: Block }) {
 
     case 'quote':
       return (
-        <blockquote className="border-l-2 border-ink pl-5">
+        <blockquote className="border-s-2 border-ink ps-5">
           <div className="prose-body italic" dangerouslySetInnerHTML={{ __html: block.html }} />
           {block.attribution && (
             <cite className="mt-2 block text-sm not-italic text-muted">— {block.attribution}</cite>

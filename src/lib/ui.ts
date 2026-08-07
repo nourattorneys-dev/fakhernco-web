@@ -32,6 +32,21 @@ export const UI = {
     exploreServices: (n: number) => `Explore ${n} services`,
 
     officeLocations: 'Our office locations',
+    /** Prefix on the numbered process cards: "STEP 01". */
+    step: 'STEP',
+
+    // Offices — the city names are content, not chrome, but there is no CMS
+    // field for them, so they live here rather than rendering English on an
+    // Arabic page.
+    cities: { abuDhabi: 'Abu Dhabi', mansoura: 'Mansoura', newDelhi: 'New Delhi' },
+    countries: { uae: 'UAE', egypt: 'Egypt', india: 'India' },
+
+    // 404
+    errorCode: 'Error 404',
+    notFoundTitle: 'This page could not be found',
+    notFoundBody:
+      'The page may have moved. You can browse our services or get in touch and we will point you in the right direction.',
+    backToHome: 'Back to home',
     officeHours: 'Office hours',
     hoursValue: 'Monday – Friday, 9AM – 6PM (GST)',
     mainOffice: 'Main Office',
@@ -97,6 +112,17 @@ export const UI = {
     exploreServices: (n: number) => `استكشف ${n} خدمة`,
 
     officeLocations: 'مواقع مكاتبنا',
+    step: 'الخطوة',
+
+    cities: { abuDhabi: 'أبوظبي', mansoura: 'المنصورة', newDelhi: 'نيودلهي' },
+    countries: { uae: 'الإمارات', egypt: 'مصر', india: 'الهند' },
+
+    // 404
+    errorCode: 'خطأ 404',
+    notFoundTitle: 'تعذّر العثور على هذه الصفحة',
+    notFoundBody:
+      'ربما تكون الصفحة قد نُقلت. يمكنك تصفّح خدماتنا أو التواصل معنا وسنرشدك إلى الوجهة الصحيحة.',
+    backToHome: 'العودة إلى الرئيسية',
     officeHours: 'ساعات العمل',
     hoursValue: 'الإثنين – الجمعة، 9 صباحاً – 6 مساءً (بتوقيت الخليج)',
     mainOffice: 'المقر الرئيسي',

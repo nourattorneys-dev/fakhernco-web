@@ -3,11 +3,15 @@ import { getArabicPaths, getPracticeAreas, getSiteSettings } from '@/lib/content
 import type { Locale } from '@/lib/locale';
 import { href, t } from '@/lib/ui';
 
+/**
+ * City and country are keys, not labels — they rendered as "Abu Dhabi, UAE"
+ * in the Arabic footer, directly under the Arabic heading المكاتب.
+ */
 const OFFICES = [
-  { city: 'Abu Dhabi', country: 'UAE', phone: '+971 50 205 7209' },
-  { city: 'Mansoura', country: 'Egypt', phone: '+20 103 403 4101' },
-  { city: 'New Delhi', country: 'India', phone: '+91 628 275 1175' },
-];
+  { city: 'abuDhabi', country: 'uae', phone: '+971 50 205 7209' },
+  { city: 'mansoura', country: 'egypt', phone: '+20 103 403 4101' },
+  { city: 'newDelhi', country: 'india', phone: '+91 628 275 1175' },
+] as const;
 
 export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
   const [areas, site, arabicPaths] = await Promise.all([
@@ -66,7 +70,9 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
           <ul className="mt-3 flex flex-col gap-2.5 text-sm">
             {OFFICES.map((o) => (
               <li key={o.city}>
-                <span className="block text-ink">{o.city}, {o.country}</span>
+                <span className="block text-ink">
+                  {s.cities[o.city]}, {s.countries[o.country]}
+                </span>
                 <a href={`tel:${o.phone.replace(/\s/g, '')}`} className="text-body hover:text-ink">
                   {o.phone}
                 </a>

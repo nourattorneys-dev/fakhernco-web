@@ -125,7 +125,7 @@ export async function Homepage({ locale = 'en' }: { locale?: Locale }) {
         slide one. Rendering them again would restate it three times.
       */}
       {home && home.blocks.length > 0 && (
-        <HomeSections blocks={home.blocks} skip={3} images={hero?.sectionImages ?? []} />
+        <HomeSections blocks={home.blocks} skip={3} images={hero?.sectionImages ?? []} locale={locale} />
       )}
 
       {/*
@@ -143,7 +143,7 @@ export async function Homepage({ locale = 'en' }: { locale?: Locale }) {
                 <h2 className="mt-4 text-display">{s.insightsHeading}</h2>
               </div>
               <Link
-                href={href(locale, '/legal-insights')}
+                href={href(locale, '/legal-insights', arPaths)}
                 className="font-display text-sm font-600 underline decoration-faint underline-offset-4 hover:decoration-ink"
               >
                 {s.allArticles(posts.length)}

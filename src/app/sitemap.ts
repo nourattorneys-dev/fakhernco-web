@@ -33,7 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Paginated pages are deliberately excluded: they are crawlable via
     // rel=prev/next but carry no unique content worth listing.
     ...categories.map((c) => entry(`/legal-insights/${c.slug}`, 0.6)),
-    ...pages.filter((s) => s !== 'home').map((s) => entry(`/${s}`, 0.7)),
+    // 'home' is the homepage, and 'legal-insights' is a literal route already
+    // listed above at a higher priority — emitting it again from the page
+    // slugs put the same URL in the sitemap twice with two priorities.
+    ...pages
+      .filter((s) => s !== 'home' && s !== 'legal-insights')
+      .map((s) => entry(`/${s}`, 0.7)),
     ...caseStudies.map((s) => entry(`/${s}`, 0.6)),
     ...posts.map((s) => entry(`/${s}`, 0.5)),
     // The Arabic homepage, listed only once it genuinely exists. Both slug

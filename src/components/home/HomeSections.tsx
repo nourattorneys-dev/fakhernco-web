@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Block } from '@/lib/content';
+import type { Locale } from '@/lib/locale';
+import { t } from '@/lib/ui';
 
 /**
  * Compose the migrated homepage copy into the sections the original had.
@@ -71,11 +73,21 @@ export function HomeSections({
   blocks,
   skip = 0,
   images = [],
+  locale = 'en',
 }: {
   blocks: Block[];
   skip?: number;
   images?: Img[];
+  /**
+   * Needed because this component renders chrome of its own — the "STEP 01"
+   * badge on the process cards and the offices eyebrow — which is design text
+   * rather than content and so has no CMS field to come from. Without it those
+   * two strings rendered in English on the Arabic homepage, directly above
+   * Arabic headings.
+   */
+  locale?: Locale;
 }) {
+  const s = t(locale);
   const groups = groupBlocks(blocks).slice(skip);
 
   /*
@@ -185,10 +197,19 @@ export function HomeSections({
             cards={p.cards}
             numbered={p.cards.every((c) => STEP.test(c.heading))}
             alt={p.alt}
+            stepLabel={s.step}
           />
         );
       case 'offices':
-        return <Offices key={`offices-${p.i}`} group={p.group} cards={p.cards} alt={p.alt} />;
+        return (
+          <Offices
+            key={`offices-${p.i}`}
+            group={p.group}
+            cards={p.cards}
+            alt={p.alt}
+            eyebrow={s.officeLocations}
+          />
+        );
       case 'cta':
         return <CtaBand key={`cta-${p.i}`} groups={p.run} />;
       case 'editorial': {
@@ -265,11 +286,13 @@ function CardRow({
   cards,
   numbered,
   alt,
+  stepLabel,
 }: {
   lead: string;
   cards: Group[];
   numbered: boolean;
   alt: boolean;
+  stepLabel: string;
 }) {
   const cols =
     cards.length === 4 ? 'lg:grid-cols-4' : cards.length === 2 ? 'sm:grid-cols-2' : 'lg:grid-cols-3';
@@ -289,7 +312,9 @@ function CardRow({
             return (
               <div key={card.heading} className="flex flex-col bg-surface card-p">
                 <span className="font-display text-xs font-700 tracking-[0.08em] tabular-nums text-faint">
-                  {step ? `STEP ${step.padStart(2, '0')}` : String(i + 1).padStart(2, '0')}
+                  {step
+                    ? `${stepLabel} ${step.padStart(2, '0')}`
+                    : `${stepLabel} ${String(i + 1).padStart(2, '0')}`}
                 </span>
                 <h3 className="mt-4 text-lg leading-snug">{title}</h3>
                 {body && (
@@ -328,10 +353,12 @@ function Offices({
   group,
   cards,
   alt,
+  eyebrow,
 }: {
   group: Group;
   cards: Extract<Block, { type: 'cards' }>;
   alt: boolean;
+  eyebrow: string;
 }) {
   const intro = paragraphs(group)[0];
 
@@ -384,7 +411,7 @@ function Offices({
   return (
     <section className={`border-t border-line ${alt ? 'bg-surface-alt' : ''}`}>
       <div className="site-container section">
-        <p className="eyebrow text-muted">Our office locations</p>
+        <p className="eyebrow text-muted">{eyebrow}</p>
         <h2 className="mt-4 text-section">{group.heading}</h2>
         {intro && (
           <div
@@ -489,7 +516,7 @@ function CtaBand({ groups }: { groups: Group[] }) {
 function Para({ html }: { html: string }) {
   if (isQuote(html)) {
     return (
-      <blockquote className="border-l-2 border-ink py-1 pl-6">
+      <blockquote className="border-s-2 border-ink py-1 ps-6">
         <div
           className="prose-body text-[1.125rem] leading-relaxed text-ink"
           dangerouslySetInnerHTML={{ __html: html }}

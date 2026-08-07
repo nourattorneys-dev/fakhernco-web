@@ -67,7 +67,7 @@ export function NavGroup({
 
       <div
         className={`invisible absolute top-full opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 group-data-[closed]:invisible group-data-[closed]:opacity-0 ${
-          wide ? 'left-1/2 w-[64rem] max-w-[95vw] -translate-x-1/2' : 'left-0'
+          wide ? 'left-1/2 w-[64rem] max-w-[95vw] -translate-x-1/2' : 'start-0'
         }`}
       >
         {children}

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { describe, getAllSlugs, getDocument, type Doc } from '@/lib/content';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { JsonLd } from '@/components/JsonLd';
-import { breadcrumbSchema, graph, serviceSchema } from '@/lib/schema';
+import { articleSchema, breadcrumbSchema, faqSchema, graph, serviceSchema } from '@/lib/schema';
 import { alternatesFor } from '@/lib/locale';
 
 export const revalidate = 300;
@@ -60,6 +60,12 @@ export async function generateMetadata({
       description,
       locale: 'ar_AE',
       url: `/ar/${doc.slug}`,
+      // A page-level openGraph object REPLACES the layout's rather than
+      // merging into it, so anything the layout supplied has to be restated
+      // here. Without these two, 51 of the 53 Arabic URLs emitted no og:type
+      // and 52 emitted no og:site_name.
+      type: 'website',
+      siteName: 'مكتب فاخر ومشاركوه',
     },
   };
 }
@@ -87,7 +93,14 @@ export default async function ArabicPage({ params }: { params: Promise<{ slug: s
             { name: 'الرئيسية', path: '/ar' },
             { name: doc.title, path: `/ar/${doc.slug}` },
           ]),
-          serviceSchema(doc, description),
+          // Same branch the English route uses. Applying serviceSchema to
+          // every kind typed translated posts as Service in Arabic and Article
+          // in English, and typed informational pages — meet-your-advocates,
+          // our-unwavering-principles, why-choose-fakherco — as services.
+          doc.kind === 'post' || doc.kind === 'case-study'
+            ? articleSchema(doc, description, 'ar')
+            : serviceSchema(doc, description, 'ar'),
+          faqSchema(doc.blocks),
         )}
       />
 

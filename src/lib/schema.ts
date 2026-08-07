@@ -8,6 +8,7 @@
  * actually carries an FAQ block.
  */
 
+import type { Locale } from './locale';
 import type { Block, Doc } from './content';
 
 const SITE = process.env.SITE_URL ?? 'https://fakhernco.com';
@@ -92,29 +93,51 @@ export function breadcrumbSchema(items: { name: string; path: string }[]) {
   };
 }
 
-export function articleSchema(doc: Doc, description: string) {
+/**
+ * `locale` decides the entity's identity, not just its label.
+ *
+ * These nodes built their @id from the bare slug, so an Arabic page emitted a
+ * node whose @id was the ENGLISH URL. The English page emitted a node with the
+ * same @id and English name/description — two conflicting definitions of one
+ * schema.org entity, published on two separately indexed URLs. The Arabic
+ * pages are also the ones whose breadcrumbs were already correctly /ar
+ * prefixed, which made the @id the odd one out.
+ *
+ * `url` is set for the same reason: without it @id was the only URL a consumer
+ * could attach the node to.
+ */
+const localePath = (slug: string, locale: Locale) =>
+  locale === 'ar' ? `/ar/${slug}` : `/${slug}`;
+
+const langTag = (locale: Locale) => (locale === 'ar' ? 'ar-AE' : 'en-AE');
+
+export function articleSchema(doc: Doc, description: string, locale: Locale = 'en') {
+  const path = localePath(doc.slug, locale);
   return {
     '@type': 'Article',
-    '@id': `${SITE}/${doc.slug}#article`,
+    '@id': `${SITE}${path}#article`,
     headline: doc.title,
     description,
     datePublished: doc.publishedDate ?? undefined,
     author: { '@id': ORG_ID },
     publisher: { '@id': ORG_ID },
-    mainEntityOfPage: `${SITE}/${doc.slug}`,
-    inLanguage: 'en',
+    mainEntityOfPage: `${SITE}${path}`,
+    inLanguage: langTag(locale),
   };
 }
 
-export function serviceSchema(doc: Doc, description: string) {
+export function serviceSchema(doc: Doc, description: string, locale: Locale = 'en') {
+  const path = localePath(doc.slug, locale);
   return {
     '@type': 'Service',
-    '@id': `${SITE}/${doc.slug}#service`,
+    '@id': `${SITE}${path}#service`,
+    url: `${SITE}${path}`,
     name: doc.title,
     description,
     provider: { '@id': ORG_ID },
     areaServed: { '@type': 'Country', name: 'United Arab Emirates' },
     serviceType: doc.practiceArea?.title ?? 'Legal service',
+    inLanguage: langTag(locale),
   };
 }
 

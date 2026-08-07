@@ -28,6 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: page?.seo?.metaDescription ?? undefined,
       locale: 'ar_AE',
       type: 'website',
+      siteName: 'مكتب فاخر ومشاركوه',
     },
   };
 }
