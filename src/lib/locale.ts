@@ -48,9 +48,15 @@ export function pathIn(pathname: string, locale: Locale): string {
  */
 export function alternatesFor(path: string, hasArabic: boolean) {
   const en = pathIn(path, 'en');
-  if (!hasArabic) return { canonical: en };
+  // Self-canonical. Every caller used to be an English route, where the
+  // canonical and the English URL are the same string, so returning `en`
+  // looked correct. The moment an Arabic route called this — /ar — it
+  // canonicalised the Arabic homepage to the English one, which tells Google
+  // the two are duplicates and drops the Arabic page from the index. Pages in
+  // an hreflang cluster must each canonicalise to themselves.
+  if (!hasArabic) return { canonical: path };
   return {
-    canonical: en,
+    canonical: path,
     languages: {
       'en-AE': en,
       ar: pathIn(path, 'ar'),

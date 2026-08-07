@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { describe, getPage, getPracticeAreas } from '@/lib/content';
+import { alternatesFor } from '@/lib/locale';
 import { ContactForm } from '@/components/ContactForm';
 
 export const revalidate = 300;
@@ -30,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: page
       ? describe(page)
       : 'Speak to Fakher & Co about your legal matter. Offices in Abu Dhabi, Mansoura and New Delhi.',
-    alternates: { canonical: '/contact-us' },
+    alternates: alternatesFor('/contact-us', true),  // /ar/contact-us exists in Arabic
   };
 }
 

@@ -71,6 +71,12 @@ export const UI = {
     genericError: 'Something went wrong. Please try again.',
     contactLead:
       'Tell us about your matter and a member of our team will respond within one business day.',
+
+    // Homepage
+    insightsHeading: 'Guidance on UAE law',
+    allArticles: (n: number) => `All ${n} articles`,
+    /** The hero H1 is split here and the tail set in a lighter weight. */
+    heroSplit: ' in ',
   },
 
   ar: {
@@ -129,6 +135,11 @@ export const UI = {
       'سيتواصل معك أحد أعضاء فريقنا خلال يوم عمل واحد. وقد أرسلنا تأكيداً إلى بريدك الإلكتروني. إذا كان الأمر عاجلاً، يُرجى الاتصال على',
     genericError: 'حدث خطأ ما. يُرجى المحاولة مرة أخرى.',
     contactLead: 'أخبرنا بتفاصيل قضيتك وسيتواصل معك أحد أعضاء فريقنا خلال يوم عمل واحد.',
+
+    // Homepage
+    insightsHeading: 'إرشادات في القانون الإماراتي',
+    allArticles: (n: number) => `جميع المقالات (${n})`,
+    heroSplit: ' في ',
   },
 } as const;
 

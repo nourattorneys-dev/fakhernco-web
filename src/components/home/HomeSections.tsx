@@ -35,7 +35,16 @@ const textLength = (g: Group) =>
 const isCardSized = (g: Group) =>
   paragraphs(g).length === 1 && !cardsBlock(g) && textLength(g) < 420;
 
-const STEP = /^step\s*(\d+)\s*/i;
+/**
+ * "Step 1", and its Arabic equivalent.
+ *
+ * The Arabic homepage numbers its process with ordinal words — أولاً, ثانياً,
+ * ثالثاً — because that is how the firm's own translation wrote them, and
+ * "الخطوة 1" would read as a translation of an English label rather than
+ * Arabic. There is no digit to capture, so the rendered number falls back to
+ * the card's position, which is the same value either way.
+ */
+const STEP = /^(?:step\s*(\d+)|أولاً|ثانياً|ثالثاً|رابعاً|خامساً)\s*/i;
 
 /**
  * A paragraph that is entirely a quotation is a testimonial the builder had
@@ -292,10 +301,28 @@ function Offices({
   type Office = { name: string; address: string; details: { label: string; value: string }[] };
   const offices: Office[] = [];
 
+  /*
+    The office grid is recovered from a flat list of cards — the builder had
+    no notion of an "office", just Address / Phone / Email repeated three
+    times. An address card starts a new office and the cards after it belong
+    to it.
+
+    These labels are content, so they arrive translated: العنوان في الإمارات,
+    الهاتف, البريد الإلكتروني. Matching English only would collapse the Arabic
+    page to zero offices and drop the addresses entirely, so every label test
+    below covers both languages.
+  */
+  const ADDRESS = /address|العنوان/i;
+  const EMAIL = /email|البريد/i;
+  const PHONE = /phone|call|الهاتف|اتصل/i;
+
   for (const card of cards.items) {
-    if (/address/i.test(card.title)) {
+    if (ADDRESS.test(card.title)) {
       offices.push({
-        name: card.title.replace(/\s*address\s*/i, '').trim() || 'Office',
+        // "UAE Address" -> "UAE", "العنوان في الإمارات" -> "الإمارات".
+        name:
+          card.title.replace(/\s*address\s*/i, '').replace(/^\s*العنوان\s*(في)?\s*/, '').trim() ||
+          card.title,
         address: card.text ?? '',
         details: [],
       });
@@ -309,8 +336,11 @@ function Offices({
 
   const link = (label: string, value: string) => {
     const v = value.trim();
-    if (/email/i.test(label)) return `mailto:${v}`;
-    if (/phone|call/i.test(label)) return `tel:${v.split(/\s+/)[0].replace(/[^\d+]/g, '')}`;
+    if (EMAIL.test(label)) return `mailto:${v}`;
+    // Phone numbers stay Western-numeral and LTR even in Arabic copy, so the
+    // tel: URI needs no special handling — but strip anything that is not a
+    // digit or a leading +, since the UAE card carries two numbers.
+    if (PHONE.test(label)) return `tel:${v.split(/\s+/)[0].replace(/[^\d+]/g, '')}`;
     return null;
   };
 

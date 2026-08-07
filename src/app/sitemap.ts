@@ -36,6 +36,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...pages.filter((s) => s !== 'home').map((s) => entry(`/${s}`, 0.7)),
     ...caseStudies.map((s) => entry(`/${s}`, 0.6)),
     ...posts.map((s) => entry(`/${s}`, 0.5)),
+    // The Arabic homepage, listed only once it genuinely exists. Both slug
+    // lists filter out 'home' because that record is the homepage rather than
+    // a /<slug> page — English gets it back via entry('/') above, and without
+    // this line the Arabic one was silently absent from the sitemap despite
+    // being a real, indexable page.
+    ...(arPages.includes('home') ? [entry('/ar', 0.9)] : []),
     ...[...new Set([...arAreas, ...arPages])]
       .filter((s) => s !== 'home')
       .map((s) => entry(`/ar/${s}`, 0.7)),

@@ -252,9 +252,10 @@ const LIGHT = {
   'populate[seo][fields][0]': 'metaDescription',
 } as const;
 
-export async function getPosts(): Promise<Summary[]> {
+export async function getPosts(locale = 'en'): Promise<Summary[]> {
   const rows = await strapiFetchAll<Record<string, any>>('posts', {
     ...LIGHT,
+    locale,
     'sort[0]': 'publishedDate:desc',
   });
   return rows.map(summarise);
@@ -293,8 +294,9 @@ export type SiteSettings = {
   aboutLinks: { title: string; slug: string }[];
 };
 
-export async function getHomepage(): Promise<Homepage | null> {
+export async function getHomepage(locale = 'en'): Promise<Homepage | null> {
   const res = await strapiFetch<{ data: Record<string, any> | null }>('homepage', {
+    locale,
     'populate[heroImage]': 'true',
     'populate[sectionImages]': 'true',
   });

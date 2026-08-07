@@ -153,8 +153,85 @@ async function main() {
     }
   }
 
+  /*
+    ---- bilingual wiring ----
+
+    Every en/ar pair must point at each other and canonicalise to itself.
+
+    Both halves of this have already been shipped broken once. alternatesFor()
+    returned the English URL as the canonical for EVERY caller, which was
+    invisible while only English routes used it and silently told Google the
+    Arabic homepage was a duplicate of the English one the moment /ar existed.
+    And /contact-us and /services set a bare canonical with no languages, so
+    they never declared their Arabic siblings at all.
+
+    ONE TRAP, worth stating because a hand-rolled version of this check passed
+    when it should not have: the language switcher renders an <a hrefLang="ar">
+    in the header of every English page. Matching hrefLang= anywhere in the
+    document therefore finds "ar" on pages that emit no alternates whatsoever.
+    The match below is anchored to <link rel="alternate"> for that reason.
+
+    Second trap: "/articles-of-association-uae".startsWith("/ar") is true, so
+    the Arabic test has to be an exact segment test.
+  */
+  const isAr = (u) => u === '/ar' || u.startsWith('/ar/');
+  const sitemapXml = (await get(`${SITE}/sitemap.xml`)).html;
+  const sitemapPaths = [
+    ...new Set(
+      [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname),
+    ),
+  ];
+  const arPaths = new Set(sitemapPaths.filter(isAr));
+  const enPaths = sitemapPaths.filter((u) => !isAr(u));
+
+  const headOf = async (p) => {
+    const { html } = await get(`${SITE}${p}`);
+    return html.slice(0, html.indexOf('</head>'));
+  };
+  const alternatesOf = (head) =>
+    Object.fromEntries(
+      [...head.matchAll(/<link rel="alternate" hrefLang="([^"]+)" href="([^"]+)"\s*\/?>/g)].map(
+        (m) => [m[1], new URL(m[2]).pathname],
+      ),
+    );
+  const canonicalOf = (head) => {
+    const m = head.match(/rel="canonical" href="([^"]+)"/);
+    return m ? new URL(m[1]).pathname : null;
+  };
+
+  const localePairs = enPaths
+    .map((en) => ({ en, ar: en === '/' ? '/ar' : `/ar${en}` }))
+    .filter((p) => arPaths.has(p.ar));
+
+  for (const { en, ar } of localePairs) {
+    const [headEn, headAr] = [await headOf(en), await headOf(ar)];
+    const [altEn, altAr] = [alternatesOf(headEn), alternatesOf(headAr)];
+
+    if (altEn.ar !== ar) fail(en, `hreflang="ar" is ${altEn.ar ?? 'MISSING'}, expected ${ar}`);
+    if (altAr['en-AE'] !== en)
+      fail(ar, `hreflang="en-AE" is ${altAr['en-AE'] ?? 'MISSING'}, expected ${en}`);
+    if (altEn['x-default'] !== en) fail(en, `x-default is ${altEn['x-default'] ?? 'MISSING'}`);
+    if (altAr['x-default'] !== en) fail(ar, `x-default is ${altAr['x-default'] ?? 'MISSING'}`);
+
+    if (canonicalOf(headEn) !== en) fail(en, `canonical points at ${canonicalOf(headEn)}`);
+    if (canonicalOf(headAr) !== ar)
+      fail(ar, `canonical points at ${canonicalOf(headAr)} — an Arabic page that canonicalises elsewhere will be dropped from the index`);
+  }
+
+  // An Arabic page missing from the sitemap is one Google must find by
+  // crawling. The live WordPress site lists zero of them; regressing to that
+  // is the specific thing this catches.
+  const arInCms = await cms('pages', { locale: 'ar', 'fields[0]': 'slug', 'pagination[pageSize]': '200' });
+  for (const row of arInCms.data ?? []) {
+    const p = row.slug === 'home' ? '/ar' : `/ar/${row.slug}`;
+    if (!arPaths.has(p)) fail(p, 'exists in the CMS but is absent from sitemap.xml');
+  }
+
   // ---- report ----
-  console.log(`checked ${hubs.length + pages.data.length + posts.data.length} pages, ${rules.length} redirects\n`);
+  console.log(
+    `checked ${hubs.length + pages.data.length + posts.data.length} pages, ` +
+      `${rules.length} redirects, ${localePairs.length} en/ar pairs\n`,
+  );
   if (warnings.length) {
     console.log(`${warnings.length} warning(s):`);
     for (const w of warnings) console.log(`  ! ${w}`);

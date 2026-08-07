@@ -1,7 +1,5 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { getHomepage, getPage, getPracticeAreas, getPosts } from '@/lib/content';
-import { HomeSections } from '@/components/home/HomeSections';
+import { Homepage } from '@/components/home/Homepage';
+import { alternatesFor } from '@/lib/locale';
 
 export const revalidate = 300;
 
@@ -11,145 +9,10 @@ export const revalidate = 300;
  * generateMetadata at all, so it inherits the layout's, which omits it.
  */
 export const metadata = {
-  alternates: { canonical: '/' },
+  // The Arabic homepage now genuinely exists, so this can finally claim it.
+  alternates: alternatesFor('/', true),
 };
 
-export default async function HomePage() {
-  const [hero, home, areas, posts] = await Promise.all([
-    getHomepage(),
-    getPage('home'),
-    getPracticeAreas(),
-    getPosts(),
-  ]);
-
-  const serviceCount = areas.reduce((n, a) => n + a.children.length, 0);
-  const [titleHead, ...titleTail] = (hero?.heroTitle ?? 'Expert Legal Services in the UAE').split(
-    ' in ',
-  );
-
-  return (
-    <>
-      {/*
-        Hero: full-bleed photograph with the copy set over it.
-        The photograph is the only colour on the page — everything around it
-        is black, white and grey, which is what lets it carry the composition.
-
-        The scrim is a left-to-right gradient rather than a flat overlay, so
-        the right side of the image stays fully saturated while the text side
-        holds contrast. Text sits at roughly 15:1 against the darkened area.
-      */}
-      <section className="relative flex min-h-[clamp(30rem,78vh,46rem)] items-center overflow-hidden bg-ink">
-        {/*
-          Positive z-indices, layered explicitly.
-
-          A negative z-index here does NOT work: the section establishes a
-          stacking context, so the image would sit behind the section's own
-          background and be painted over entirely.
-        */}
-        {hero?.heroImage && (
-          <Image
-            src={hero.heroImage.src}
-            alt={hero.heroImage.alt}
-            fill
-            priority
-            sizes="100vw"
-            className="z-0 object-cover object-[62%_center]"
-          />
-        )}
-        <div
-          aria-hidden
-          className="absolute inset-0 z-10 bg-gradient-to-r from-black/92 via-black/70 to-black/30 lg:via-black/55 lg:to-black/10"
-        />
-
-        <div className="site-container relative z-20 py-20">
-          <p className="eyebrow max-w-[46ch] text-white/75">
-            {hero?.heroEyebrow ?? 'Trusted Law Firm in Abu Dhabi & Dubai'}
-          </p>
-
-          {/* The page's single H1. Content blocks can only emit h2-h4. */}
-          <h1 className="mt-5 text-hero text-white">
-            <span className="block">{titleHead}</span>
-            {titleTail.length > 0 && (
-              <span className="block text-white/55">in {titleTail.join(' in ')}</span>
-            )}
-          </h1>
-
-          <p className="mt-7 max-w-[50ch] text-lg leading-relaxed text-white/80">
-            {hero?.heroText}
-          </p>
-
-          <div className="mt-10 flex flex-wrap items-center gap-3">
-            <Link
-              href="/contact-us"
-              className="bg-white px-7 py-3.5 font-display text-sm font-700 text-ink transition-colors hover:bg-white/85"
-            >
-              Request a consultation
-            </Link>
-            <Link
-              href="/services"
-              className="border border-white/70 px-7 py-3.5 font-display text-sm font-700 text-white transition-colors hover:bg-white hover:text-ink"
-            >
-              Explore {serviceCount} services
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/*
-        The migrated homepage copy, composed back into the sections the
-        original actually had: intro, commitments, services, a numbered
-        process, principles and the offices grid.
-
-        skip={3} drops the first three groups — they are the three slides of
-        the original's hero carousel, and the hero above already presents
-        slide one. Rendering them again would restate it three times.
-      */}
-      {home && home.blocks.length > 0 && <HomeSections blocks={home.blocks} skip={3} images={hero?.sectionImages ?? []} />}
-
-      {posts.length > 0 && (
-        <section className="border-t border-line">
-          <div className="site-container section">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="eyebrow text-ink">Legal Insights</p>
-                <h2 className="mt-4 text-display">Guidance on UAE law</h2>
-              </div>
-              <Link
-                href="/legal-insights"
-                className="font-display text-sm font-600 underline decoration-faint underline-offset-4 hover:decoration-ink"
-              >
-                All {posts.length} articles
-              </Link>
-            </div>
-
-            <div className="section-body grid gap-px border border-line bg-line md:grid-cols-3">
-              {posts.slice(0, 3).map((post) => (
-                <Link
-                  key={post.slug}
-                  href={`/${post.slug}`}
-                  className="group flex flex-col bg-surface card-p transition-colors hover:bg-surface-alt"
-                >
-                  {post.date && (
-                    <time
-                      dateTime={post.date}
-                      className="text-xs uppercase tracking-[0.08em] text-muted"
-                    >
-                      {new Date(post.date).toLocaleDateString('en-GB', {
-                        day: 'numeric', month: 'short', year: 'numeric',
-                      })}
-                    </time>
-                  )}
-                  <h3 className="mt-3 text-lg leading-snug">{post.title}</h3>
-                  {post.excerpt && (
-                    <p className="mt-3 line-clamp-3 text-sm text-body">{post.excerpt}</p>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-    </>
-  );
+export default function HomePage() {
+  return <Homepage locale="en" />;
 }
