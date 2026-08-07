@@ -64,14 +64,19 @@ export function organizationSchema() {
   };
 }
 
-export function websiteSchema() {
+/**
+ * `locale` is not decoration: the Arabic pages were emitting inLanguage:"en",
+ * which tells search engines the Arabic site is English and undercuts the
+ * hreflang cluster it sits in.
+ */
+export function websiteSchema(locale: 'en' | 'ar' = 'en') {
   return {
     '@type': 'WebSite',
     '@id': SITE_ID,
     url: SITE,
-    name: 'Fakher & Co',
+    name: locale === 'ar' ? 'مكتب فاخر ومشاركوه' : 'Fakher & Co',
     publisher: { '@id': ORG_ID },
-    inLanguage: 'en',
+    inLanguage: locale === 'ar' ? 'ar-AE' : 'en-AE',
   };
 }
 

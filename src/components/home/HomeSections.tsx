@@ -78,10 +78,31 @@ export function HomeSections({
 }) {
   const groups = groupBlocks(blocks).slice(skip);
 
-  const rendered: React.ReactNode[] = [];
+  /*
+    Planned first, rendered second.
+
+    The two passes exist so photographs can be assigned by RANK rather than by
+    an absolute character count. The original rule — "a section longer than
+    380 characters gets a photograph" — is a length threshold applied to two
+    different scripts, and Arabic says the same thing in about 0.86 of the
+    characters English needs. Two sections sat either side of the line, so the
+    Arabic homepage rendered three photographs where the English one rendered
+    four, and the layouts silently diverged.
+
+    Ranking is stable under translation where an absolute count is not: the
+    longest sections stay the longest sections. Both locales now select the
+    same set. Images are still handed out in document order, so the alternating
+    left/right rhythm is unchanged.
+  */
+  type Planned =
+    | { kind: 'cards'; i: number; lead: string; cards: Group[]; alt: boolean }
+    | { kind: 'offices'; i: number; group: Group; cards: Extract<Block, { type: 'cards' }>; alt: boolean }
+    | { kind: 'cta'; i: number; run: Group[] }
+    | { kind: 'editorial'; i: number; group: Group; alt: boolean; length: number };
+
+  const plan: Planned[] = [];
   let i = 0;
   let band = 0;
-  let imageIndex = 0;
 
   while (i < groups.length) {
     const group = groups[i];
@@ -96,15 +117,7 @@ export function HomeSections({
         j += 1;
       }
       if (cards.length >= 2) {
-        rendered.push(
-          <CardRow
-            key={`row-${i}`}
-            lead={group.heading}
-            cards={cards}
-            numbered={cards.every((c) => STEP.test(c.heading))}
-            alt={alt}
-          />,
-        );
+        plan.push({ kind: 'cards', i, lead: group.heading, cards, alt });
         i = j;
         band += 1;
         continue;
@@ -117,7 +130,7 @@ export function HomeSections({
     // The offices grid.
     const cardsInBody = cardsBlock(group);
     if (cardsInBody) {
-      rendered.push(<Offices key={`offices-${i}`} group={group} cards={cardsInBody} alt={alt} />);
+      plan.push({ kind: 'offices', i, group, cards: cardsInBody, alt });
       i += 1;
       band += 1;
       continue;
@@ -140,28 +153,52 @@ export function HomeSections({
         run.push(groups[j]);
         j += 1;
       }
-      rendered.push(<CtaBand key={`cta-${i}`} groups={run} />);
+      plan.push({ kind: 'cta', i, run });
       i = j;
       band += 1;
       continue;
     }
 
-    // Editorial. Long ones get a photograph; short ones stay text-only so the
-    // imagery does not become wallpaper.
-    const withImage = textLength(group) > 380 && imageIndex < images.length;
-    rendered.push(
-      <Editorial
-        key={`sec-${i}`}
-        group={group}
-        alt={alt}
-        image={withImage ? images[imageIndex] : null}
-        flip={imageIndex % 2 === 1}
-      />,
-    );
-    if (withImage) imageIndex += 1;
+    plan.push({ kind: 'editorial', i, group, alt, length: textLength(group) });
     i += 1;
     band += 1;
   }
+
+  // The longest editorial sections get the photographs; short ones stay
+  // text-only so the imagery does not become wallpaper.
+  const withImages = new Set(
+    plan
+      .filter((p): p is Extract<Planned, { kind: 'editorial' }> => p.kind === 'editorial')
+      .sort((a, b) => b.length - a.length)
+      .slice(0, images.length)
+      .map((p) => p.i),
+  );
+
+  let imageIndex = 0;
+  const rendered = plan.map((p) => {
+    switch (p.kind) {
+      case 'cards':
+        return (
+          <CardRow
+            key={`row-${p.i}`}
+            lead={p.lead}
+            cards={p.cards}
+            numbered={p.cards.every((c) => STEP.test(c.heading))}
+            alt={p.alt}
+          />
+        );
+      case 'offices':
+        return <Offices key={`offices-${p.i}`} group={p.group} cards={p.cards} alt={p.alt} />;
+      case 'cta':
+        return <CtaBand key={`cta-${p.i}`} groups={p.run} />;
+      case 'editorial': {
+        const image = withImages.has(p.i) ? images[imageIndex] : null;
+        const flip = imageIndex % 2 === 1;
+        if (image) imageIndex += 1;
+        return <Editorial key={`sec-${p.i}`} group={p.group} alt={p.alt} image={image} flip={flip} />;
+      }
+    }
+  });
 
   return <>{rendered}</>;
 }

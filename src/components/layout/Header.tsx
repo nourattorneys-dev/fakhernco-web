@@ -109,7 +109,13 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
             className="hidden items-center gap-2 bg-ink px-5 py-2.5 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2 sm:flex"
           >
             <span aria-hidden>✆</span>
-            <span>{WHATSAPP}</span>
+            {/*
+              dir="ltr" because bidi reordering moves the leading "+" of a
+              phone number to the far end inside an RTL paragraph: the Arabic
+              header was rendering "971502057209+". Phone numbers are always
+              read left to right, in either language.
+            */}
+            <span dir="ltr">{WHATSAPP}</span>
           </a>
 
           <Link

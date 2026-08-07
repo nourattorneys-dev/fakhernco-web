@@ -78,7 +78,7 @@ export default function ArabicRootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="ar" dir="rtl" className={`${sarabun.variable} ${robotoCondensed.variable} ${plexArabic.variable}`}>
       <body>
-        <JsonLd data={graph(organizationSchema(), websiteSchema())} />
+        <JsonLd data={graph(organizationSchema(), websiteSchema('ar'))} />
         <UtilityBar />
         <Header locale="ar" />
         <main>{children}</main>
@@ -96,13 +96,13 @@ function UtilityBar() {
         <span className="flex items-center gap-2">
           <span aria-hidden className="text-white/40">◷</span>
           <span className="font-semibold">الإثنين – الجمعة</span>
-          <span className="text-white/55">٩ صباحاً – ٦ مساءً</span>
+          <span className="text-white/55">9 صباحاً – 6 مساءً</span>
         </span>
         <span className="hidden items-center gap-2 sm:flex">
           <span aria-hidden className="text-white/40">⌖</span>
           <span className="font-semibold">المقر الرئيسي</span>
           <span className="text-white/55">
-            مكتب ٢١٩، ريجس، الطابق الثاني، فندق كورتيارد ماريوت، شارع المطار، أبوظبي
+            مكتب 219، ريجس، الطابق الثاني، فندق كورتيارد ماريوت، شارع المطار، أبوظبي
           </span>
         </span>
       </div>
