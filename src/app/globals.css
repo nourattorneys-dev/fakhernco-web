@@ -29,6 +29,19 @@
   --color-surface-alt: #f5f5f5;
   --color-bar: #101010;
 
+  /*
+    WhatsApp brand green — the one exception to the monochrome palette,
+    because the whole value of a WhatsApp button is being recognised at a
+    glance, and that recognition is carried by this specific green.
+
+    Contrast note: white on #25D366 is 2.0:1. That is fine for the glyph on
+    the floating button, which is the official brand lockup and is backed by
+    an aria-label, but it is NOT readable for the header button's phone
+    number — that one uses ink on green instead, which is 9.3:1.
+  */
+  --color-whatsapp: #25d366;
+  --color-whatsapp-dark: #1da851;
+
   --font-display: var(--font-roboto-condensed), "Roboto Condensed", Arial, sans-serif;
   --font-sans: var(--font-sarabun), Sarabun, Arial, Helvetica, sans-serif;
 

@@ -5,12 +5,18 @@ import { WHATSAPP_URL } from '@/lib/contact';
 /**
  * Floating WhatsApp button.
  *
- * WHY IT IS BLACK AND NOT WHATSAPP GREEN
- * The site is monochrome by design — colour appears only in photographs. A
- * brand-green circle would read as a third-party widget bolted onto the page
- * rather than part of it. The glyph is the recognisable part; the container
- * follows the design system. Swap `bg-ink`/`hover:bg-ink-2` for `#25D366` if
- * brand recognition is worth more than consistency here.
+ * COLOUR
+ * WhatsApp brand green, white glyph — the official lockup. This is the one
+ * deliberate exception to the site's monochrome palette: the entire value of
+ * this control is being recognised without being read, and that recognition
+ * lives in this specific green.
+ *
+ * White on #25D366 is only 2.0:1, below the 3:1 that WCAG 1.4.11 asks of a
+ * graphical object. Accepted here because the mark is the brand's own, the
+ * link carries a real accessible name, and the focus ring is drawn in ink
+ * rather than white so it stays visible against the green. The header's
+ * WhatsApp button makes the opposite trade — it contains a phone number that
+ * has to be read, so it puts ink on the green instead.
  *
  * POSITIONING
  * `end-*` rather than `right-*`, so it sits bottom-right in English and
@@ -36,9 +42,9 @@ export function WhatsAppButton({ locale = 'en' }: { locale?: Locale }) {
       className="
         group fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] end-5 z-40
         flex h-14 w-14 items-center justify-center rounded-full
-        bg-ink text-white shadow-lg shadow-black/20
+        bg-whatsapp text-white shadow-lg shadow-black/25
         transition-[background-color,transform] duration-200
-        hover:bg-ink-2 hover:scale-105
+        hover:bg-whatsapp-dark hover:scale-105
         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink
         motion-reduce:transition-none motion-reduce:hover:scale-100
       "

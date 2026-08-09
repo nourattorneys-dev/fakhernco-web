@@ -105,9 +105,25 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
 
         <div className="flex items-center justify-self-end gap-3">
           <LanguageSwitcher translated={arabicPaths} />
+          {/*
+            WhatsApp green, but with INK text rather than white.
+
+            White on #25D366 is 2.0:1, which is unreadable for a phone number
+            and fails WCAG AA outright. Ink on the same green is 9.3:1. The
+            floating button keeps the white-on-green brand lockup because its
+            glyph only has to be recognised, not read.
+
+            target="_blank" because this leaves for wa.me: without it, tapping
+            the number navigated the site away and the visitor lost their
+            place. rel="noopener" is required alongside it — a _blank link
+            otherwise hands the opened page a reference to this window.
+          */}
           <a
-            href={WHATSAPP_URL()}
-            className="hidden items-center gap-2 bg-ink px-5 py-2.5 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2 sm:flex"
+            href={WHATSAPP_URL(s.whatsappPrefill)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={s.whatsappLabel}
+            className="hidden items-center gap-2 bg-whatsapp px-5 py-2.5 font-display text-sm font-700 text-ink transition-colors hover:bg-whatsapp-dark sm:flex"
           >
             <span aria-hidden>✆</span>
             {/*
