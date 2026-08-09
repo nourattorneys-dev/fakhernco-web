@@ -12,3 +12,9 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# Generated review documents. Regenerate with:
+#   python3 scripts/export-landing-docx.py
+# Not committed: a stale .docx is the worst possible state for a file whose
+# whole purpose is to be the version under review.
+content/landing/docx/
