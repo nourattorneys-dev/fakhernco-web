@@ -148,39 +148,67 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         </div>
       </header>
 
-      <div className="site-container section grid gap-16 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="site-container section">
         <div className="max-w-[68ch]">
           <Prose blocks={page.blocks} />
         </div>
+      </div>
 
-        {/* The form travels with the reader rather than sitting only at the
-            foot of the page — on an ad page the enquiry is the whole point. */}
-        <aside id="enquire" className="lg:sticky lg:top-28 lg:self-start">
-          <div className="border border-ink card-p">
-            <h2 className="text-card">Request a consultation</h2>
-            <p className="mt-3 text-sm text-body">
+      {/*
+        The form sits at the foot, full width, rather than in a sidebar.
+
+        A sidebar form competes with the copy for attention the whole way down
+        and squeezes the reading column; at the end it arrives once the case
+        has been made, which is when someone is actually ready to enquire. The
+        hero's "Request a consultation" jumps straight here for anyone who is
+        ready sooner.
+      */}
+      <section id="enquire" className="scroll-mt-28 border-t border-line bg-surface-alt">
+        <div className="site-container section">
+          <div className="mx-auto max-w-[46rem]">
+            <p className="eyebrow text-ink">Get in touch</p>
+            <h2 className="mt-4 text-display">Request a consultation</h2>
+            <p className="prose-body mt-4 max-w-[52ch]">
               Tell us about your matter and a member of our team will respond within one business
-              day.
+              day. Everything you share is confidential.
             </p>
-            <div className="mt-6">
+            <div className="section-body border border-ink bg-surface card-p">
               <ContactForm services={areas.map((a) => a.title)} />
             </div>
           </div>
-        </aside>
-      </div>
+        </div>
+      </section>
 
       {others.length > 0 && (
-        <section className="border-t border-line bg-surface-alt">
-          <div className="site-container section-tight">
+        /*
+          A grid of real cards on white, not a row of small underlined links.
+
+          As a wrapped list of 14px links on grey it read as a footnote and was
+          easy to miss entirely — which is wasted, because someone who has read
+          to the bottom of one service page is exactly the person most likely
+          to want another. Each card is a full click target at card type size.
+        */
+        <section className="border-t border-line bg-surface">
+          <div className="site-container section">
             <p className="eyebrow text-ink">Other services</p>
-            <ul className="section-body flex flex-wrap gap-x-6 gap-y-3 text-sm">
+            <h2 className="mt-4 text-display">How else we can help</h2>
+
+            <ul className="section-body grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
               {others.map((o) => (
-                <li key={o.slug}>
+                <li key={o.slug} className="bg-surface">
                   <Link
                     href={`/lp/${o.slug}`}
-                    className="underline decoration-faint underline-offset-4 hover:decoration-ink"
+                    className="group flex h-full items-start justify-between gap-4 card-p transition-colors hover:bg-surface-alt"
                   >
-                    {o.title}
+                    <span className="text-card group-hover:underline group-hover:decoration-faint group-hover:underline-offset-4">
+                      {o.title}
+                    </span>
+                    <span
+                      aria-hidden
+                      className="mt-1 shrink-0 text-muted transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 motion-reduce:transition-none"
+                    >
+                      &rarr;
+                    </span>
                   </Link>
                 </li>
               ))}

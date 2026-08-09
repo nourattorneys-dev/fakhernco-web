@@ -86,11 +86,22 @@ export function ContactForm({
         <Field label={s.fullName} name="name" required autoComplete="name" />
         <Field label={s.email} name="email" type="email" required autoComplete="email" />
         <Field label={s.phone} name="phone" type="tel" autoComplete="tel" />
-        <label className="flex flex-col gap-2">
+        {/*
+          min-w-0 is load-bearing.
+
+          Grid items default to min-width:auto, which refuses to shrink below
+          the content's intrinsic size. A <select> takes that from its longest
+          option — "Company Formation & Corporate Services" measures 326px — so
+          on a 390px phone, where this column has 244px, the control pushed 82px
+          past the container and the form hung off the right edge of the screen.
+          The options come from the CMS, so the longest one is not fixed and
+          this cannot be solved by shortening a label.
+        */}
+        <label className="flex min-w-0 flex-col gap-2">
           <span className="font-display text-sm font-600 text-ink">{s.howCanWeHelp}</span>
           <select
             name="service"
-            className="border border-line bg-surface px-4 py-3 text-[0.9375rem] focus:border-ink focus:outline-none"
+            className="w-full border border-line bg-surface px-4 py-3 text-[0.9375rem] focus:border-ink focus:outline-none"
             defaultValue=""
           >
             <option value="" disabled>
@@ -105,7 +116,7 @@ export function ContactForm({
         </label>
       </div>
 
-      <label className="flex flex-col gap-2">
+      <label className="flex min-w-0 flex-col gap-2">
         <span className="font-display text-sm font-600 text-ink">
           {s.yourMessage} <span className="text-muted">*</span>
         </span>
@@ -113,7 +124,7 @@ export function ContactForm({
           name="message"
           required
           rows={6}
-          className="border border-line bg-surface px-4 py-3 text-[0.9375rem] focus:border-ink focus:outline-none"
+          className="w-full border border-line bg-surface px-4 py-3 text-[0.9375rem] focus:border-ink focus:outline-none"
           placeholder={s.messagePlaceholder}
         />
       </label>
@@ -156,7 +167,7 @@ function Field({
   autoComplete?: string;
 }) {
   return (
-    <label className="flex flex-col gap-2">
+    <label className="flex min-w-0 flex-col gap-2">
       <span className="font-display text-sm font-600 text-ink">
         {label} {required && <span className="text-muted">*</span>}
       </span>
@@ -165,7 +176,7 @@ function Field({
         type={type}
         required={required}
         autoComplete={autoComplete}
-        className="border border-line bg-surface px-4 py-3 text-[0.9375rem] focus:border-ink focus:outline-none"
+        className="w-full border border-line bg-surface px-4 py-3 text-[0.9375rem] focus:border-ink focus:outline-none"
       />
     </label>
   );

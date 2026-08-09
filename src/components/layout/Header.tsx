@@ -107,12 +107,14 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
         <div className="flex items-center justify-self-end gap-3">
           <LanguageSwitcher translated={arabicPaths} />
           {/*
-            WhatsApp green, but with INK text rather than white.
+            Black button, white number, green glyph.
 
-            White on #25D366 is 2.0:1, which is unreadable for a phone number
-            and fails WCAG AA outright. Ink on the same green is 9.3:1. The
-            floating button keeps the white-on-green brand lockup because its
-            glyph only has to be recognised, not read.
+            This gets the best of both: the number sits at ~16:1 on ink, which
+            a solid-green button could not manage (white on #25D366 is 2.0:1),
+            while the WhatsApp mark still carries the brand recognition. The
+            green reads at 9.3:1 against ink, so the glyph is well clear of the
+            3:1 WCAG asks of a graphical object — better than the floating
+            button's white-on-green lockup manages.
 
             target="_blank" because this leaves for wa.me: without it, tapping
             the number navigated the site away and the visitor lost their
@@ -124,7 +126,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={s.whatsappLabel}
-            className="hidden items-center gap-2 bg-whatsapp px-5 py-2.5 font-display text-sm font-700 text-ink transition-colors hover:bg-whatsapp-dark sm:flex"
+            className="hidden items-center gap-2 bg-ink px-5 py-2.5 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2 sm:flex"
           >
             {/*
               Was a ✆ text glyph (U+2706), which rendered at the 14px font
@@ -132,7 +134,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
               generic telephone sign rather than the WhatsApp mark the green
               is promising. 1.25rem against 0.875rem text.
             */}
-            <WhatsAppGlyph className="h-5 w-5 shrink-0" />
+            <WhatsAppGlyph className="h-5 w-5 shrink-0 text-whatsapp" />
             {/*
               dir="ltr" because bidi reordering moves the leading "+" of a
               phone number to the far end inside an RTL paragraph: the Arabic
