@@ -4,6 +4,7 @@ title: Corporate Matters and Disputes
 h1: Corporate Matters & Shareholder Disputes
 subhead: Governance, restructuring, and what happens when the people who own a business stop agreeing.
 description: UAE corporate lawyers: shareholder disputes, governance, restructuring, share transfers and exits. Abu Dhabi and Dubai. Confidential consultation.
+image: 4
 ---
 ## When the dispute is inside the company
 

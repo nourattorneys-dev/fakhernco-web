@@ -36,6 +36,13 @@ export type Landing = {
   h1: string;
   subhead: string;
   description: string;
+  /**
+   * Index into the brand photography (the homepage hero plus its four section
+   * images). Chosen per page so the photograph matches the subject rather than
+   * rotating arbitrarily, and set in the markdown so it is editable alongside
+   * the copy.
+   */
+  image: number;
   blocks: Block[];
 };
 
@@ -119,6 +126,7 @@ function parse(slug: string, raw: string): Landing {
     h1: meta.h1 ?? meta.title ?? slug,
     subhead: meta.subhead ?? '',
     description: meta.description ?? '',
+    image: Number.isFinite(Number(meta.image)) ? Number(meta.image) : 0,
     blocks: parseBody(body),
   };
 }

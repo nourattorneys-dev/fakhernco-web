@@ -4,6 +4,7 @@ title: Real Estate Advice
 h1: Real Estate Legal Advice
 subhead: Advice before you buy, sell, lease or develop — so the transaction does not become the dispute.
 description: UAE real estate legal advice: purchase and off-plan review, title and due diligence, leases, developer agreements. Abu Dhabi and Dubai.
+image: 3
 ---
 ## The cheapest property dispute is the one you avoided
 

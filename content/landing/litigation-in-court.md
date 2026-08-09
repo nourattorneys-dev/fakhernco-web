@@ -4,6 +4,7 @@ title: Litigation in Court
 h1: Litigation in the UAE Courts
 subhead: Representation before the Court of First Instance, Court of Appeal and Court of Cassation — in Abu Dhabi and Dubai.
 description: UAE litigation lawyers in Abu Dhabi and Dubai. Commercial, contractual and property disputes at every court tier. Confidential consultation.
+image: 1
 ---
 ## When a dispute has to go to court
 

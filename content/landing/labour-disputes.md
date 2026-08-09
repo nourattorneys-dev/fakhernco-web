@@ -4,6 +4,7 @@ title: Labour Disputes
 h1: Labour & Employment Disputes
 subhead: MOHRE claims, labour court representation and labour bans — for employers and employees in Abu Dhabi and Dubai.
 description: UAE labour dispute lawyers. MOHRE mediation, labour court claims, end-of-service, wrongful dismissal and labour bans. Confidential consultation.
+image: 1
 ---
 ## Most labour disputes start at MOHRE, not in court
 

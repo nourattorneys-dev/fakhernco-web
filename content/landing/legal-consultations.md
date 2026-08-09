@@ -4,6 +4,7 @@ title: Legal Consultations
 h1: Legal Consultations
 subhead: A confidential session with a UAE-qualified lawyer, and a clear written view of where you stand.
 description: Book a confidential legal consultation with Fakher & Co in Abu Dhabi or Dubai. Clear advice on your position and options under UAE law.
+image: 0
 ---
 ## Before you commit to anything
 

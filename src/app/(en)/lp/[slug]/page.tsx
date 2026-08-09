@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAllLandings, getLanding, getLandingSlugs, inline, type Block } from '@/lib/landing';
-import { getPracticeAreas } from '@/lib/content';
+import { getHomepage, getPracticeAreas } from '@/lib/content';
+import Image from 'next/image';
 import { ContactForm } from '@/components/ContactForm';
 import { PHONE, WHATSAPP_URL } from '@/lib/contact';
 import { WhatsAppGlyph } from '@/components/icons/WhatsAppGlyph';
@@ -103,21 +104,50 @@ function Text({ value }: { value: string }) {
 
 export default async function LandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [page, areas, all] = await Promise.all([
+  const [page, areas, all, home] = await Promise.all([
     getLanding(slug),
     getPracticeAreas(),
     getAllLandings(),
+    getHomepage(),
   ]);
   if (!page) notFound();
+
+  // The brand photography, as one pool: the homepage hero plus its four
+  // section images. The markdown picks by index.
+  const photos = [home?.heroImage, ...(home?.sectionImages ?? [])].filter(
+    (x): x is { src: string; alt: string } => Boolean(x),
+  );
+  const photo = photos[page.image] ?? photos[0] ?? null;
 
   const others = all.filter((p) => p.slug !== slug);
 
   return (
     <article>
-      {/* Hero. No photograph: an ad landing page should load fast and put the
-          offer and the form above the fold, not a 200KB image. */}
-      <header className="border-b border-line bg-ink text-white">
-        <div className="site-container section">
+      {/*
+        Hero, matching the homepage's treatment: full-bleed photograph with the
+        copy set over a directional scrim, so the text side holds contrast
+        while the far side of the image stays saturated.
+
+        Explicit positive z-indices. A negative one does not work here — the
+        section establishes a stacking context, so the image would be painted
+        behind the section's own background and vanish.
+      */}
+      <header className="relative isolate overflow-hidden border-b border-line bg-ink text-white">
+        {photo && (
+          <Image
+            src={photo.src}
+            alt={photo.alt}
+            fill
+            priority
+            sizes="100vw"
+            className="z-0 object-cover object-[60%_center] rtl:object-[40%_center]"
+          />
+        )}
+        <div
+          aria-hidden
+          className="absolute inset-0 z-10 bg-gradient-to-r from-black/94 via-black/80 to-black/45 rtl:bg-gradient-to-l lg:via-black/70 lg:to-black/25"
+        />
+        <div className="site-container section relative z-20">
           <p className="eyebrow text-white/70">Fakher &amp; Co · Abu Dhabi &amp; Dubai</p>
           {/* text-white is required, not decorative: globals.css sets
               h1 { color: var(--color-ink) } in the base layer, so on this ink
@@ -198,20 +228,42 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
                 <li key={o.slug} className="bg-surface">
                   <Link
                     href={`/lp/${o.slug}`}
-                    className="group flex h-full items-start justify-between gap-4 card-p transition-colors hover:bg-surface-alt"
+                    className="group flex h-full flex-col card-p transition-colors hover:bg-surface-alt"
                   >
-                    <span className="text-card group-hover:underline group-hover:decoration-faint group-hover:underline-offset-4">
+                    <h3 className="text-card group-hover:underline group-hover:decoration-faint group-hover:underline-offset-4">
                       {o.title}
-                    </span>
-                    <span
-                      aria-hidden
-                      className="mt-1 shrink-0 text-muted transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 motion-reduce:transition-none"
-                    >
-                      &rarr;
+                    </h3>
+                    {/* The page's own subhead, so the card says what the
+                        service actually is instead of making the reader infer
+                        it from a title. mt-auto pins the affordance to the
+                        bottom so every card in a row lines up regardless of
+                        how long its description runs. */}
+                    {o.subhead && <p className="mt-3 text-sm text-body">{o.subhead}</p>}
+                    <span className="mt-auto flex items-center gap-2 pt-6 font-display text-sm font-600 text-ink">
+                      Read more
+                      <span
+                        aria-hidden
+                        className="transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 motion-reduce:transition-none"
+                      >
+                        &rarr;
+                      </span>
                     </span>
                   </Link>
                 </li>
               ))}
+              {/*
+                Fillers for the trailing cells of the last row.
+
+                The grid draws its rules by showing a bg-line parent through a
+                1px gap, so an incomplete final row leaves the backing colour
+                exposed as a grey block. Seven cards in three columns did
+                exactly that. These have no padding, so they are zero-height
+                wherever they are not sharing a row with a real card — which
+                makes them invisible at one and two columns and correct at
+                three.
+              */}
+              <li aria-hidden className="hidden bg-surface sm:block" />
+              <li aria-hidden className="hidden bg-surface sm:block" />
             </ul>
           </div>
         </section>
