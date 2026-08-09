@@ -5,6 +5,7 @@ import type { Locale } from '@/lib/locale';
 import { href, t } from '@/lib/ui';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { PHONE, WHATSAPP_URL } from '@/lib/contact';
+import { WhatsAppGlyph } from '@/components/icons/WhatsAppGlyph';
 import { NavGroup } from './NavGroup';
 
 
@@ -125,7 +126,13 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
             aria-label={s.whatsappLabel}
             className="hidden items-center gap-2 bg-whatsapp px-5 py-2.5 font-display text-sm font-700 text-ink transition-colors hover:bg-whatsapp-dark sm:flex"
           >
-            <span aria-hidden>✆</span>
+            {/*
+              Was a ✆ text glyph (U+2706), which rendered at the 14px font
+              size and read as small and faint next to the number — and was a
+              generic telephone sign rather than the WhatsApp mark the green
+              is promising. 1.25rem against 0.875rem text.
+            */}
+            <WhatsAppGlyph className="h-5 w-5 shrink-0" />
             {/*
               dir="ltr" because bidi reordering moves the leading "+" of a
               phone number to the far end inside an RTL paragraph: the Arabic
