@@ -223,12 +223,22 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
             <p className="eyebrow text-ink">Other services</p>
             <h2 className="mt-4 text-display">How else we can help</h2>
 
-            <ul className="section-body grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+            {/*
+              Separated cards, not a flush table.
+
+              This used the gap-px-over-a-bg-line trick, where cards butt
+              together and share single-pixel rules. That reads as one ruled
+              block; discrete cards with space around them read as a set of
+              choices, which is what this is. Real gaps also mean an
+              incomplete final row is simply whitespace, so the filler cells
+              that were patching the exposed grid backing are gone.
+            */}
+            <ul className="section-body grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {others.map((o) => (
-                <li key={o.slug} className="bg-surface">
+                <li key={o.slug}>
                   <Link
                     href={`/lp/${o.slug}`}
-                    className="group flex h-full flex-col card-p transition-colors hover:bg-surface-alt"
+                    className="group flex h-full flex-col border border-line bg-surface card-p transition-colors hover:border-ink hover:bg-surface-alt"
                   >
                     <h3 className="text-card group-hover:underline group-hover:decoration-faint group-hover:underline-offset-4">
                       {o.title}
@@ -251,19 +261,6 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
                   </Link>
                 </li>
               ))}
-              {/*
-                Fillers for the trailing cells of the last row.
-
-                The grid draws its rules by showing a bg-line parent through a
-                1px gap, so an incomplete final row leaves the backing colour
-                exposed as a grey block. Seven cards in three columns did
-                exactly that. These have no padding, so they are zero-height
-                wherever they are not sharing a row with a real card — which
-                makes them invisible at one and two columns and correct at
-                three.
-              */}
-              <li aria-hidden className="hidden bg-surface sm:block" />
-              <li aria-hidden className="hidden bg-surface sm:block" />
             </ul>
           </div>
         </section>
