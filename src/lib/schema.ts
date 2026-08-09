@@ -9,6 +9,7 @@
  */
 
 import type { Locale } from './locale';
+import { PHONE } from './contact';
 import type { Block, Doc } from './content';
 
 const SITE = process.env.SITE_URL ?? 'https://fakhernco.com';
@@ -20,7 +21,7 @@ export const OFFICES = [
   {
     city: 'Abu Dhabi', country: 'AE',
     street: '219 Office, Regus, 2nd Floor Court Marriot Hotel, Airport St',
-    phone: '+971502057209',
+    phone: `+${PHONE.E164}`,
   },
   {
     city: 'Mansoura', country: 'EG',

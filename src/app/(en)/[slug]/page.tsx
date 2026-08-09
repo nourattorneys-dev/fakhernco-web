@@ -13,6 +13,7 @@ import { alternatesFor } from '@/lib/locale';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { JsonLd } from '@/components/JsonLd';
 import { articleSchema, breadcrumbSchema, faqSchema, graph, serviceSchema } from '@/lib/schema';
+import { TEL_HREF } from '@/lib/contact';
 
 export const revalidate = 300;
 
@@ -184,7 +185,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
               Request a consultation
             </Link>
             <a
-              href="tel:+971502057209"
+              href={TEL_HREF}
               className="mt-4 block font-display text-sm font-600 text-white/80 underline decoration-white/30 underline-offset-4 hover:decoration-white"
             >
               +971 50 205 7209

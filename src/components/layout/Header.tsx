@@ -4,9 +4,10 @@ import { getArabicPaths, getPracticeAreas, getSiteSettings } from '@/lib/content
 import type { Locale } from '@/lib/locale';
 import { href, t } from '@/lib/ui';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { PHONE, WHATSAPP_URL } from '@/lib/contact';
 import { NavGroup } from './NavGroup';
 
-const WHATSAPP = '+971502057209';
+
 
 /**
  * Sticky header, following the live site's structure: wordmark left, centred
@@ -105,7 +106,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
         <div className="flex items-center justify-self-end gap-3">
           <LanguageSwitcher translated={arabicPaths} />
           <a
-            href={`https://wa.me/${WHATSAPP.replace('+', '')}`}
+            href={WHATSAPP_URL()}
             className="hidden items-center gap-2 bg-ink px-5 py-2.5 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2 sm:flex"
           >
             <span aria-hidden>✆</span>
@@ -115,7 +116,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
               header was rendering "971502057209+". Phone numbers are always
               read left to right, in either language.
             */}
-            <span dir="ltr">{WHATSAPP}</span>
+            <span dir="ltr">{PHONE.COMPACT}</span>
           </a>
 
           <Link

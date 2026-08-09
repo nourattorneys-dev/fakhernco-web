@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { Locale } from '@/lib/locale';
 import { t } from '@/lib/ui';
+import { PHONE, TEL_HREF } from '@/lib/contact';
 
 type State = 'idle' | 'sending' | 'sent' | 'error';
 
@@ -60,8 +61,8 @@ export function ContactForm({
         <h2 className="text-card">{s.thanksTitle}</h2>
         <p className="mt-3 text-body">
           {s.thanksBody}{' '}
-          <a href="tel:+971502057209" className="font-medium text-ink underline underline-offset-2">
-            +971 50 205 7209
+          <a href={TEL_HREF} className="font-medium text-ink underline underline-offset-2" dir="ltr">
+            {PHONE.DISPLAY}
           </a>
           .
         </p>

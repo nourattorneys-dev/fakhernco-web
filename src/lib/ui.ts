@@ -47,6 +47,10 @@ export const UI = {
     notFoundBody:
       'The page may have moved. You can browse our services or get in touch and we will point you in the right direction.',
     backToHome: 'Back to home',
+
+    // Floating WhatsApp button
+    whatsappLabel: 'Chat with us on WhatsApp',
+    whatsappPrefill: "Hello, I'd like to speak to a lawyer about a legal matter.",
     officeHours: 'Office hours',
     hoursValue: 'Monday – Friday, 9AM – 6PM (GST)',
     mainOffice: 'Main Office',
@@ -123,6 +127,10 @@ export const UI = {
     notFoundBody:
       'ربما تكون الصفحة قد نُقلت. يمكنك تصفّح خدماتنا أو التواصل معنا وسنرشدك إلى الوجهة الصحيحة.',
     backToHome: 'العودة إلى الرئيسية',
+
+    // Floating WhatsApp button
+    whatsappLabel: 'تحدّث إلينا عبر واتساب',
+    whatsappPrefill: 'مرحباً، أودّ التحدث إلى محامٍ بشأن مسألة قانونية.',
     officeHours: 'ساعات العمل',
     hoursValue: 'الإثنين – الجمعة، 9 صباحاً – 6 مساءً (بتوقيت الخليج)',
     mainOffice: 'المقر الرئيسي',
