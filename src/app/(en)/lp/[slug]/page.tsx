@@ -45,16 +45,86 @@ export async function generateMetadata({
   };
 }
 
-function Prose({ blocks }: { blocks: Block[] }) {
+/**
+ * Copy for the inline calls to action, rotated by position.
+ *
+ * Rotated rather than repeated because the same sentence three times down one
+ * page reads as a template and stops being read at all. Each one offers a
+ * different reason to make contact, so a reader who ignored the first has a
+ * different hook at the second.
+ */
+const CTA_COPY = [
+  {
+    line: 'Not sure whether you have a case, or whether it is worth pursuing?',
+    sub: 'A confidential consultation will tell you, with no obligation.',
+  },
+  {
+    line: 'Working to a deadline?',
+    sub: 'Tell us when you make contact and we will say honestly whether it is achievable.',
+  },
+  {
+    line: 'Would it be easier to talk it through?',
+    sub: 'We advise in Arabic and English, in person in Abu Dhabi and Dubai, or by call.',
+  },
+];
+
+function InlineCta({ index, service }: { index: number; service: string }) {
+  const copy = CTA_COPY[index % CTA_COPY.length];
+  return (
+    <aside className="my-12 border border-line bg-surface-alt card-p">
+      <p className="font-display text-lg font-700 text-ink">{copy.line}</p>
+      <p className="mt-2 text-body">{copy.sub}</p>
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <a
+          href="#enquire"
+          className="bg-ink px-6 py-3 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2"
+        >
+          Request a consultation
+        </a>
+        <a
+          href={WHATSAPP_URL(`Hello, I'd like to ask about: ${service}.`)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 border border-ink px-5 py-3 font-display text-sm font-700 text-ink transition-colors hover:bg-surface"
+        >
+          <WhatsAppGlyph className="h-5 w-5 shrink-0 text-whatsapp" />
+          WhatsApp
+        </a>
+      </div>
+    </aside>
+  );
+}
+
+function Prose({ blocks, service }: { blocks: Block[]; service: string }) {
+  /*
+    A call to action after every second section.
+
+    The sticky bar is mobile-only, so on desktop a reader working down 900
+    words had nothing to act on between the hero and the form at the foot.
+    These sit in the flow instead, at the natural pauses between sections.
+
+    Counted on h2 boundaries and inserted BEFORE the heading that starts the
+    next pair, so a CTA never separates a heading from the text under it. The
+    first pair is skipped — nobody is ready to enquire two paragraphs in — and
+    so is the last, because the form itself is immediately below.
+  */
+  let seen = 0;
+  const lastH2 = blocks.reduce((last, b, i) => (b.type === 'h2' ? i : last), -1);
   return (
     <>
       {blocks.map((b, i) => {
-        if (b.type === 'h2')
+        if (b.type === 'h2') {
+          seen += 1;
+          const breakHere = seen > 2 && seen % 2 === 1 && i !== lastH2;
           return (
-            <h2 key={i} className="mt-12 text-section first:mt-0">
-              <Text value={b.text} />
-            </h2>
+            <div key={i}>
+              {breakHere && <InlineCta index={Math.floor(seen / 2) - 1} service={service} />}
+              <h2 className="mt-12 text-section">
+                <Text value={b.text} />
+              </h2>
+            </div>
           );
+        }
         if (b.type === 'h3')
           return (
             <h3 key={i} className="mt-8 text-card">
@@ -183,7 +253,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
 
       <div className="site-container section">
         <div className="max-w-[68ch]">
-          <Prose blocks={page.blocks} />
+          <Prose blocks={page.blocks} service={page.title} />
         </div>
       </div>
 
