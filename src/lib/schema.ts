@@ -59,7 +59,11 @@ export function organizationSchema() {
     telephone: OFFICES.map((o) => o.phone),
     openingHoursSpecification: {
       '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      // Sunday to Thursday, per the firm's own contact page. The site said
+      // Monday to Friday everywhere, which is the Western week, not theirs —
+      // and in structured data a wrong opening time shows in Google's own
+      // business panel, telling people the office is shut when it is open.
+      dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
       opens: '09:00',
       closes: '18:00',
     },

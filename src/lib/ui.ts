@@ -52,9 +52,9 @@ export const UI = {
     whatsappLabel: 'Chat with us on WhatsApp',
     whatsappPrefill: "Hello, I'd like to speak to a lawyer about a legal matter.",
     officeHours: 'Office hours',
-    hoursValue: 'Monday – Friday, 9AM – 6PM (GST)',
+    hoursValue: 'Sunday – Thursday, 9AM – 6PM (GST)',
     mainOffice: 'Main Office',
-    weekdays: 'Monday – Friday',
+    weekdays: 'Sunday – Thursday',
     hours: '9AM – 6PM',
 
     firm: 'Firm',
@@ -133,9 +133,9 @@ export const UI = {
     whatsappLabel: 'تحدّث إلينا عبر واتساب',
     whatsappPrefill: 'مرحباً، أودّ التحدث إلى محامٍ بشأن مسألة قانونية.',
     officeHours: 'ساعات العمل',
-    hoursValue: 'الإثنين – الجمعة، 9 صباحاً – 6 مساءً (بتوقيت الخليج)',
+    hoursValue: 'الأحد – الخميس، 9 صباحاً – 6 مساءً (بتوقيت الخليج)',
     mainOffice: 'المقر الرئيسي',
-    weekdays: 'الإثنين – الجمعة',
+    weekdays: 'الأحد – الخميس',
     hours: '9 صباحاً – 6 مساءً',
 
     firm: 'المكتب',

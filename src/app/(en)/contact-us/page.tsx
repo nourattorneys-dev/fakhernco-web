@@ -81,7 +81,7 @@ export default async function ContactPage() {
           ))}
           <div className="border-t border-line pt-5 text-sm text-body">
             <p className="font-display font-600 text-ink">Office hours</p>
-            <p className="mt-1">Monday – Friday, 9AM – 6PM (GST)</p>
+            <p className="mt-1">Sunday – Thursday, 9AM – 6PM (GST)</p>
           </div>
         </aside>
       </div>

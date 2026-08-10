@@ -82,7 +82,7 @@ function UtilityBar() {
       <div className="site-container flex h-9 items-center gap-6 overflow-x-auto text-xs whitespace-nowrap">
         <span className="flex items-center gap-2">
           <span aria-hidden className="text-white/40">◷</span>
-          <span className="font-semibold">Monday – Friday</span>
+          <span className="font-semibold">Sunday – Thursday</span>
           <span className="text-white/55">9AM – 6PM</span>
         </span>
         <span className="hidden items-center gap-2 sm:flex">
