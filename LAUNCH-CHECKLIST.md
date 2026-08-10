@@ -41,6 +41,32 @@ The media is the irreplaceable part. Everything else can be rebuilt.
 
 ### A4 — Email · **BLOCKING**
 
+> **OUTSTANDING — needs a Google account to sign up for Resend.**
+> Blocked as of 10 Aug 2026: creating the Resend account requires an email
+> address the firm did not have to hand. Nothing else in the email path is
+> waiting on development work — the CMS is configured and only needs the key.
+>
+> When you have it:
+>   1. resend.com → sign up → **add domain `fakhernco.com`** (the root)
+>   2. Add the DNS records it shows, in cPanel → Zone Editor.
+>      **NEVER add an MX record to the root domain** — the root MX is
+>      Microsoft 365 and is how the firm receives all of its mail. Resend's MX
+>      goes on the `send.` subdomain only.
+>   3. Wait for **Verified**, create an API key
+>   4. Set `SMTP_PASS=<key>` on the CMS server. The other five values are
+>      already documented in `fakhernco-cms/.env.example`.
+>
+> Alternative that needs no new account: ask whoever administers Microsoft
+> 365 whether **SMTP AUTH** is enabled for the mailboxes. If it is,
+> `smtp.office365.com:587` with an app password works instead and Resend is
+> not needed. It could not be determined from outside — the endpoint
+> advertises `AUTH LOGIN`, but permission is a per-tenant flag.
+>
+> Until this is done: enquiries still STORE in the CMS under **Contact
+> submission** and nothing is lost — but nobody is notified, so somebody has
+> to check the admin panel. That is survivable for a staging deploy and not
+> survivable once ads are running.
+
 - [ ] `SMTP_*` and `CONTACT_NOTIFY_EMAIL` set on the CMS
 - [ ] Submit a real enquiry; confirm the internal notification arrives
 - [ ] Confirm the bilingual auto-reply arrives
