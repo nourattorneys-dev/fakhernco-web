@@ -41,7 +41,7 @@ export async function generateMetadata({
       `follow` stays on so link equity still reaches the real pages.
     */
     robots: { index: false, follow: true },
-    alternates: { canonical: `/lp/${slug}` },
+    alternates: { canonical: `/legal-services/${slug}` },
   };
 }
 
@@ -351,7 +351,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
               {others.map((o) => (
                 <li key={o.slug}>
                   <Link
-                    href={`/lp/${o.slug}`}
+                    href={`/legal-services/${o.slug}`}
                     className="group flex h-full flex-col border border-line bg-surface card-p transition-colors hover:border-ink hover:bg-surface-alt"
                   >
                     <h3 className="text-card group-hover:underline group-hover:decoration-faint group-hover:underline-offset-4">

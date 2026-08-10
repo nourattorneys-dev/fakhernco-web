@@ -41,13 +41,13 @@ export default async function LandingIndex() {
       <ul className="section-body grid gap-px border border-line bg-line sm:grid-cols-2">
         {pages.map((p) => (
           <li key={p.slug} className="bg-surface card-p">
-            <Link href={`/lp/${p.slug}`} className="group">
+            <Link href={`/legal-services/${p.slug}`} className="group">
               <h2 className="text-card group-hover:underline group-hover:decoration-faint group-hover:underline-offset-4">
                 {p.title}
               </h2>
             </Link>
             <p className="mt-2 text-sm text-body">{p.subhead}</p>
-            <p className="mt-3 font-mono text-xs text-muted">/lp/{p.slug}</p>
+            <p className="mt-3 font-mono text-xs text-muted">/legal-services/{p.slug}</p>
           </li>
         ))}
       </ul>

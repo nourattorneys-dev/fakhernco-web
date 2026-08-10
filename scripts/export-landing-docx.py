@@ -13,7 +13,7 @@ directly. zipfile is in the standard library, so this runs anywhere.
 
 THE MARKDOWN IS THE SOURCE OF TRUTH
 -----------------------------------
-The same files render at /lp/<slug> on the site. Editing the .docx changes
+The same files render at /legal-services/<slug> on the site. Editing the .docx changes
 nothing; edit the .md and re-run this. That is deliberate — it is the only way
 the document under review and the page that goes live cannot drift apart.
 """
@@ -132,7 +132,7 @@ def build(meta, body, slug):
     p.append(para(meta.get("h1", meta.get("title", slug)), "Title"))
     if meta.get("subhead"):
         p.append(para(meta["subhead"], "Subtitle"))
-    p.append(para(f"Landing page  ·  /lp/{slug}  ·  not indexed by search engines", "Meta"))
+    p.append(para(f"Landing page  ·  /legal-services/{slug}  ·  not indexed by search engines", "Meta"))
     if meta.get("description"):
         p.append(para(f"Meta description: {meta['description']}", "Meta"))
 

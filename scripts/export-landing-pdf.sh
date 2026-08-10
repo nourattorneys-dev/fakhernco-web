@@ -26,7 +26,7 @@ for s in litigation-in-court set-up-companies contracts-drafting-and-review \
   P=$(mktemp -d)
   perl -e 'alarm 60; exec @ARGV' -- "$CHROME" --headless --disable-gpu --no-sandbox \
       --user-data-dir="$P" --no-pdf-header-footer --virtual-time-budget=8000 \
-      --print-to-pdf="$OUT/$s.pdf" "http://localhost:$PORT/lp/$s" >/dev/null 2>&1
+      --print-to-pdf="$OUT/$s.pdf" "http://localhost:$PORT/legal-services/$s" >/dev/null 2>&1
   rm -rf "$P"
   [ -s "$OUT/$s.pdf" ] && echo "ok   $s" || echo "FAIL $s"
 done
