@@ -421,3 +421,72 @@ export function describe(doc: Doc): string {
   const para = doc.blocks.find((b) => b.type === 'paragraph');
   return para ? clamp(para.html) : '';
 }
+
+// --------------------------------------------------------------- landing pages
+
+/**
+ * Campaign landing pages, for paid search.
+ *
+ * Their own collection rather than `pages`, deliberately: everything that
+ * enumerates pages — the sitemap, the orphan gate, the nav — would otherwise
+ * pick these up, and they are meant to be invisible to all three. They are
+ * served noindex because each one duplicates a service page that already
+ * ranks organically.
+ *
+ * The copy is seeded from markdown in content/landing (npm run wp:landing in
+ * the CMS repo) and edited in the admin panel from then on.
+ */
+export type Landing = {
+  slug: string;
+  title: string;
+  h1: string;
+  subhead: string;
+  description: string;
+  heroImage: { src: string; alt: string } | null;
+  blocks: Block[];
+};
+
+const LANDING_QUERY = {
+  'sort[0]': 'order:asc',
+  'populate[heroImage]': 'true',
+  'populate[seo]': 'true',
+  ...Object.fromEntries(
+    ['blocks.heading', 'blocks.paragraph', 'blocks.list', 'blocks.faq', 'blocks.image', 'blocks.quote']
+      .map((c) => [`populate[blocks][on][${c}][populate]`, '*']),
+  ),
+} as const;
+
+function toLanding(raw: Record<string, any>): Landing {
+  const src = mediaUrl(raw.heroImage?.url);
+  return {
+    slug: String(raw.slug),
+    title: String(raw.title ?? raw.slug),
+    h1: String(raw.h1 ?? raw.title ?? raw.slug),
+    subhead: String(raw.subhead ?? ''),
+    description: String(raw.seo?.metaDescription ?? ''),
+    heroImage: src ? { src, alt: raw.heroImage?.alternativeText ?? '' } : null,
+    blocks: ((raw.blocks ?? []) as StrapiComponent[]).map(toBlock).filter(Boolean) as Block[],
+  };
+}
+
+export async function getAllLandings(): Promise<Landing[]> {
+  const rows = await strapiFetchAll<Record<string, any>>('landing-pages', LANDING_QUERY);
+  return rows.map(toLanding);
+}
+
+export async function getLandingSlugs(): Promise<string[]> {
+  const rows = await strapiFetchAll<{ slug: string }>('landing-pages', {
+    'fields[0]': 'slug',
+    'sort[0]': 'order:asc',
+  });
+  return rows.map((r) => r.slug).filter(Boolean);
+}
+
+export async function getLanding(slug: string): Promise<Landing | null> {
+  const res = await strapiFetch<{ data: Record<string, any>[] }>('landing-pages', {
+    'filters[slug][$eq]': slug,
+    ...LANDING_QUERY,
+  });
+  const row = res.data?.[0];
+  return row ? toLanding(row) : null;
+}

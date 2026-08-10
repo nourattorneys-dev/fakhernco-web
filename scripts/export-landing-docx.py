@@ -11,8 +11,19 @@ review artefact is not worth it. A .docx is a zip of XML parts, and the subset
 needed here — headings, paragraphs, bullets and bold — is small enough to emit
 directly. zipfile is in the standard library, so this runs anywhere.
 
-THE MARKDOWN IS THE SOURCE OF TRUTH
------------------------------------
+THE MARKDOWN IS NO LONGER THE SOURCE OF TRUTH
+---------------------------------------------
+ THE CMS IS NOW THE SOURCE OF TRUTH FOR THIS CONTENT.
+
+ These markdown files SEEDED the Strapi `Landing page` collection via
+ `npm run wp:landing` in the CMS repo. Anything edited in the admin panel
+ since then is NOT reflected here, so a document exported from this script
+ may not match the page that is actually serving traffic.
+
+ Ask before trusting an export. If review documents are wanted on an ongoing
+ basis, this script should be repointed at the Strapi API instead.
+
+Originally:
 The same files render at /legal-services/<slug> on the site. Editing the .docx changes
 nothing; edit the .md and re-run this. That is deliberate — it is the only way
 the document under review and the page that goes live cannot drift apart.

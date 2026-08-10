@@ -1,9 +1,9 @@
 ---
 slug: corporate-matters-and-disputes
 title: Corporate Matters and Disputes
-h1: Corporate Matters & Shareholder Disputes
-subhead: Governance, restructuring, and what happens when the people who own a business stop agreeing.
-description: UAE corporate lawyers: shareholder disputes, governance, restructuring, share transfers and exits. Abu Dhabi and Dubai. Confidential consultation.
+h1: Shareholder & Corporate Dispute Lawyers
+subhead: Deadlock, removal, valuation and exit — resolved before the business loses more value than the dispute is worth.
+description: UAE shareholder and corporate dispute lawyers. Deadlock, director removal, share valuation, exit and restructuring. Abu Dhabi and Dubai.
 image: 4
 ---
 ## When the dispute is inside the company

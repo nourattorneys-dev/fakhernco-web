@@ -2,6 +2,9 @@
 #
 # Render the ad landing pages to PDF, for review.
 #
+# NOTE: renders the LIVE pages, which read from Strapi — so unlike the .docx
+# exporter this one always reflects what is actually serving.
+#
 #   npm run export:lp-pdf
 #
 # Headless Chrome rather than a text converter, so the PDF shows the real

@@ -1,9 +1,9 @@
 ---
 slug: set-up-companies
 title: Set up Companies
-h1: Set Up Your Company in the UAE
-subhead: Mainland, free zone and offshore formation — structured properly the first time, by lawyers rather than agents.
-description: Company formation in the UAE: mainland, free zone and offshore. Licensing, ownership structure, shareholder agreements. Speak to a lawyer.
+h1: Company Formation in the UAE
+subhead: Mainland, free zone and offshore — structured properly the first time, by lawyers rather than agents.
+description: Company formation in the UAE: mainland, free zone and offshore. Licensing, ownership structure and shareholder agreements. Speak to a lawyer.
 image: 0
 ---
 ## Getting the structure right is the whole decision

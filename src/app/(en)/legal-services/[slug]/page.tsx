@@ -1,8 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getAllLandings, getLanding, getLandingSlugs, inline, type Block } from '@/lib/landing';
-import { getHomepage, getPracticeAreas } from '@/lib/content';
+import {
+  getAllLandings,
+  getLanding,
+  getLandingSlugs,
+  getPracticeAreas,
+  type Block,
+} from '@/lib/content';
 import Image from 'next/image';
 import { ContactForm } from '@/components/ContactForm';
 import { PHONE, TEL_HREF, WHATSAPP_URL } from '@/lib/contact';
@@ -106,96 +111,81 @@ function Prose({ blocks, service }: { blocks: Block[]; service: string }) {
   /*
     A call to action after every second section.
 
-    The sticky bar is mobile-only, so on desktop a reader working down 900
-    words had nothing to act on between the hero and the form at the foot.
-    These sit in the flow instead, at the natural pauses between sections.
-
-    Counted on h2 boundaries and inserted BEFORE the heading that starts the
+    Counted on level-2 headings and inserted BEFORE the heading that opens the
     next pair, so a CTA never separates a heading from the text under it. The
     first pair is skipped — nobody is ready to enquire two paragraphs in — and
     so is the last, because the form itself is immediately below.
   */
   let seen = 0;
-  const lastH2 = blocks.reduce((last, b, i) => (b.type === 'h2' ? i : last), -1);
+  const lastH2 = blocks.reduce(
+    (last, b, i) => (b.type === 'heading' && b.level === 2 ? i : last),
+    -1,
+  );
+
   return (
     <>
       {blocks.map((b, i) => {
-        if (b.type === 'h2') {
-          seen += 1;
-          const breakHere = seen > 2 && seen % 2 === 1 && i !== lastH2;
-          return (
-            <div key={i}>
-              {breakHere && <InlineCta index={Math.floor(seen / 2) - 1} service={service} />}
-              <h2 className="mt-12 text-section">
-                <Text value={b.text} />
-              </h2>
-            </div>
-          );
+        switch (b.type) {
+          case 'heading': {
+            if (b.level !== 2) {
+              return (
+                <h3 key={i} className="mt-8 text-card">
+                  {b.text}
+                </h3>
+              );
+            }
+            seen += 1;
+            const breakHere = seen > 2 && seen % 2 === 1 && i !== lastH2;
+            return (
+              <div key={i}>
+                {breakHere && <InlineCta index={Math.floor(seen / 2) - 1} service={service} />}
+                <h2 className="mt-12 text-section">{b.text}</h2>
+              </div>
+            );
+          }
+          case 'paragraph':
+            return (
+              <div
+                key={i}
+                className="prose-body mt-4"
+                dangerouslySetInnerHTML={{ __html: b.html }}
+              />
+            );
+          case 'list': {
+            const List = b.ordered ? 'ol' : 'ul';
+            return (
+              <List
+                key={i}
+                className={`prose-body mt-4 flex flex-col gap-2 ps-5 marker:text-muted ${
+                  b.ordered ? 'list-decimal' : 'list-disc'
+                }`}
+              >
+                {b.items.map((item, j) => (
+                  <li key={j} dangerouslySetInnerHTML={{ __html: item }} />
+                ))}
+              </List>
+            );
+          }
+          default:
+            return null;
         }
-        if (b.type === 'h3')
-          return (
-            <h3 key={i} className="mt-8 text-card">
-              <Text value={b.text} />
-            </h3>
-          );
-        if (b.type === 'p')
-          return (
-            <p key={i} className="prose-body mt-4">
-              <Text value={b.text} />
-            </p>
-          );
-        const List = b.type === 'ol' ? 'ol' : 'ul';
-        return (
-          <List
-            key={i}
-            className={`prose-body mt-4 flex flex-col gap-2 ps-5 marker:text-muted ${
-              b.type === 'ol' ? 'list-decimal' : 'list-disc'
-            }`}
-          >
-            {b.items.map((item, j) => (
-              <li key={j}>
-                <Text value={item} />
-              </li>
-            ))}
-          </List>
-        );
       })}
-    </>
-  );
-}
-
-function Text({ value }: { value: string }) {
-  return (
-    <>
-      {inline(value).map((s, i) =>
-        s.bold ? (
-          <strong key={i} className="font-600 text-ink">
-            {s.text}
-          </strong>
-        ) : (
-          <span key={i}>{s.text}</span>
-        ),
-      )}
     </>
   );
 }
 
 export default async function LandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [page, areas, all, home] = await Promise.all([
+  const [page, areas, all] = await Promise.all([
     getLanding(slug),
     getPracticeAreas(),
     getAllLandings(),
-    getHomepage(),
   ]);
   if (!page) notFound();
 
-  // The brand photography, as one pool: the homepage hero plus its four
-  // section images. The markdown picks by index.
-  const photos = [home?.heroImage, ...(home?.sectionImages ?? [])].filter(
-    (x): x is { src: string; alt: string } => Boolean(x),
-  );
-  const photo = photos[page.image] ?? photos[0] ?? null;
+  // The hero is a media relation on the landing page itself now, chosen in the
+  // admin panel rather than indexed into the homepage's photographs.
+  const photo = page.heroImage;
 
   const others = all.filter((p) => p.slug !== slug);
 

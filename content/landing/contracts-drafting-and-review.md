@@ -2,8 +2,8 @@
 slug: contracts-drafting-and-review
 title: Contracts Drafting and Review
 h1: Contract Drafting & Review Under UAE Law
-subhead: Agreements that hold up in an Arabic-language court — drafted bilingually, from the start.
-description: Contract drafting and review under UAE law. Bilingual Arabic-English agreements, NDAs, shareholder and employment contracts. Most standard contracts in 2-5 working days.
+subhead: Agreements that hold up in an Arabic-language court — drafted bilingually, from the start. Most in two to five working days.
+description: Contract drafting and review under UAE law. Bilingual Arabic-English agreements, NDAs, shareholder and employment contracts. Two to five working days.
 image: 2
 ---
 ## A contract is only worth what a UAE court will enforce

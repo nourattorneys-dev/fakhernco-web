@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getAllLandings } from '@/lib/landing';
+import { getAllLandings } from '@/lib/content';
 
 export const revalidate = 300;
 
@@ -30,12 +30,10 @@ export default async function LandingIndex() {
         site navigation.
       </p>
       <p className="prose-body mt-4 max-w-[62ch]">
-        The copy lives in <code className="text-sm">content/landing/*.md</code>. Editing the
-        markdown and re-running <code className="text-sm">
-          python3 scripts/export-landing-docx.py
-        </code>{' '}
-        updates both the page and the Word document, so the version under review and the version
-        serving traffic cannot drift apart.
+        Edited in the Strapi admin panel under <strong className="font-600 text-ink">Landing page</strong>,
+        alongside the rest of the site's content. The copy was seeded from markdown in
+        <code className="text-sm"> content/landing/*.md</code>; re-running that import overwrites
+        anything edited in the admin panel, so treat the CMS as the source from here.
       </p>
 
       <ul className="section-body grid gap-px border border-line bg-line sm:grid-cols-2">

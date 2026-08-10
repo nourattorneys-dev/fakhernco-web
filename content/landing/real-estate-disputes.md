@@ -1,9 +1,9 @@
 ---
 slug: real-estate-disputes
 title: Real Estate Disputes
-h1: Real Estate & Rental Disputes
-subhead: Landlord and tenant claims, sale and purchase disputes, delayed handover and developer claims.
-description: UAE property dispute lawyers: rental disputes, eviction, delayed handover, developer and off-plan claims, service charges. Abu Dhabi and Dubai.
+h1: Property & Rental Dispute Lawyers
+subhead: Eviction and rent claims, delayed handover and developer disputes — and the deadlines that decide them.
+description: UAE property and rental dispute lawyers: eviction, rent increases, delayed handover, off-plan and developer claims. Abu Dhabi and Dubai.
 image: 4
 ---
 ## Property disputes run to deadlines

@@ -21,24 +21,6 @@ function strapiImageHost() {
 }
 
 const nextConfig: NextConfig = {
-  /**
-   * The ad landing pages moved from /lp/ to /legal-services/.
-   *
-   * /lp/ read as internal plumbing, and this path is visible: Google Ads shows
-   * it in the display URL under the headline, so a searcher comparing law
-   * firms sees it before they click.
-   *
-   * Kept as a redirect because a Google Ads final URL that 404s gets the ad
-   * disapproved, and a URL pasted into a draft campaign is easy to forget.
-   * Safe to delete once the campaigns are confirmed to point at the new path.
-   */
-  async redirects() {
-    return [
-      { source: '/lp', destination: '/legal-services', permanent: true },
-      { source: '/lp/:slug', destination: '/legal-services/:slug', permanent: true },
-    ];
-  },
-
   images: {
     remotePatterns: [
       ...strapiImageHost(),
