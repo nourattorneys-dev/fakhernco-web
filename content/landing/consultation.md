@@ -1,5 +1,5 @@
 ---
-slug: legal-consultations
+slug: consultation
 title: Legal Consultations
 h1: Speak to a UAE Lawyer
 subhead: A confidential session, and a clear written view of where you stand — before you commit to anything.

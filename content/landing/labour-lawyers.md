@@ -1,5 +1,5 @@
 ---
-slug: labour-disputes
+slug: labour-lawyers
 title: Labour Disputes
 h1: Labour & Employment Lawyers in the UAE
 subhead: MOHRE claims, labour court representation and labour bans — for employers and employees in Abu Dhabi and Dubai.

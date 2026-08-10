@@ -1,5 +1,5 @@
 ---
-slug: corporate-matters-and-disputes
+slug: shareholder-disputes
 title: Corporate Matters and Disputes
 h1: Shareholder & Corporate Dispute Lawyers
 subhead: Deadlock, removal, valuation and exit — resolved before the business loses more value than the dispute is worth.

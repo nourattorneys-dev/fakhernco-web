@@ -1,5 +1,5 @@
 ---
-slug: real-estate-advice
+slug: property-advice
 title: Real Estate Advice
 h1: Property Legal Advice Before You Sign
 subhead: Purchase, off-plan, leases and title — reviewed before the transaction becomes the dispute.

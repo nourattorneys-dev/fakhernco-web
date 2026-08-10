@@ -1,5 +1,5 @@
 ---
-slug: real-estate-disputes
+slug: property-disputes
 title: Real Estate Disputes
 h1: Property & Rental Dispute Lawyers
 subhead: Eviction and rent claims, delayed handover and developer disputes — and the deadlines that decide them.

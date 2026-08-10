@@ -1,5 +1,5 @@
 ---
-slug: set-up-companies
+slug: company-formation
 title: Set up Companies
 h1: Company Formation in the UAE
 subhead: Mainland, free zone and offshore — structured properly the first time, by lawyers rather than agents.

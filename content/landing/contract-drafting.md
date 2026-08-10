@@ -1,5 +1,5 @@
 ---
-slug: contracts-drafting-and-review
+slug: contract-drafting
 title: Contracts Drafting and Review
 h1: Contract Drafting & Review Under UAE Law
 subhead: Agreements that hold up in an Arabic-language court — drafted bilingually, from the start. Most in two to five working days.

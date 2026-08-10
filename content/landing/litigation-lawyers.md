@@ -1,5 +1,5 @@
 ---
-slug: litigation-in-court
+slug: litigation-lawyers
 title: Litigation in Court
 h1: Litigation Lawyers in Abu Dhabi & Dubai
 subhead: Representation at every tier — Court of First Instance, Appeal and Cassation. Commercial, contractual and property disputes.
