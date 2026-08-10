@@ -58,6 +58,7 @@ export const UI = {
     hours: '9AM – 6PM',
 
     firm: 'Firm',
+    federation: 'SKP Federation',
     offices: 'Offices',
     privacy: 'Privacy policy',
     rightsReserved: 'All rights reserved.',
@@ -138,6 +139,7 @@ export const UI = {
     hours: '9 صباحاً – 6 مساءً',
 
     firm: 'المكتب',
+    federation: 'اتحاد SKP',
     offices: 'المكاتب',
     privacy: 'سياسة الخصوصية',
     rightsReserved: 'جميع الحقوق محفوظة.',

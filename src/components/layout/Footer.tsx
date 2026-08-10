@@ -13,6 +13,18 @@ const OFFICES = [
   { city: 'newDelhi', country: 'india', phone: '+91 628 275 1175' },
 ] as const;
 
+/**
+ * The federation pages. Titles are hardcoded because these four have no
+ * Arabic localisation — an entry here would render English either way, and
+ * the CMS has nothing better to offer.
+ */
+const FEDERATION = [
+  { slug: 'skp-business-federation', title: 'SKP Business Federation' },
+  { slug: 'our-federation-partners', title: 'Our federation partners' },
+  { slug: 'the-integrated-service-model', title: 'The integrated service model' },
+  { slug: 'the-client-advantage', title: 'The client advantage' },
+] as const;
+
 export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
   const [areas, site, arabicPaths] = await Promise.all([
     getPracticeAreas(locale),
@@ -53,15 +65,31 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
             ))}
             <li><Link href={L("/legal-insights")} className="hover:text-ink">{s.insights}</Link></li>
             <li><Link href={L("/contact-us")} className="hover:text-ink">{s.contact}</Link></li>
-            {/*
-              The SKP Federation section — four pages that imported cleanly
-              and had no inbound link anywhere on the site. The footer is the
-              right home: they are firm background, not a service.
-            */}
-            <li><Link href={L("/skp-business-federation")} className="hover:text-ink">SKP Business Federation</Link></li>
-            <li><Link href={L("/our-federation-partners")} className="hover:text-ink">Our federation partners</Link></li>
-            <li><Link href={L("/the-integrated-service-model")} className="hover:text-ink">The integrated service model</Link></li>
-            <li><Link href={L("/the-client-advantage")} className="hover:text-ink">The client advantage</Link></li>
+          </ul>
+
+          {/*
+            The SKP Federation pages, under their own heading rather than
+            appended to the firm list.
+
+            They were the tail of a ten-item column and read as though the
+            list had simply run on — they are about the federation the firm
+            belongs to, not about the firm, so the grouping was wrong rather
+            than the links.
+
+            They are NOT removed, which was the other option considered: the
+            footer is their only inbound link anywhere on the site, and they
+            carry 2,721 words between them — more than the About page. Cutting
+            them would orphan real content and fail the orphan gate.
+          */}
+          <h2 className="mt-8 text-2xs font-semibold uppercase tracking-[0.12em] text-muted">
+            {s.federation}
+          </h2>
+          <ul className="mt-3 flex flex-col gap-1.5 text-sm">
+            {FEDERATION.map((f) => (
+              <li key={f.slug}>
+                <Link href={L(`/${f.slug}`)} className="hover:text-ink">{f.title}</Link>
+              </li>
+            ))}
           </ul>
         </div>
 
