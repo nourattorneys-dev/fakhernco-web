@@ -71,7 +71,14 @@ const CTA_COPY = [
 function InlineCta({ index, service }: { index: number; service: string }) {
   const copy = CTA_COPY[index % CTA_COPY.length];
   return (
-    <aside className="my-12 border border-line bg-surface-alt card-p">
+    /*
+      Desktop only, and the breakpoint is deliberately the same one the sticky
+      bar uses. Below lg the bar is on screen at all times with the identical
+      two actions, so this would be the same buttons twice within a thumb's
+      reach of each other. The two are exact complements: wherever the bar is
+      visible, none of the repeated in-flow CTAs are, and vice versa.
+    */
+    <aside className="my-12 hidden border border-line bg-surface-alt card-p lg:block">
       <p className="font-display text-lg font-700 text-ink">{copy.line}</p>
       <p className="mt-2 text-body">{copy.sub}</p>
       <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -264,7 +271,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
             fill in a form at all, so it offers the alternative: call or
             message. It converts the people the form would have lost.
           */}
-          <aside className="mt-14 flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-line pt-8">
+          <aside className="mt-14 hidden flex-wrap items-center gap-x-6 gap-y-4 border-t border-line pt-8 lg:flex">
             <p className="text-body">
               <strong className="font-600 text-ink">Would you rather not fill in a form?</strong>{' '}
               Call or message us and we will come back to you.
@@ -378,7 +385,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         but scroll back up. Ink, so it reads as the end of the page rather
         than another content section.
       */}
-      <section className="border-t border-line bg-ink text-white">
+      <section className="hidden border-t border-line bg-ink text-white lg:block">
         {/*
           Left-aligned, like every other section on the page.
 
