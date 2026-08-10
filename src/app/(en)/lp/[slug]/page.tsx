@@ -385,7 +385,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         but scroll back up. Ink, so it reads as the end of the page rather
         than another content section.
       */}
-      <section className="hidden border-t border-line bg-ink text-white lg:block">
+      <section data-flush-footer className="hidden border-t border-line bg-ink text-white lg:block">
         {/*
           Left-aligned, like every other section on the page.
 

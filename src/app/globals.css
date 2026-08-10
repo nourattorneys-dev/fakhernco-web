@@ -253,6 +253,53 @@
   }
 }
 
+/*
+  Print.
+
+  Fixed-position chrome — the floating WhatsApp button and the landing pages'
+  sticky action bar — sits over the text on every printed page, because
+  `position: fixed` repeats on each sheet. The sticky header does the same at
+  the top of every page.
+
+  Also forces backgrounds on: the hero and the closing band are white text on
+  ink, and browsers drop background colours when printing by default, which
+  would render both as white on white.
+*/
+/*
+  The footer carries mt-24, which is the right breathing room when a page ends
+  on white content. The landing pages end on a full-bleed ink band, so that
+  margin rendered as a band of white trapped between the black section and the
+  grey footer.
+
+  Scoped to lg because the band is hidden below it — on mobile those pages end
+  on the white services grid, where the margin is wanted. :has() matches the
+  element's presence, not its visibility, so the media query is doing the real
+  work here.
+*/
+@media (min-width: 64rem) {
+  body:has([data-flush-footer]) footer {
+    margin-top: 0;
+  }
+}
+
+@media print {
+  [data-whatsapp-fab],
+  [data-action-bar],
+  header.sticky,
+  .bg-bar {
+    display: none !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Do not split a heading from the text it introduces, or break a card. */
+  h1, h2, h3 { break-after: avoid; }
+  li, blockquote, aside { break-inside: avoid; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
