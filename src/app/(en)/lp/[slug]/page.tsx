@@ -5,7 +5,7 @@ import { getAllLandings, getLanding, getLandingSlugs, inline, type Block } from 
 import { getHomepage, getPracticeAreas } from '@/lib/content';
 import Image from 'next/image';
 import { ContactForm } from '@/components/ContactForm';
-import { PHONE, WHATSAPP_URL } from '@/lib/contact';
+import { PHONE, TEL_HREF, WHATSAPP_URL } from '@/lib/contact';
 import { WhatsAppGlyph } from '@/components/icons/WhatsAppGlyph';
 import { StickyActionBar } from '@/components/layout/StickyActionBar';
 
@@ -254,6 +254,40 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
       <div className="site-container section">
         <div className="max-w-[68ch]">
           <Prose blocks={page.blocks} service={page.title} />
+
+          {/*
+            Immediately before the form, and deliberately NOT another
+            "Request a consultation" button — that would scroll the reader two
+            hundred pixels to a form already in view.
+
+            This is the moment someone decides whether they are willing to
+            fill in a form at all, so it offers the alternative: call or
+            message. It converts the people the form would have lost.
+          */}
+          <aside className="mt-14 flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-line pt-8">
+            <p className="text-body">
+              <strong className="font-600 text-ink">Would you rather not fill in a form?</strong>{' '}
+              Call or message us and we will come back to you.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href={TEL_HREF}
+                dir="ltr"
+                className="border border-ink px-5 py-2.5 font-display text-sm font-700 text-ink transition-colors hover:bg-surface-alt"
+              >
+                {PHONE.DISPLAY}
+              </a>
+              <a
+                href={WHATSAPP_URL(`Hello, I'd like to ask about: ${page.title}.`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 border border-ink px-5 py-2.5 font-display text-sm font-700 text-ink transition-colors hover:bg-surface-alt"
+              >
+                <WhatsAppGlyph className="h-5 w-5 shrink-0 text-whatsapp" />
+                WhatsApp
+              </a>
+            </div>
+          </aside>
         </div>
       </div>
 
@@ -338,6 +372,40 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
           </div>
         </section>
       )}
+      {/*
+        Closing ask. The page previously ended on a list of other services,
+        which leaves a reader who is interested in THIS one with nothing to do
+        but scroll back up. Ink, so it reads as the end of the page rather
+        than another content section.
+      */}
+      <section className="border-t border-line bg-ink text-white">
+        <div className="site-container section-tight text-center">
+          <h2 className="mx-auto max-w-[20ch] text-display text-white">
+            Ready to protect your position?
+          </h2>
+          <p className="mx-auto mt-5 max-w-[48ch] text-white/80">
+            A confidential consultation, with no obligation. We will tell you where you stand and
+            what your options cost before you commit to anything.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="#enquire"
+              className="bg-white px-7 py-3.5 font-display text-sm font-700 text-ink transition-colors hover:bg-white/85"
+            >
+              Request a consultation
+            </a>
+            <a
+              href={WHATSAPP_URL(`Hello, I'd like to ask about: ${page.title}.`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 border border-white/70 px-6 py-3.5 font-display text-sm font-700 text-white transition-colors hover:bg-white hover:text-ink"
+            >
+              <WhatsAppGlyph className="h-5 w-5 shrink-0 text-whatsapp" />
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
     </article>
   );
 }
