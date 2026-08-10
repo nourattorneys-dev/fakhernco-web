@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { ContactForm } from '@/components/ContactForm';
 import { PHONE, WHATSAPP_URL } from '@/lib/contact';
 import { WhatsAppGlyph } from '@/components/icons/WhatsAppGlyph';
+import { StickyActionBar } from '@/components/layout/StickyActionBar';
 
 export const revalidate = 300;
 
@@ -122,7 +123,9 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
   const others = all.filter((p) => p.slug !== slug);
 
   return (
-    <article>
+    /* pb on mobile so the sticky bar never covers the last of the content. */
+    <article className="pb-24 lg:pb-0">
+      <StickyActionBar />
       {/*
         Hero, matching the homepage's treatment: full-bleed photograph with the
         copy set over a directional scrim, so the text side holds contrast

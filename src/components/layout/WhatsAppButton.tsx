@@ -35,6 +35,7 @@ export function WhatsAppButton({ locale = 'en' }: { locale?: Locale }) {
 
   return (
     <a
+      data-whatsapp-fab
       href={WHATSAPP_URL(s.whatsappPrefill)}
       target="_blank"
       rel="noopener noreferrer"

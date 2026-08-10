@@ -239,6 +239,20 @@
   display: inline-block;
 }
 
+/*
+  Landing pages render a sticky action bar at the foot. Lift the floating
+  WhatsApp button above it so the two do not overlap — :has() keeps this
+  contained to the pages that actually have a bar, rather than making the
+  global layout aware of a route it should not know about.
+
+  The bar is mobile-only, so the lift is too.
+*/
+@media (max-width: 63.999rem) {
+  body:has([data-action-bar]) [data-whatsapp-fab] {
+    bottom: calc(4.5rem + max(0.75rem, env(safe-area-inset-bottom)));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
