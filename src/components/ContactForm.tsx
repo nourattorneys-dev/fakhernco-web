@@ -48,6 +48,26 @@ export function ContactForm({
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? s.genericError);
       }
+      /*
+        Reported here, not on the button click, and only after the CMS has
+        confirmed it stored. A click-triggered conversion counts submissions
+        that failed validation, timed out, or hit a network error — which
+        teaches Google's bidding to buy clicks that never became enquiries.
+
+        `generate_lead` is GA4's standard lead event, so it can be marked as a
+        key event in GA4 and imported into Google Ads as a conversion — no
+        conversion label to copy around, and it keeps working if the Ads
+        account is ever rebuilt.
+
+        source_page is the landing page the enquiry came from, which is the
+        number that tells the firm where to move budget.
+      */
+      window.gtag?.('event', 'generate_lead', {
+        source_page: window.location.pathname,
+        service: String(payload.service ?? ''),
+        language: locale,
+      });
+
       setState('sent');
     } catch (err) {
       setState('error');

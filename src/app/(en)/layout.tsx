@@ -3,6 +3,7 @@ import { Sarabun, Roboto_Condensed } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton';
+import { GoogleTag } from '@/components/analytics/GoogleTag';
 import { JsonLd } from '@/components/JsonLd';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
 import '../globals.css';
@@ -70,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Last in the DOM: it is supplementary, so it should not sit between
             the main content and the footer for a screen-reader user. */}
         <WhatsAppButton />
+        <GoogleTag />
       </body>
     </html>
   );
