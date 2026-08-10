@@ -379,15 +379,21 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         than another content section.
       */}
       <section className="border-t border-line bg-ink text-white">
-        <div className="site-container section-tight text-center">
-          <h2 className="mx-auto max-w-[20ch] text-display text-white">
-            Ready to protect your position?
-          </h2>
-          <p className="mx-auto mt-5 max-w-[48ch] text-white/80">
+        {/*
+          Left-aligned, like every other section on the page.
+
+          This was centred with the heading capped at 20ch, which put it out
+          of line with the hero, the body copy and the cards above it, and the
+          narrow cap read as though the band had been given a large horizontal
+          inset of its own.
+        */}
+        <div className="site-container section-tight">
+          <h2 className="max-w-[26ch] text-display text-white">Ready to protect your position?</h2>
+          <p className="mt-5 max-w-[58ch] text-white/80">
             A confidential consultation, with no obligation. We will tell you where you stand and
             what your options cost before you commit to anything.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <a
               href="#enquire"
               className="bg-white px-7 py-3.5 font-display text-sm font-700 text-ink transition-colors hover:bg-white/85"

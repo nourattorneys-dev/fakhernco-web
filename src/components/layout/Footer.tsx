@@ -37,7 +37,16 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
 
   return (
     <footer className="mt-24 border-t border-line bg-surface-alt">
-      <div className="site-container section-tight grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+      {/*
+        Five cells in one row at desktop: the brand note plus four link lists.
+
+        The federation group used to be stacked inside the Firm column, which
+        left that column running far below the others and reading as a broken
+        second row. Splitting it out balances the row — and dropping to
+        three columns at md keeps the long labels ("The integrated service
+        model") from wrapping to three lines in a narrow track.
+      */}
+      <div className="site-container section-tight grid gap-x-8 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         <div>
           <p className="font-display text-lg font-semibold text-ink">{site.siteName}</p>
           <p className="mt-2 text-sm text-body">{site.footerText}</p>
@@ -66,9 +75,11 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
             <li><Link href={L("/legal-insights")} className="hover:text-ink">{s.insights}</Link></li>
             <li><Link href={L("/contact-us")} className="hover:text-ink">{s.contact}</Link></li>
           </ul>
+        </div>
 
+        <div>
           {/*
-            The SKP Federation pages, under their own heading rather than
+            The SKP Federation pages, in their own column rather than
             appended to the firm list.
 
             They were the tail of a ten-item column and read as though the
@@ -81,7 +92,7 @@ export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
             carry 2,721 words between them — more than the About page. Cutting
             them would orphan real content and fail the orphan gate.
           */}
-          <h2 className="mt-8 text-2xs font-semibold uppercase tracking-[0.12em] text-muted">
+          <h2 className="text-2xs font-semibold uppercase tracking-[0.12em] text-muted">
             {s.federation}
           </h2>
           <ul className="mt-3 flex flex-col gap-1.5 text-sm">
