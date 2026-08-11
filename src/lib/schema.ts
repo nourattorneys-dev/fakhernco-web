@@ -63,9 +63,12 @@ export function organizationSchema() {
       // Monday to Friday everywhere, which is the Western week, not theirs —
       // and in structured data a wrong opening time shows in Google's own
       // business panel, telling people the office is shut when it is open.
-      dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
-      opens: '09:00',
-      closes: '18:00',
+      // Open six days, closed Sunday. Structured data feeds Google's business
+      // panel, so a wrong day here tells a searcher the office is shut when it
+      // is open — or open when nobody is there.
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      opens: '08:00',
+      closes: '20:00',
     },
   };
 }

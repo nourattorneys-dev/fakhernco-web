@@ -84,13 +84,20 @@ function UtilityBar() {
       <div className="site-container flex h-9 items-center gap-6 overflow-x-auto text-xs whitespace-nowrap">
         <span className="flex items-center gap-2">
           <span aria-hidden className="text-white/40">◷</span>
-          <span className="font-semibold">Sunday – Thursday</span>
-          <span className="text-white/55">9AM – 6PM</span>
+          <span className="font-semibold">Saturday – Friday</span>
+          <span className="text-white/55">8AM – 8PM</span>
         </span>
-        <span className="hidden items-center gap-2 sm:flex">
+        {/*
+          The location was `hidden sm:flex`, so on a phone it disappeared
+          entirely — the bar told you the hours of an office it would not name.
+          The full street address is too long for a 390px bar, so the city
+          shows there and the whole thing from sm up.
+        */}
+        <span className="flex items-center gap-2">
           <span aria-hidden className="text-white/40">⌖</span>
           <span className="font-semibold">Main Office</span>
-          <span className="text-white/55">
+          <span className="text-white/55 sm:hidden">Abu Dhabi, UAE</span>
+          <span className="hidden text-white/55 sm:inline">
             219 Office, Regus, 2nd Floor Court Marriot Hotel, Airport St, Abu Dhabi, UAE
           </span>
         </span>

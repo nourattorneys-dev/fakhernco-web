@@ -153,19 +153,25 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
         </div>
       </div>
 
-      {/* Mobile: the original exposes no service links at all below 980px. */}
+      {/*
+        Mobile navigation: the same four sections the desktop nav has.
+
+        It used to also list the five practice areas, with their titles cut at
+        the ampersand — which turned "Personal & Criminal Legal Services" into
+        "Personal" and "Contracts & Legal Document Drafting" into "Contracts".
+        A row reading About Us / Services / Litigation / Personal / Contracts /
+        Company Formation / Private Notary / Legal Insights is not a menu, it
+        is a list of fragments, and it duplicated what Services already leads
+        to.
+      */}
       <nav
         aria-label={s.sections}
-        className="flex gap-5 overflow-x-auto border-t border-line-soft px-5 py-3 text-[0.875rem] whitespace-nowrap lg:hidden"
+        className="flex gap-6 overflow-x-auto border-t border-line-soft px-5 py-3 text-[0.875rem] whitespace-nowrap lg:hidden"
       >
-        <Link href={L("/about-us")}>{s.about}</Link>
-        <Link href={L("/services")} className="font-600">{s.services}</Link>
-        {areas.map((a) => (
-          <Link key={a.slug} href={L(`/${a.slug}`)} className="text-body">
-            {a.title.replace(/ &.*$/, '')}
-          </Link>
-        ))}
-        <Link href={L("/legal-insights")}>{s.insights}</Link>
+        <Link href={L('/about-us')}>{s.about}</Link>
+        <Link href={L('/services')} className="font-600">{s.services}</Link>
+        <Link href={L('/legal-insights')}>{s.insights}</Link>
+        <Link href={L('/contact-us')}>{s.contact}</Link>
       </nav>
     </header>
   );

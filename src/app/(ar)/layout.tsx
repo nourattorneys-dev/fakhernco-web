@@ -101,13 +101,14 @@ function UtilityBar() {
       <div className="site-container flex h-9 items-center gap-6 overflow-x-auto text-xs whitespace-nowrap">
         <span className="flex items-center gap-2">
           <span aria-hidden className="text-white/40">◷</span>
-          <span className="font-semibold">الأحد – الخميس</span>
-          <span className="text-white/55">9 صباحاً – 6 مساءً</span>
+          <span className="font-semibold">السبت – الجمعة</span>
+          <span className="text-white/55">8 صباحاً – 8 مساءً</span>
         </span>
-        <span className="hidden items-center gap-2 sm:flex">
+        <span className="flex items-center gap-2">
           <span aria-hidden className="text-white/40">⌖</span>
           <span className="font-semibold">المقر الرئيسي</span>
-          <span className="text-white/55">
+          <span className="text-white/55 sm:hidden">أبوظبي، الإمارات</span>
+          <span className="hidden text-white/55 sm:inline">
             مكتب 219، ريجس، الطابق الثاني، فندق كورتيارد ماريوت، شارع المطار، أبوظبي
           </span>
         </span>
