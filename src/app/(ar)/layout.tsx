@@ -104,9 +104,11 @@ function UtilityBar() {
           <span className="font-semibold">السبت – الجمعة</span>
           <span className="text-white/55">8 صباحاً – 8 مساءً</span>
         </span>
+        {/* The label drops below sm so the city is not cut off — see the note
+            in the English layout. */}
         <span className="flex items-center gap-2">
           <span aria-hidden className="text-white/40">⌖</span>
-          <span className="font-semibold">المقر الرئيسي</span>
+          <span className="hidden font-semibold sm:inline">المقر الرئيسي</span>
           <span className="text-white/55 sm:hidden">أبوظبي، الإمارات</span>
           <span className="hidden text-white/55 sm:inline">
             مكتب 219، ريجس، الطابق الثاني، فندق كورتيارد ماريوت، شارع المطار، أبوظبي

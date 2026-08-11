@@ -92,10 +92,16 @@ function UtilityBar() {
           entirely — the bar told you the hours of an office it would not name.
           The full street address is too long for a 390px bar, so the city
           shows there and the whole thing from sm up.
+
+          The "Main Office" label goes too below sm. With it, the two groups
+          need ~364px and a 390px phone offers ~350, so the address ran under
+          the edge — the bar scrolls, but all the reader sees is a word cut in
+          half. The label is the redundant part: the pin marks it as a place
+          and the text already says Abu Dhabi.
         */}
         <span className="flex items-center gap-2">
           <span aria-hidden className="text-white/40">⌖</span>
-          <span className="font-semibold">Main Office</span>
+          <span className="hidden font-semibold sm:inline">Main Office</span>
           <span className="text-white/55 sm:hidden">Abu Dhabi, UAE</span>
           <span className="hidden text-white/55 sm:inline">
             219 Office, Regus, 2nd Floor Court Marriot Hotel, Airport St, Abu Dhabi, UAE
