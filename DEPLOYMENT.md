@@ -13,6 +13,31 @@ STRAPI_REVALIDATE=300
 REVALIDATE_SECRET=…        # must match the CMS
 ```
 
+### STRAPI_URL must ALSO be present at RUNTIME
+
+Build time is not enough, and the failure is easy to mistake for a content
+problem.
+
+Most pages are prerendered, so they serve fine from the build. But a URL that
+is NOT in `generateStaticParams` — anything unknown, which is to say every
+404 — is rendered on demand, and that render fetches the CMS at request time.
+With `STRAPI_URL` absent at runtime the fetch falls back to
+`http://localhost:1337`, is refused, and the route answers **500 instead of
+404**.
+
+A soft 404 is worse than it sounds: Google keeps the dead URL in the index and
+keeps crawling it, and genuine 404s stop being distinguishable from an outage.
+
+Verify after deploying, with a URL that cannot exist:
+
+```bash
+curl -o /dev/null -w '%{http_code}\n' https://fakhernco.com/definitely-not-a-real-page-9f3a
+# 404 = correct.  500 = STRAPI_URL is missing from the runtime environment.
+```
+
+The same applies to ISR: a page revalidating after 300s fetches the CMS from
+the running server, not from the build.
+
 ### STRAPI_URL must be present at BUILD time
 
 `next.config.ts` derives the `next/image` remote pattern from it and compiles
