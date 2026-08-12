@@ -51,6 +51,17 @@ function strapiImageHost(failFast: boolean) {
   a running site down at boot over a variable that only the build actually
   needed. The build is the one moment where the absence is unrecoverable.
 */
+/** Same host twice is harmless but noisy; keep the first occurrence. */
+function dedupeHosts(patterns: { protocol?: string; hostname: string; pathname?: string }[]) {
+  const seen = new Set<string>();
+  return patterns.filter((p) => {
+    const key = `${p.protocol}//${p.hostname}${p.pathname}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 /**
  * Stamp the commit into the build so /api/version can report what is running.
  *
@@ -97,11 +108,35 @@ export default function config(phase: string): NextConfig {
     */
     experimental: { cpus: 2 },
     images: {
-      remotePatterns: [
+      remotePatterns: dedupeHosts([
         ...strapiImageHost(phase === PHASE_PRODUCTION_BUILD),
+        /*
+          The production CMS, stated outright rather than derived.
+
+          The server runs Next through a hand-written Passenger entry point:
+
+            const app = next({ dev: false, dir: __dirname })
+
+          A custom server re-evaluates this file at RUNTIME instead of reading
+          the config baked into required-server-files.json at build time. If
+          STRAPI_URL is not already in process.env at that instant — and on
+          that host it is not, whatever .env.production.local says — the derived
+          pattern is silently absent and every CMS image 404s.
+
+          The symptom is maddening, because by the time a request is served the
+          env file HAS loaded, so /api/version cheerfully reports
+          strapiUrlAtRuntime: "https://cms.fakhernco.com" while the optimiser
+          treats that same host as unknown.
+
+          The hostname is a fixed fact about this deployment. Deriving it buys
+          nothing and costs an entire class of failure, so it is written down.
+          STRAPI_URL still drives it everywhere else, which is what makes local
+          and preview environments work.
+        */
+        { protocol: "https", hostname: "cms.fakhernco.com", pathname: "/uploads/**" },
         // Legacy WordPress origin — images not yet migrated still render.
         { protocol: "https", hostname: "fakhernco.com", pathname: "/wp-content/**" },
-      ],
+      ]),
       // Allow a localhost CMS whenever STRAPI_URL actually points at one, rather
       // than keying off NODE_ENV. A production build against a local CMS is a
       // normal thing to do while testing, and gating on NODE_ENV makes every
