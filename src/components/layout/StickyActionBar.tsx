@@ -1,4 +1,6 @@
 import { PHONE, TEL_HREF } from '@/lib/contact';
+import { t } from '@/lib/ui';
+import type { Locale } from '@/lib/locale';
 
 /**
  * Sticky action bar for the ad landing pages.
@@ -19,7 +21,8 @@ import { PHONE, TEL_HREF } from '@/lib/contact';
  * `data-action-bar` is read by globals.css, which lifts the floating WhatsApp
  * button clear of this bar on pages that render it.
  */
-export function StickyActionBar() {
+export function StickyActionBar({ locale = 'en' }: { locale?: Locale }) {
+  const s = t(locale);
   return (
     <div
       data-action-bar
@@ -30,14 +33,14 @@ export function StickyActionBar() {
           href="#enquire"
           className="flex flex-1 items-center justify-center bg-ink px-5 py-3 font-display text-sm font-700 text-white transition-colors hover:bg-ink-2"
         >
-          Request a consultation
+          {s.requestConsultation}
         </a>
         <a
           href={TEL_HREF}
-          aria-label={`Call ${PHONE.DISPLAY}`}
+          aria-label={s.landing.callAria(PHONE.DISPLAY)}
           className="flex shrink-0 items-center justify-center border border-ink px-5 py-3 font-display text-sm font-700 text-ink transition-colors hover:bg-surface-alt"
         >
-          <span aria-hidden>Call</span>
+          <span aria-hidden>{s.landing.call}</span>
         </a>
       </div>
     </div>

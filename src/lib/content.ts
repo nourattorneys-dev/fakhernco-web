@@ -469,23 +469,28 @@ function toLanding(raw: Record<string, any>): Landing {
   };
 }
 
-export async function getAllLandings(): Promise<Landing[]> {
-  const rows = await strapiFetchAll<Record<string, any>>('landing-pages', LANDING_QUERY);
+export async function getAllLandings(locale = 'en'): Promise<Landing[]> {
+  const rows = await strapiFetchAll<Record<string, any>>('landing-pages', {
+    ...LANDING_QUERY,
+    locale,
+  });
   return rows.map(toLanding);
 }
 
-export async function getLandingSlugs(): Promise<string[]> {
+export async function getLandingSlugs(locale = 'en'): Promise<string[]> {
   const rows = await strapiFetchAll<{ slug: string }>('landing-pages', {
     'fields[0]': 'slug',
     'sort[0]': 'order:asc',
+    locale,
   });
   return rows.map((r) => r.slug).filter(Boolean);
 }
 
-export async function getLanding(slug: string): Promise<Landing | null> {
+export async function getLanding(slug: string, locale = 'en'): Promise<Landing | null> {
   const res = await strapiFetch<{ data: Record<string, any>[] }>('landing-pages', {
     'filters[slug][$eq]': slug,
     ...LANDING_QUERY,
+    locale,
   });
   const row = res.data?.[0];
   return row ? toLanding(row) : null;

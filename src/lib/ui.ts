@@ -97,6 +97,73 @@ export const UI = {
     allArticles: (n: number) => `All ${n} articles`,
     /** The hero H1 is split here and the tail set in a lighter weight. */
     heroSplit: ' in ',
+
+    /**
+     * The campaign landing pages under /legal-services.
+     *
+     * Every string on those pages that is not CMS content lives here, because
+     * the English and Arabic routes render the same component and the only
+     * thing that differs is this object.
+     */
+    landing: {
+      eyebrow: 'Fakher & Co · Abu Dhabi & Dubai',
+      askAbout: (s: string) => `Hello, I'd like to ask about: ${s}.`,
+      whatsapp: 'WhatsApp',
+      /** The sticky mobile bar's second button. Short: it sits beside a
+          full-width primary action and must not wrap. */
+      call: 'Call',
+      callAria: (n: string) => `Call ${n}`,
+
+      /*
+        Rotated rather than repeated: the same sentence three times down one
+        page reads as a template and stops being read. Each offers a different
+        reason to make contact, so a reader who ignored the first meets a
+        different hook at the second.
+      */
+      ctas: [
+        {
+          line: 'Not sure whether you have a case, or whether it is worth pursuing?',
+          sub: 'A confidential consultation will tell you, with no obligation.',
+        },
+        {
+          line: 'Working to a deadline?',
+          sub: 'Tell us when you make contact and we will say honestly whether it is achievable.',
+        },
+        {
+          line: 'Would it be easier to talk it through?',
+          sub: 'We advise in Arabic and English, in person in Abu Dhabi and Dubai, or by call.',
+        },
+      ],
+
+      ratherNotFormLead: 'Would you rather not fill in a form?',
+      ratherNotFormBody: 'Call or message us and we will come back to you.',
+
+      getInTouch: 'Get in touch',
+      formLead:
+        'Tell us about your matter and a member of our team will respond within one business day. Everything you share is confidential.',
+
+      otherServices: 'Other services',
+      howElse: 'How else we can help',
+      readMore: 'Read more',
+
+      readyTitle: 'Ready to protect your position?',
+      readyBody:
+        'A confidential consultation, with no obligation. We will tell you where you stand and what your options cost before you commit to anything.',
+
+      // The index at /legal-services
+      indexTitle: 'Legal Services in the UAE',
+      indexLead:
+        'Practising since 2011, with offices in Abu Dhabi and Dubai. Whatever the matter, the first step is the same — tell us the situation and we will tell you where you stand.',
+      howWeHelp: 'How we can help',
+      chooseMatter: 'Choose the matter closest to yours',
+      chooseLead:
+        'Each one sets out what we do, how the process works, what it typically costs you in time, and the questions clients ask most. If your matter spans more than one, start anywhere — the same team handles all of them.',
+      notSureTitle: 'Not sure which applies?',
+      notSureBody: (n: number) =>
+        `Tell us the situation and we will point you to the right place — including telling you when you do not need a lawyer. We also publish ${n} detailed service pages covering the full range of our practice.`,
+      browseAll: 'Browse all services',
+      helloLawyer: 'Hello, I would like to speak to a lawyer.',
+    },
   },
 
   ar: {
@@ -176,6 +243,57 @@ export const UI = {
     insightsHeading: 'إرشادات في القانون الإماراتي',
     allArticles: (n: number) => `جميع المقالات (${n})`,
     heroSplit: ' في ',
+
+    landing: {
+      eyebrow: 'فاخر ومشاركوه · أبوظبي ودبي',
+      askAbout: (s: string) => `مرحباً، أودّ الاستفسار عن: ${s}.`,
+      whatsapp: 'واتساب',
+      call: 'اتصل',
+      callAria: (n: string) => `اتصل على ${n}`,
+
+      ctas: [
+        {
+          line: 'لست متأكداً مما إذا كانت لديك قضية، أو ما إذا كان من المجدي المضي فيها؟',
+          sub: 'استشارة سرّية تُجيبك، دون أي التزام.',
+        },
+        {
+          line: 'هل تعمل ضمن مهلة محددة؟',
+          sub: 'أخبرنا بها عند التواصل وسنصارحك بما إذا كانت قابلة للتحقيق.',
+        },
+        {
+          line: 'هل يكون الحديث المباشر أيسر؟',
+          sub: 'نقدّم استشاراتنا بالعربية والإنجليزية، حضورياً في أبوظبي ودبي أو عبر الهاتف.',
+        },
+      ],
+
+      ratherNotFormLead: 'هل تفضّل ألا تملأ نموذجاً؟',
+      ratherNotFormBody: 'اتصل بنا أو راسلنا وسنعاود التواصل معك.',
+
+      getInTouch: 'تواصل معنا',
+      formLead:
+        'أخبرنا بتفاصيل قضيتك وسيتواصل معك أحد أعضاء فريقنا خلال يوم عمل واحد. وكل ما تشاركنا به يبقى سرّياً.',
+
+      otherServices: 'خدمات أخرى',
+      howElse: 'كيف يمكننا مساعدتك أيضاً',
+      readMore: 'اقرأ المزيد',
+
+      readyTitle: 'هل أنت مستعد لحماية موقفك؟',
+      readyBody:
+        'استشارة سرّية دون أي التزام. سنوضّح لك موقفك القانوني وتكلفة الخيارات المتاحة قبل أن تلتزم بأي شيء.',
+
+      indexTitle: 'الخدمات القانونية في الإمارات',
+      indexLead:
+        'نمارس المهنة منذ عام 2011، ولنا مكاتب في أبوظبي ودبي. أياً كانت القضية، تبقى الخطوة الأولى واحدة — أخبرنا بالتفاصيل ونوضّح لك موقفك.',
+      howWeHelp: 'كيف يمكننا مساعدتك',
+      chooseMatter: 'اختر الخدمة الأقرب إلى قضيتك',
+      chooseLead:
+        'توضّح كل صفحة ما نقوم به، وكيف تسير الإجراءات، والمدة التي تستغرقها عادةً، والأسئلة الأكثر تكراراً لدى الموكلين. وإذا كانت قضيتك تمتد إلى أكثر من مجال، فابدأ من أيها شئت — الفريق نفسه يتولاها جميعاً.',
+      notSureTitle: 'لست متأكداً أيها ينطبق على حالتك؟',
+      notSureBody: (n: number) =>
+        `أخبرنا بتفاصيل الأمر ونرشدك إلى الجهة الصحيحة — بما في ذلك مصارحتك حين لا تحتاج إلى محامٍ أصلاً. كما ننشر ${n} صفحة خدمات مفصّلة تغطي نطاق ممارستنا بالكامل.`,
+      browseAll: 'تصفّح جميع الخدمات',
+      helloLawyer: 'مرحباً، أودّ التحدث إلى محامٍ.',
+    },
   },
 } as const;
 
