@@ -51,8 +51,15 @@ function strapiImageHost(failFast: boolean) {
   a running site down at boot over a variable that only the build actually
   needed. The build is the one moment where the absence is unrecoverable.
 */
-/** Same host twice is harmless but noisy; keep the first occurrence. */
-function dedupeHosts(patterns: { protocol?: string; hostname: string; pathname?: string }[]) {
+/**
+ * Same host twice is harmless but noisy; keep the first occurrence.
+ *
+ * Generic so the caller's literal `protocol: "https"` survives — widening it to
+ * `string` makes the result unassignable to next/image's RemotePattern.
+ */
+function dedupeHosts<T extends { protocol?: string; hostname: string; pathname?: string }>(
+  patterns: T[],
+): T[] {
   const seen = new Set<string>();
   return patterns.filter((p) => {
     const key = `${p.protocol}//${p.hostname}${p.pathname}`;
