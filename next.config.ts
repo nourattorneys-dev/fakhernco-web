@@ -144,6 +144,28 @@ export default function config(phase: string): NextConfig {
         // Legacy WordPress origin — images not yet migrated still render.
         { protocol: "https", hostname: "fakhernco.com", pathname: "/wp-content/**" },
       ]),
+      /*
+        Serve images straight from the CMS instead of through Next's optimiser.
+
+        On this host the optimiser fails for EVERY image, whatever the host and
+        whether or not the upstream file exists — it returns the app's 404 page
+        rather than an image error, because the failure is thrown inside the
+        route and falls through to not-found. Next requires `sharp` for
+        production image optimisation, and the most likely explanation is that
+        it is missing or is the wrong platform binary in the server's
+        node_modules, which were installed by hand.
+
+        The cost here is small and the benefit is a site with pictures on it.
+        Strapi already stores these at sensible sizes — the hero photographs are
+        WordPress "-scaled" derivatives around 175KB, and the logo is 7KB — so
+        serving the originals is not the bandwidth disaster it would be with
+        untouched camera files.
+
+        REVISIT WHEN THIS MOVES TO VERCEL, where sharp is provided and the
+        optimiser works: deleting this line restores resizing and WebP.
+      */
+      unoptimized: true,
+
       // Allow a localhost CMS whenever STRAPI_URL actually points at one, rather
       // than keying off NODE_ENV. A production build against a local CMS is a
       // normal thing to do while testing, and gating on NODE_ENV makes every
