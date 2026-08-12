@@ -80,6 +80,22 @@ function buildStamp() {
 export default function config(phase: string): NextConfig {
   return {
     env: buildStamp(),
+    /*
+      Cap the build's parallelism.
+
+      Next defaults to one worker per CPU — nine on this host — and the
+      production server is CloudLinux shared hosting that refuses the spawns:
+
+        spawn /opt/alt/alt-nodejs22/root/usr/bin/node EAGAIN
+
+      Its CPU allowance was exhausted 35 times in the hour a build ran, while
+      steady-state usage sits at 3-7%. The box can run the app comfortably and
+      cannot compile it.
+
+      Two workers also stops a build from opening nine simultaneous connections
+      to the CMS, which is what made remote-CMS builds time out.
+    */
+    experimental: { cpus: 2 },
     images: {
       remotePatterns: [
         ...strapiImageHost(phase === PHASE_PRODUCTION_BUILD),
