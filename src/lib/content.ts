@@ -383,16 +383,37 @@ export async function getPostsByCategory(slug: string): Promise<Summary[]> {
  */
 export async function getArabicPaths(): Promise<string[]> {
   try {
-    const [pages, posts, areas, caseStudies] = await Promise.all([
+    const [pages, posts, areas, caseStudies, landings] = await Promise.all([
       strapiFetchAll<{ slug: string }>('pages', { 'fields[0]': 'slug', locale: 'ar' }),
       strapiFetchAll<{ slug: string }>('posts', { 'fields[0]': 'slug', locale: 'ar' }),
       strapiFetchAll<{ slug: string }>('practice-areas', { 'fields[0]': 'slug', locale: 'ar' }),
       strapiFetchAll<{ slug: string }>('case-studies', { 'fields[0]': 'slug', locale: 'ar' }),
+      strapiFetchAll<{ slug: string }>('landing-pages', { 'fields[0]': 'slug', locale: 'ar' }),
     ]);
     const slugs = [...pages, ...posts, ...areas, ...caseStudies]
       .map((r) => r.slug)
       .filter(Boolean);
-    return [...new Set(slugs)].map((s) => (s === 'home' ? '/ar' : `/ar/${s}`));
+    const paths = [...new Set(slugs)].map((s) => (s === 'home' ? '/ar' : `/ar/${s}`));
+
+    /*
+      Landing pages sit under their own prefix, so they cannot go through the
+      mapping above — /ar/contract-drafting is not a page, /ar/legal-services/
+      contract-drafting is.
+
+      Until this was added the switcher was hidden on every landing page: it
+      only appears where it knows an Arabic version exists, and these were not
+      in the list it checks. The Arabic pages existed and were reachable; no
+      reader could find them.
+
+      The index itself is listed only when at least one translated page exists
+      behind it, which keeps the same promise the rest of this function makes —
+      never offer a switch into an empty page.
+    */
+    const landingSlugs = [...new Set(landings.map((r) => r.slug).filter(Boolean))];
+    if (landingSlugs.length) {
+      paths.push('/ar/legal-services', ...landingSlugs.map((s) => `/ar/legal-services/${s}`));
+    }
+    return paths;
   } catch {
     // A missing locale must not take the header down with it.
     return [];

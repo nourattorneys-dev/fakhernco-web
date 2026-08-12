@@ -32,7 +32,16 @@ export function LanguageSwitcher({ translated }: { translated: string[] }) {
       lang={other}
       dir={other === 'ar' ? 'rtl' : 'ltr'}
       aria-label={`Switch to ${other === 'ar' ? 'Arabic' : 'English'}`}
-      className="hidden shrink-0 border border-line px-3.5 py-2 font-display text-sm font-600 text-ink transition-colors hover:border-ink lg:inline-block"
+      /*
+        Visible at every width. It used to be `hidden lg:inline-block`, and the
+        footer has no switcher of its own, so below 1024px there was no way to
+        change language from any page on the site — on a bilingual firm's site
+        whose Arabic readers are mostly on phones.
+
+        Smaller on mobile, where it shares the header row with the wordmark and
+        the contact link.
+      */
+      className="shrink-0 border border-line px-3 py-1.5 font-display text-xs font-600 text-ink transition-colors hover:border-ink lg:px-3.5 lg:py-2 lg:text-sm"
     >
       {LOCALE_LABEL[other]}
     </Link>
