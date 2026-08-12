@@ -49,7 +49,8 @@ who is not a lawyer.
 - **Master service agreements** and statements of work
 - **Construction contracts** — payment, delay, variation and defects
 - **E-commerce terms and conditions** — governed by Federal Decree-Law No. 14 of
-  2023 on Consumer Protection and the Electronic Transactions Law
+  2023 on Trading by Modern Technological Means, alongside the Consumer
+  Protection Law and the Electronic Transactions Law
 - **Real estate and lease agreements**
 
 ## What a review actually covers
