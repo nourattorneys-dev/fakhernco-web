@@ -67,6 +67,36 @@ The media is the irreplaceable part. Everything else can be rebuilt.
 > to check the admin panel. That is survivable for a staging deploy and not
 > survivable once ads are running.
 
+**The six values, all on the CMS server's `.env`:**
+
+```
+SMTP_HOST=smtp.resend.com
+SMTP_PORT=465
+SMTP_USER=resend                       # the literal string, not an address
+SMTP_PASS=re_xxxxxxxx                  # the Resend API key
+SMTP_FROM_EMAIL=noreply@fakhernco.com  # must be the domain verified in Resend
+CONTACT_NOTIFY_EMAIL=info@fakhernco.com
+```
+
+Then restart Strapi. No code change is needed and no rebuild of the front end.
+
+`CONTACT_NOTIFY_EMAIL` is the one that catches people: it is checked
+independently of SMTP, so if it is missing the notification to the firm is
+never even attempted, however perfectly the rest is configured. The auto-reply
+is gated on `SMTP_HOST` instead, so a half-configured server can send the
+client an acknowledgement while telling nobody at the firm.
+
+`noreply@fakhernco.com` does **not** need to exist as a mailbox — Resend signs
+the domain with DKIM, and replies are directed to `info@` by the handler.
+
+**What one submission produces** (verified against a local SMTP sink, both
+languages):
+
+| to | from | reply-to | contents |
+|----|------|----------|----------|
+| `info@fakhernco.com` | noreply@ | the client | name, email, phone, service, page, language, message |
+| the client | noreply@ | `info@fakhernco.com` | bilingual acknowledgement, in the language they wrote in |
+
 - [ ] `SMTP_*` and `CONTACT_NOTIFY_EMAIL` set on the CMS
 - [ ] Submit a real enquiry; confirm the internal notification arrives
 - [ ] Confirm the bilingual auto-reply arrives
