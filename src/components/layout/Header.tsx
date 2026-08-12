@@ -104,8 +104,17 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
           <TopLink href={L("/contact-us")}>{s.contact}</TopLink>
         </nav>
 
-        <div className="flex items-center justify-self-end gap-3">
-          <LanguageSwitcher translated={arabicPaths} />
+        {/*
+          col-start-3 is load-bearing, not tidiness.
+
+          The nav in the middle column is `hidden lg:flex`, and a display:none
+          element is removed from grid placement altogether — so below lg this
+          cluster was auto-placed into column 2 and column 3 sat empty. The
+          result was the language button stranded mid-header with 133px of dead
+          space to its right, close enough to the wordmark to read as attached
+          to it. Naming the column pins it to the outer edge at every width.
+        */}
+        <div className="col-start-3 flex items-center justify-self-end gap-3">
           {/*
             Black button, white number, green glyph.
 
@@ -150,6 +159,18 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
           >
             {s.contact}
           </Link>
+
+          {/*
+            Last in the cluster, so in English it sits at the far right of the
+            header rather than tucked to the left of the WhatsApp button.
+
+            Being last in the DOM is what makes it mirror correctly: the row
+            reverses under RTL, so on the Arabic site it lands at the far left,
+            which is the same "outside edge" position an Arabic reader expects.
+            Ordering it visually with CSS instead would have pinned it to one
+            physical side in both languages.
+          */}
+          <LanguageSwitcher translated={arabicPaths} />
         </div>
       </div>
 
