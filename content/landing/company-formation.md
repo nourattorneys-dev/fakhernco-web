@@ -46,7 +46,7 @@ the mainland client it was set up to serve is a common and expensive mistake.
 - **Advise on the exit before you need it** — share transfers, restructuring, and
   the liquidation process, which is far easier to plan for than to improvise.
 
-## Why a law firm rather than a formation agent
+## Why a legal consultancy rather than a formation agent
 
 An agent files forms. The things that decide whether a company survives its first
 disagreement are legal documents: a shareholder agreement that holds when two
