@@ -51,8 +51,35 @@ function strapiImageHost(failFast: boolean) {
   a running site down at boot over a variable that only the build actually
   needed. The build is the one moment where the absence is unrecoverable.
 */
+/**
+ * Stamp the commit into the build so /api/version can report what is running.
+ *
+ * Read at build time from git, or from SOURCE_COMMIT where the deploy has no
+ * .git directory. Never throws: a missing commit is worth an "unknown", not a
+ * failed build.
+ */
+function buildStamp() {
+  let commit = process.env.SOURCE_COMMIT ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "";
+  if (!commit) {
+    try {
+      commit = require("node:child_process")
+        .execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+        .toString()
+        .trim();
+    } catch {
+      commit = "unknown";
+    }
+  }
+  return {
+    NEXT_PUBLIC_BUILD_COMMIT: commit.slice(0, 12),
+    NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
+    NEXT_PUBLIC_BUILD_HAS_STRAPI: process.env.STRAPI_URL ? "1" : "0",
+  };
+}
+
 export default function config(phase: string): NextConfig {
   return {
+    env: buildStamp(),
     images: {
       remotePatterns: [
         ...strapiImageHost(phase === PHASE_PRODUCTION_BUILD),
