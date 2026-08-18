@@ -11,8 +11,7 @@
 import type { Locale } from './locale';
 import { PHONE } from './contact';
 import type { Block, Doc } from './content';
-
-const SITE = process.env.SITE_URL ?? 'https://fakhernco.com';
+import { SITE } from './site';
 
 const ORG_ID = `${SITE}/#organization`;
 const SITE_ID = `${SITE}/#website`;

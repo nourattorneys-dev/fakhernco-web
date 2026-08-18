@@ -1,6 +1,5 @@
 import { getPosts } from '@/lib/content';
-
-const SITE = process.env.SITE_URL ?? 'https://fakhernco.com';
+import { SITE } from '@/lib/site';
 
 export const revalidate = 3600;
 

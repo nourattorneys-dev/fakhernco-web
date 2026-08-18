@@ -7,8 +7,7 @@ import { GoogleTag } from '@/components/analytics/GoogleTag';
 import { JsonLd } from '@/components/JsonLd';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
 import '../globals.css';
-
-const SITE = process.env.SITE_URL ?? 'https://fakhernco.com';
+import { SITE } from '@/lib/site';
 
 /**
  * The brand faces, self-hosted.

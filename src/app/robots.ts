@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
-
-const SITE = process.env.SITE_URL ?? 'https://fakhernco.com';
+import { SITE } from '@/lib/site';
 
 /**
  * robots.txt.
