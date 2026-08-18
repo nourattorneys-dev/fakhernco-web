@@ -44,9 +44,18 @@ export function ContactForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...payload, sourcePage: window.location.pathname, locale }),
       });
+      const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? s.genericError);
+      }
+      /*
+        A preview deploy short-circuits the proxy rather than writing a real
+        enquiry into the firm's leads table. Say so plainly instead of showing
+        the success panel — a green tick that did nothing is the one outcome
+        that would make a genuinely broken form look fine during QA.
+      */
+      if (body.preview) {
+        throw new Error('Preview deployment — nothing was sent to the CMS.');
       }
       /*
         Reported here, not on the button click, and only after the CMS has

@@ -6,10 +6,34 @@
  * timer rather than re-fetched per request.
  */
 
-const BASE = process.env.STRAPI_URL ?? 'http://localhost:1337';
+/*
+  Trimmed and de-slashed, because both failures are invisible.
+
+  A trailing SPACE does not break the API calls — `new URL('/api/...', BASE)`
+  tolerates it — it breaks every IMAGE, because mediaUrl() below concatenates
+  rather than parses. The symptom is a site whose text is perfect and whose
+  every photograph is missing, and the cause is one character in an env var.
+  A trailing SLASH is the same story via `${BASE}/uploads/...`.
+*/
+const BASE = (process.env.STRAPI_URL ?? 'http://localhost:1337').trim().replace(/\/$/, '');
 const TOKEN = process.env.STRAPI_API_TOKEN;
 
-export const REVALIDATE = Number(process.env.STRAPI_REVALIDATE ?? 300);
+/*
+  Integer seconds only.
+
+  `300s`, `5m` or `5 minutes` make Number() NaN, which Next's fetch validator
+  rejects — and it throws naming the ROUTE that was rendering, not this
+  variable, so the trail leads nowhere near the cause. An empty string coerces
+  to 0, which is worse than wrong: it silently disables ISR and turns every
+  build into a full uncached crawl of a 2GB CMS.
+*/
+const parsedRevalidate = Number(process.env.STRAPI_REVALIDATE);
+export const REVALIDATE =
+  process.env.STRAPI_REVALIDATE?.trim() &&
+  Number.isFinite(parsedRevalidate) &&
+  parsedRevalidate > 0
+    ? parsedRevalidate
+    : 300;
 
 export class StrapiError extends Error {
   constructor(readonly status: number, path: string) {
