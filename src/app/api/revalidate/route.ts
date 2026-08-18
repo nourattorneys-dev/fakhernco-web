@@ -12,7 +12,9 @@ import { NextResponse } from 'next/server';
  * Configure in Strapi under Settings -> Webhooks:
  *   URL:     https://fakhernco.com/api/revalidate
  *   Header:  x-revalidate-secret: <REVALIDATE_SECRET>
- *   Events:  entry.publish, entry.unpublish, entry.update, entry.delete
+ *   Events:  entry.publish, entry.unpublish, entry.delete
+ *
+ * entry.update is deliberately NOT subscribed — see the event filter below.
  */
 
 export const dynamic = 'force-dynamic';
@@ -37,6 +39,18 @@ function pathsFor(model: string, slug: string | undefined, locale: string | unde
       );
     case 'homepage':
       return [`${prefix}/`];
+    /*
+      The ad-spend surface, and it had no mapping at all — a published edit to
+      a landing page waited out the full ISR window with no way to force it
+      through, on the nine pages where a wrong price or a wrong claim is being
+      actively paid for. Both locales exist; they live under their own prefix
+      rather than at the root.
+    */
+    case 'landing-page':
+      return [
+        ...(slug ? [`${prefix}/legal-services/${slug}`] : []),
+        `${prefix}/legal-services`,
+      ];
     case 'site-setting':
       // Header and footer are in the root layout, so everything is affected.
       return ['LAYOUT'];
@@ -50,15 +64,40 @@ export async function POST(request: Request) {
   if (!secret) {
     return NextResponse.json({ error: 'Revalidation is not configured.' }, { status: 503 });
   }
-  if (request.headers.get('x-revalidate-secret') !== secret) {
+  // Trimmed on both sides: this secret is copied by hand between the Strapi
+  // webhook row and the Vercel dashboard, and a pasted trailing newline
+  // presents as an authentication failure with nothing to see.
+  if (request.headers.get('x-revalidate-secret')?.trim() !== secret.trim()) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }
 
-  let body: { model?: string; entry?: { slug?: string; locale?: string } };
+  let body: { model?: string; event?: string; entry?: { slug?: string; locale?: string } };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid payload.' }, { status: 400 });
+  }
+
+  /*
+    Only publish-shaped events invalidate anything.
+
+    Subscribed to entry.update, every keystroke-level DRAFT save purged the
+    live page — and a Site Settings save (not publish) purged all ~302
+    prerendered pages at once, each of which then foreground-rendered against
+    the 2GB CloudLinux box. The webhook was quietly a load generator.
+
+    Strapi sends `event` in the body and X-Strapi-Event in the headers; the
+    `event &&` guard keeps hand-made curl payloads working.
+
+    Do NOT reach for `entry.publishedAt == null` instead. Under Strapi 5 draft
+    & publish the entry carried by entry.update is always the DRAFT, whose
+    publishedAt is null even when a published version exists — so that test
+    silently means "ignore everything".
+  */
+  const ACTIONABLE = new Set(['entry.publish', 'entry.unpublish', 'entry.delete']);
+  const event = body.event ?? request.headers.get('x-strapi-event') ?? '';
+  if (event && !ACTIONABLE.has(event)) {
+    return NextResponse.json({ ok: true, revalidated: [], note: `ignored ${event}` });
   }
 
   const model = body.model ?? '';
