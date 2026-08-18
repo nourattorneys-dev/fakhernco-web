@@ -95,25 +95,42 @@ function buildStamp() {
   };
 }
 
+/*
+  Build parallelism, opt-in.
+
+  Next defaults to one worker per CPU. The cPanel box (CloudLinux, 2GB) refuses
+  those spawns — `spawn /opt/alt/alt-nodejs22/root/usr/bin/node EAGAIN`, its CPU
+  allowance exhausted 35 times in the hour a build ran — so a build there opts
+  IN to the cap:
+
+    BUILD_CPUS=2 npm run build:fresh
+
+  Vercel's builders have cores to spare, so leaving BUILD_CPUS unset there is
+  the entire point: the cap was a tax paid to one specific host, and it was
+  costing roughly half the static-generation time of every build.
+
+  Deliberately NOT keyed on process.env.VERCEL. That variable exists only while
+  "Enable access to System Environment Variables" is ticked, so a VERCEL gate
+  fails CLOSED — untick the box and the two-worker cap silently returns with
+  nothing to point at. This gate fails open.
+
+  BUILD_PAGE_CONCURRENCY is the knob that actually bounds simultaneous
+  connections to the 2GB CMS: in-flight requests are roughly cpus x this
+  (default 8). If the CMS 5xxs during a build, lower THIS, not cpus.
+*/
+const buildCpus = Number(process.env.BUILD_CPUS);
+const pageConcurrency = Number(process.env.BUILD_PAGE_CONCURRENCY);
+const experimental: NextConfig['experimental'] = {
+  ...(Number.isInteger(buildCpus) && buildCpus > 0 ? { cpus: buildCpus } : {}),
+  ...(Number.isInteger(pageConcurrency) && pageConcurrency > 0
+    ? { staticGenerationMaxConcurrency: pageConcurrency }
+    : {}),
+};
+
 export default function config(phase: string): NextConfig {
   return {
     env: buildStamp(),
-    /*
-      Cap the build's parallelism.
-
-      Next defaults to one worker per CPU — nine on this host — and the
-      production server is CloudLinux shared hosting that refuses the spawns:
-
-        spawn /opt/alt/alt-nodejs22/root/usr/bin/node EAGAIN
-
-      Its CPU allowance was exhausted 35 times in the hour a build ran, while
-      steady-state usage sits at 3-7%. The box can run the app comfortably and
-      cannot compile it.
-
-      Two workers also stops a build from opening nine simultaneous connections
-      to the CMS, which is what made remote-CMS builds time out.
-    */
-    experimental: { cpus: 2 },
+    experimental,
     images: {
       remotePatterns: dedupeHosts([
         ...strapiImageHost(phase === PHASE_PRODUCTION_BUILD),
@@ -161,10 +178,26 @@ export default function config(phase: string): NextConfig {
         serving the originals is not the bandwidth disaster it would be with
         untouched camera files.
 
-        REVISIT WHEN THIS MOVES TO VERCEL, where sharp is provided and the
-        optimiser works: deleting this line restores resizing and WebP.
+        On Vercel none of that holds: sharp is provided, the optimiser works,
+        and resizing plus WebP is the single biggest LCP win available to a
+        page whose hero is a 175KB photograph. So the bypass is keyed on the
+        host rather than deleted outright — the cPanel deployment stays live
+        until DNS moves, and removing this line outright would put every image
+        back to serving a 45KB HTML 404 the moment anyone rebuilt it there.
       */
-      unoptimized: true,
+      unoptimized: !process.env.VERCEL,
+
+      /*
+        The CMS sends `Cache-Control: max-age=0` on /uploads, and an optimised
+        image's max-age is max(upstream max-age, minimumCacheTTL). Left at Next
+        16's 14400s default that re-transforms — and re-bills — every variant
+        six times a day for files that never change.
+
+        Strapi hashes upload filenames, so a long TTL is safe: a replaced image
+        arrives at a new URL. The corollary is that a file overwritten IN PLACE
+        at the same URL sticks for 31 days, and there is no purge.
+      */
+      minimumCacheTTL: 2678400, // 31 days
 
       // Allow a localhost CMS whenever STRAPI_URL actually points at one, rather
       // than keying off NODE_ENV. A production build against a local CMS is a
@@ -173,6 +206,35 @@ export default function config(phase: string): NextConfig {
       dangerouslyAllowLocalIP: /^https?:\/\/(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(
         process.env.STRAPI_URL ?? "",
       ),
+    },
+
+    /*
+      Keep the *.vercel.app aliases out of the index.
+
+      The production alias serves the entire site on a second hostname, and it
+      is discoverable — certificate-transparency logs list it the moment it is
+      issued, and any outbound link leaks it as a referrer. Indexed, it competes
+      with fakhernco.com on the firm's own brand name with byte-identical
+      content.
+
+      A header rather than robots.txt, deliberately: src/app/robots.ts keeps
+      AdsBot-Google on `Allow: /` because a Disallow gets the Ads landing pages
+      disapproved for an unreachable destination, and a host-conditional
+      robots.txt cannot be expressed there at all.
+
+      The pattern is anchored on the whole host so it cannot match the apex.
+      Verify both halves after the first deploy — present on the vercel.app URL,
+      ABSENT on fakhernco.com — because a regex that matched both would quietly
+      deindex the firm.
+    */
+    async headers() {
+      return [
+        {
+          source: "/:path*",
+          has: [{ type: "host", value: "^.+\\.vercel\\.app$" }],
+          headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        },
+      ];
     },
   };
 }
