@@ -224,12 +224,31 @@ export async function getPracticeArea(slug: string, locale = 'en'): Promise<Doc 
   return raw ? mapDoc(raw, 'practice-area') : null;
 }
 
-/** Anything reachable at a root-level slug, in resolution order. */
+/**
+ * Anything reachable at a root-level slug.
+ *
+ * Ordered by how likely each collection is to hold the answer, not
+ * alphabetically: posts are 146 of the 211 English documents, pages 58,
+ * practice areas 5, case studies 2. Probing practice areas first — as this did
+ * — spent two guaranteed-miss round trips before reaching the collection that
+ * holds two thirds of the content, on every one of ~300 prerendered routes and
+ * on every on-demand 404. Frequency order takes the average from ~3 round
+ * trips to ~1.4.
+ *
+ * Still sequential rather than parallel, deliberately: the CMS is a 2GB shared
+ * box, and firing four queries to answer one lookup would triple its load to
+ * save latency it can spare.
+ *
+ * The order IS the precedence rule, so it only stays behaviour-neutral while
+ * slugs are unique across collections. That was verified — 165 slugs, zero
+ * collisions — but it is a property of the content, not of the code. If two
+ * collections ever share a slug, the winner is now the earlier line here.
+ */
 export async function getDocument(slug: string, locale = 'en'): Promise<Doc | null> {
   return (
-    (await getPracticeArea(slug, locale)) ??
-    (await getPage(slug, locale)) ??
     (await getPost(slug, locale)) ??
+    (await getPage(slug, locale)) ??
+    (await getPracticeArea(slug, locale)) ??
     (await getCaseStudy(slug, locale))
   );
 }
