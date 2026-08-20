@@ -22,8 +22,19 @@
  *
  * The trailing slash is stripped because every caller concatenates onto this.
  */
+/*
+  Empty is treated as unset, which `??` alone does not do.
+
+  Vercel's import screen pre-detects keys from .env.example and offers them
+  with BLANK values. Accept one and process.env.SITE_URL is '' — not
+  undefined — so `??` does not fall through, HOST becomes '', and
+  `new URL('')` throws at build. A variable nobody deliberately set would
+  take the whole site down, which is too sharp an edge to leave in place.
+*/
+const configured = process.env.SITE_URL?.trim();
+
 const HOST =
-  process.env.SITE_URL ??
+  (configured || undefined) ??
   (process.env.VERCEL_ENV === 'production'
     ? 'https://fakhernco.com'
     : process.env.VERCEL_BRANCH_URL
