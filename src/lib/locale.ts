@@ -23,16 +23,63 @@ export const LOCALE_DIR: Record<Locale, 'ltr' | 'rtl'> = {
   ar: 'rtl',
 };
 
+/**
+ * URL prefix per locale. The default locale has none — English is at the root.
+ *
+ * This table is what makes the functions below stop hardcoding `/ar`. Adding a
+ * locale is now an entry here rather than an edit to three regexes, each of
+ * which failed differently: a two-branch `if` in pathIn() would have sent
+ * German traffic to Arabic URLs without a compile error, because the union
+ * widens but the else-branch still catches everything.
+ */
+export const LOCALE_PREFIX: Record<Locale, string> = {
+  en: '',
+  ar: '/ar',
+};
+
+/**
+ * hreflang keys.
+ *
+ * Deliberately kept byte-identical to what the site emits today — `en-AE` is
+ * region-qualified and `ar` is not. Both are valid, and normalising them is a
+ * live SEO change on 63 Arabic routes that has nothing to do with adding a
+ * locale. Change it on purpose, in its own commit, or not at all.
+ */
+export const LOCALE_HREFLANG: Record<Locale, string> = {
+  en: 'en-AE',
+  ar: 'ar',
+};
+
 /** Which locale a pathname belongs to. */
 export function localeOf(pathname: string): Locale {
-  return pathname === '/ar' || pathname.startsWith('/ar/') ? 'ar' : 'en';
+  /*
+    Exact-segment test, not a bare startsWith.
+
+    `pathname.startsWith('/ar')` would classify the real English route
+    /articles-of-association-uae as Arabic. That page exists; this is the bug
+    the original regex was written to avoid, and it survives the rewrite.
+  */
+  for (const locale of LOCALES) {
+    const prefix = LOCALE_PREFIX[locale];
+    if (prefix && (pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+      return locale;
+    }
+  }
+  return DEFAULT_LOCALE;
 }
 
-/** The same page in the other locale. */
+/** The path with any locale prefix removed. Always starts with a slash. */
+export function barePath(pathname: string): string {
+  const prefix = LOCALE_PREFIX[localeOf(pathname)];
+  return prefix ? pathname.slice(prefix.length) || '/' : pathname;
+}
+
+/** The same page in another locale. */
 export function pathIn(pathname: string, locale: Locale): string {
-  const bare = pathname === '/ar' ? '/' : pathname.replace(/^\/ar(?=\/)/, '') || '/';
-  if (locale === 'en') return bare;
-  return bare === '/' ? '/ar' : `/ar${bare}`;
+  const bare = barePath(pathname);
+  const prefix = LOCALE_PREFIX[locale];
+  if (!prefix) return bare;
+  return bare === '/' ? prefix : `${prefix}${bare}`;
 }
 
 /**
