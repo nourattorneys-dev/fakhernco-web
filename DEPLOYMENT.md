@@ -69,6 +69,35 @@ If a build ever starts logging CMS 5xx or ETIMEDOUT, lower
 `BUILD_PAGE_CONCURRENCY`, not `BUILD_CPUS` — that is the one that bounds
 connections.
 
+## Firewall
+
+Two rules, live on the project. They exist because the migration removes a
+throttle nobody designed: on cPanel, CloudLinux's process cap limited bot
+traffic by accident. Vercel functions scale freely, and `/[slug]` catches every
+unmatched root URL — each miss costing an upstream query against a 2 GB box.
+
+| Rule | Match | Action |
+|---|---|---|
+| Block legacy WordPress probes | path matches `^/(wp-admin\|wp-login\.php\|xmlrpc\.php\|wp-json\|wp-includes)` | Deny (403) |
+| Throttle contact submissions | path equals `/api/contact` | 10 req / 600s per IP, then 429 |
+
+`wp-content` is deliberately **not** in the deny pattern. The legacy WordPress
+origin is still an allowed `next/image` remote host, and blocking it would
+change how those (already broken) images fail. Verified before shipping: no
+rule in `src/lib/redirects.json` has a `wp-` source, so nothing legitimate is
+shadowed.
+
+The rate limit is the throttle that actually holds. The CMS has its own
+limiter, but it keys on `ctx.request.ip` — and now that the proxy forwards
+`x-forwarded-for`, anyone POSTing straight at `cms.fakhernco.com` can set that
+header to whatever they like. Rate limiting is billed on *allowed* requests
+($0.50/1M); blocked ones are free.
+
+Measured after publishing: 429 begins at roughly the sixth rapid request
+rather than the eleventh, so the edge counts with some slack. Fine for a form
+a real person submits once — but if a genuine enquiry ever reports being
+blocked, raise the request count rather than lengthening the window.
+
 ## Environment variables
 
 There is no build-vs-runtime split on Vercel: every variable is visible to
