@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import {
   describe,
   getAllSlugs,
-  getArabicPaths,
+  getTranslatedPaths,
   getDocument,
   getPracticeAreas,
   type Doc,
@@ -52,7 +52,7 @@ export async function generateMetadata({
   if (!doc) return {};
 
   const description = describe(doc);
-  const hasArabic = (await getArabicPaths()).includes(`/ar/${doc.slug}`);
+  const hasArabic = (await getTranslatedPaths('ar')).includes(`/ar/${doc.slug}`);
 
   return {
     title: doc.seo?.metaTitle || doc.title,

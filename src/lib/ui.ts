@@ -1,4 +1,4 @@
-import type { Locale } from './locale';
+import { DEFAULT_LOCALE, pathIn, type Locale } from './locale';
 
 /**
  * Interface strings.
@@ -308,13 +308,21 @@ export const t = (locale: Locale) => UI[locale];
  * to the English URL is the honest behaviour, and it matches how the language
  * switcher already decides whether to appear at all.
  *
- * Pass `available` (the set of real /ar paths) to enable the check; without
- * it the function assumes the target exists, which is right for links the
- * caller has already verified.
+ * Pass `available` (the set of real paths in that locale) to enable the check;
+ * without it the function assumes the target exists, which is right for links
+ * the caller has already verified.
+ *
+ * The prefixing is delegated to pathIn rather than rebuilt here. It used to be
+ * `if (locale !== 'ar') return path`, which reads as "English needs no prefix"
+ * but actually means "every locale except Arabic is at the root" — so a third
+ * locale would have had every navigation and footer link on every one of its
+ * pages resolve silently to the English page. There is no compile error to
+ * catch it: the guard is a negation, so widening Locale changes nothing
+ * TypeScript can see.
  */
 export const href = (locale: Locale, path: string, available?: Set<string> | string[]) => {
-  if (locale !== 'ar') return path;
-  const target = path === '/' ? '/ar' : `/ar${path}`;
+  if (locale === DEFAULT_LOCALE) return path;
+  const target = pathIn(path, locale);
   if (!available) return target;
   const set = available instanceof Set ? available : new Set(available);
   return set.has(target) ? target : path;

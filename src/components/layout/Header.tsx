@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getArabicPaths, getPracticeAreas, getSiteSettings } from '@/lib/content';
+import { getAllTranslatedPaths, getPracticeAreas, getSiteSettings } from '@/lib/content';
 import type { Locale } from '@/lib/locale';
 import { href, t } from '@/lib/ui';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -20,14 +20,13 @@ import { NavGroup } from './NavGroup';
  * exposes the service pages, which the original hides entirely below 980px.
  */
 export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
-  const [areas, site, arabicPaths] = await Promise.all([
+  const [areas, site, translated] = await Promise.all([
     getPracticeAreas(locale),
     getSiteSettings(locale),
-    getArabicPaths(),
+    getAllTranslatedPaths(),
   ]);
   const s = t(locale);
-  const arSet = new Set(arabicPaths);
-  const L = (path: string) => href(locale, path, arSet);
+  const L = (path: string) => href(locale, path, translated[locale]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur-sm">
@@ -170,7 +169,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
             Ordering it visually with CSS instead would have pinned it to one
             physical side in both languages.
           */}
-          <LanguageSwitcher translated={arabicPaths} />
+          <LanguageSwitcher translated={translated.ar ?? []} />
         </div>
       </div>
 

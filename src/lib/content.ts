@@ -6,7 +6,9 @@
  * component, `toBlock()` below, and BlockRenderer.
  */
 
+import { cache } from 'react';
 import { mediaUrl, strapiFetch, strapiFetchAll } from './strapi';
+import { DEFAULT_LOCALE, LOCALES, pathIn, type Locale } from './locale';
 
 // ------------------------------------------------------------------- types
 
@@ -393,26 +395,30 @@ export async function getPostsByCategory(slug: string): Promise<Summary[]> {
 }
 
 /**
- * Paths that genuinely exist in Arabic.
+ * Paths that genuinely exist in a given locale.
  *
  * Used to decide whether to offer the language switcher at all. Strapi's i18n
- * plugin returns only the requested locale, so an empty result here means the
- * Arabic import has not run yet — and the switcher stays hidden rather than
+ * plugin returns only the requested locale, so an empty result here means that
+ * locale's import has not run yet — and the switcher stays hidden rather than
  * linking into a 404.
  */
-export async function getArabicPaths(): Promise<string[]> {
+export const getTranslatedPaths = cache(async (locale: Locale): Promise<string[]> => {
+  // The default locale is the baseline, not a translation of anything.
+  if (locale === DEFAULT_LOCALE) return [];
   try {
     const [pages, posts, areas, caseStudies, landings] = await Promise.all([
-      strapiFetchAll<{ slug: string }>('pages', { 'fields[0]': 'slug', locale: 'ar' }),
-      strapiFetchAll<{ slug: string }>('posts', { 'fields[0]': 'slug', locale: 'ar' }),
-      strapiFetchAll<{ slug: string }>('practice-areas', { 'fields[0]': 'slug', locale: 'ar' }),
-      strapiFetchAll<{ slug: string }>('case-studies', { 'fields[0]': 'slug', locale: 'ar' }),
-      strapiFetchAll<{ slug: string }>('landing-pages', { 'fields[0]': 'slug', locale: 'ar' }),
+      strapiFetchAll<{ slug: string }>('pages', { 'fields[0]': 'slug', locale }),
+      strapiFetchAll<{ slug: string }>('posts', { 'fields[0]': 'slug', locale }),
+      strapiFetchAll<{ slug: string }>('practice-areas', { 'fields[0]': 'slug', locale }),
+      strapiFetchAll<{ slug: string }>('case-studies', { 'fields[0]': 'slug', locale }),
+      strapiFetchAll<{ slug: string }>('landing-pages', { 'fields[0]': 'slug', locale }),
     ]);
     const slugs = [...pages, ...posts, ...areas, ...caseStudies]
       .map((r) => r.slug)
       .filter(Boolean);
-    const paths = [...new Set(slugs)].map((s) => (s === 'home' ? '/ar' : `/ar/${s}`));
+    const paths = [...new Set(slugs)].map((s) =>
+      s === 'home' ? pathIn('/', locale) : pathIn(`/${s}`, locale),
+    );
 
     /*
       Landing pages sit under their own prefix, so they cannot go through the
@@ -430,13 +436,71 @@ export async function getArabicPaths(): Promise<string[]> {
     */
     const landingSlugs = [...new Set(landings.map((r) => r.slug).filter(Boolean))];
     if (landingSlugs.length) {
-      paths.push('/ar/legal-services', ...landingSlugs.map((s) => `/ar/legal-services/${s}`));
+      paths.push(
+        pathIn('/legal-services', locale),
+        ...landingSlugs.map((s) => pathIn(`/legal-services/${s}`, locale)),
+      );
     }
     return paths;
-  } catch {
-    // A missing locale must not take the header down with it.
+  } catch (err) {
+    /*
+      A missing locale must not take the header down with it — but it must not
+      be silent either.
+
+      This catch cost the live site its language switcher on the homepage, and
+      nobody noticed. A transient CMS failure during one page's prerender
+      returns [], the switcher decides no Arabic version exists, and it renders
+      nothing. Every other page built fine, so the site looked healthy while the
+      most important page in the Arabic cluster had no way to reach it — until
+      the next rebuild, which might not fix it either.
+
+      The 2GB CMS makes this likely rather than theoretical: /api/landing-pages
+      has been measured at 29.7s against 1.6s for /api/pages.
+
+      Logging turns an invisible degradation into a line in the build output.
+    */
+    console.warn(
+      `[content] getTranslatedPaths(${locale}) failed — the language switcher ` +
+        `will be hidden on pages built in this window. Cause: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+    );
     return [];
   }
+});
+
+/**
+ * Every non-default locale's translated paths, in one object.
+ *
+ * Header and Footer both need this on every render, and both used to call the
+ * Arabic version separately — cache() collapses that to one set of requests per
+ * request, which matters because each call is five paginated Strapi queries
+ * against a 2GB box.
+ */
+export const getAllTranslatedPaths = cache(
+  async (): Promise<Partial<Record<Locale, string[]>>> => {
+    const others = LOCALES.filter((l) => l !== DEFAULT_LOCALE);
+    const rows = await Promise.all(
+      others.map(async (l) => [l, await getTranslatedPaths(l)] as const),
+    );
+    return Object.fromEntries(rows);
+  },
+);
+
+/**
+ * Which locales a given unprefixed path genuinely exists in.
+ *
+ * Always includes the default locale — English is the baseline and every page
+ * has one. Used to build hreflang clusters, which must never point at a 404.
+ */
+export async function localesFor(bare: string): Promise<Locale[]> {
+  const all = await getAllTranslatedPaths();
+  return [
+    DEFAULT_LOCALE,
+    ...LOCALES.filter(
+      (l) => l !== DEFAULT_LOCALE && (all[l] ?? []).includes(pathIn(bare, l)),
+    ),
+  ];
 }
 
 export async function getAllSlugs(collection: string, locale = 'en'): Promise<string[]> {
