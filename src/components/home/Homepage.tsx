@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getHomepage, getPage, getPracticeAreas, getPosts, getTranslatedPaths } from '@/lib/content';
+import { getHomepage, getPage, getPracticeAreas, getPosts, getNavPaths } from '@/lib/content';
 import { HomeSections } from '@/components/home/HomeSections';
 import { LOCALE_DATE, type Locale } from '@/lib/locale';
 import { t, href } from '@/lib/ui';
@@ -48,7 +48,7 @@ export async function Homepage({ locale = 'en' }: { locale?: Locale }) {
     getTranslatedPaths is cache()d and the header already calls it on every
     render, so this costs no extra requests.
   */
-  const localePaths = await getTranslatedPaths(locale);
+  const localePaths = await getNavPaths(locale);
 
   return (
     <>

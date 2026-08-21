@@ -14,7 +14,13 @@ import {
   StrapiError,
   STRUCTURE_REVALIDATE,
 } from './strapi';
-import { DEFAULT_LOCALE, LOCALES, pathIn, type Locale } from './locale';
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  LOCALE_STATIC_ROUTES,
+  pathIn,
+  type Locale,
+} from './locale';
 
 // ------------------------------------------------------------------- types
 
@@ -560,6 +566,21 @@ export const getAllTranslatedPaths = cache(
  * Always includes the default locale — English is the baseline and every page
  * has one. Used to build hreflang clusters, which must never point at a 404.
  */
+/**
+ * Paths a reader can actually navigate to in `locale`: CMS content plus the
+ * routes that exist as files.
+ *
+ * This is what href() should consult. localesFor() below deliberately does NOT
+ * use it — see LOCALE_STATIC_ROUTES for why the two questions are separate.
+ */
+export async function getNavPaths(locale: Locale): Promise<Set<string>> {
+  const fromCms = await getTranslatedPaths(locale);
+  return new Set([
+    ...fromCms,
+    ...LOCALE_STATIC_ROUTES[locale].map((path) => pathIn(path, locale)),
+  ]);
+}
+
 export async function localesFor(bare: string): Promise<Locale[]> {
   const all = await getAllTranslatedPaths();
   return [

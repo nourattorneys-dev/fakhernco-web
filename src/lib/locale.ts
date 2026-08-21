@@ -130,6 +130,33 @@ export const LOCALE_LANG_TAG: Record<Locale, string> = {
   de: 'de',
 };
 
+/**
+ * Routes that exist as literal files in a locale's route group, regardless of
+ * whether the CMS has any content for that locale.
+ *
+ * The availability set that href() consults is built from Strapi, which is the
+ * right source for CONTENT pages — it is what stops the header linking to
+ * /ar/about-us, which was never translated. But it knows nothing about routes
+ * that exist because a file exists.
+ *
+ * German exposed the gap. With no CMS content, its list was empty — and an
+ * empty array is truthy, so href() took the availability branch, found nothing,
+ * and returned the English path for EVERY link. /de rendered in German and every
+ * link out of it landed in English: a one-way door. That is byte-identical to
+ * the `locale !== 'ar'` bug the table was introduced to fix.
+ *
+ * Deliberately separate from the CMS list rather than merged into it. This set
+ * answers "can the reader navigate there", which the header needs. The CMS list
+ * answers "does a translation of this page exist", which the language switcher
+ * and hreflang need — and those must not advertise a locale on the strength of
+ * an empty shell.
+ */
+export const LOCALE_STATIC_ROUTES: Record<Locale, string[]> = {
+  en: [],
+  ar: ['/', '/contact-us', '/legal-services'],
+  de: ['/', '/contact-us', '/legal-services'],
+};
+
 /** Which locale a pathname belongs to. */
 export function localeOf(pathname: string): Locale {
   /*

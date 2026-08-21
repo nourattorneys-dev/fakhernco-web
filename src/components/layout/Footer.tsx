@@ -1,5 +1,10 @@
 import Link from 'next/link';
-import { getAllTranslatedPaths, getPracticeAreas, getSiteSettings } from '@/lib/content';
+import {
+  getAllTranslatedPaths,
+  getNavPaths,
+  getPracticeAreas,
+  getSiteSettings,
+} from '@/lib/content';
 import type { Locale } from '@/lib/locale';
 import { href, t } from '@/lib/ui';
 
@@ -26,13 +31,14 @@ const FEDERATION = [
 ] as const;
 
 export async function Footer({ locale = 'en' }: { locale?: Locale } = {}) {
-  const [areas, site, translated] = await Promise.all([
+  const [areas, site, translated, navPaths] = await Promise.all([
     getPracticeAreas(locale),
     getSiteSettings(locale),
     getAllTranslatedPaths(),
+    getNavPaths(locale),
   ]);
   const s = t(locale);
-  const L = (path: string) => href(locale, path, translated[locale]);
+  const L = (path: string) => href(locale, path, navPaths);
 
   return (
     <footer className="mt-24 border-t border-line bg-surface-alt">

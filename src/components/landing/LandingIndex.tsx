@@ -2,8 +2,9 @@ import Link from 'next/link';
 import type { Landing } from '@/lib/content';
 import { PHONE, TEL_HREF, WHATSAPP_URL } from '@/lib/contact';
 import { WhatsAppGlyph } from '@/components/icons/WhatsAppGlyph';
-import { t } from '@/lib/ui';
+import { href, t } from '@/lib/ui';
 import { pathIn, type Locale } from '@/lib/locale';
+import { getNavPaths } from '@/lib/content';
 
 /**
  * The hub at /legal-services, in either language.
@@ -15,7 +16,7 @@ import { pathIn, type Locale } from '@/lib/locale';
  * anyone who removed a slug from the address bar or followed a stray link
  * from an ad.
  */
-export function LandingIndex({
+export async function LandingIndex({
   pages,
   serviceCount,
   locale,
@@ -26,9 +27,25 @@ export function LandingIndex({
   locale: Locale;
 }) {
   const s = t(locale).landing;
+
+  /*
+    `base` and `contactHref` are safe as pure prefixing: /legal-services and
+    /contact-us are literal routes in every locale's group, so they always exist.
+
+    `/services` is NOT. It is a literal route only in (en). Arabic resolves
+    because a CMS page happens to carry that slug; German has neither, so
+    pathIn('/services', 'de') produced /de/services — a hard 404 behind
+    dynamicParams=false, and it was the "all services" call to action on the
+    German paid-traffic hub.
+
+    href() with the navigable set falls back to the English URL when the target
+    does not exist, which is the same promise the header makes, and it starts
+    resolving to /de/services on its own the moment a German page with that slug
+    is published.
+  */
   const base = pathIn('/legal-services', locale);
-  const servicesHref = pathIn('/services', locale);
   const contactHref = pathIn('/contact-us', locale);
+  const servicesHref = href(locale, '/services', await getNavPaths(locale));
 
   return (
     <article>

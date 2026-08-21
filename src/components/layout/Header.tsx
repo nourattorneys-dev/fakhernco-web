@@ -1,6 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getAllTranslatedPaths, getPracticeAreas, getSiteSettings } from '@/lib/content';
+import {
+  getAllTranslatedPaths,
+  getNavPaths,
+  getPracticeAreas,
+  getSiteSettings,
+} from '@/lib/content';
 import type { Locale } from '@/lib/locale';
 import { href, t } from '@/lib/ui';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -20,13 +25,14 @@ import { NavGroup } from './NavGroup';
  * exposes the service pages, which the original hides entirely below 980px.
  */
 export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
-  const [areas, site, translated] = await Promise.all([
+  const [areas, site, translated, navPaths] = await Promise.all([
     getPracticeAreas(locale),
     getSiteSettings(locale),
     getAllTranslatedPaths(),
+    getNavPaths(locale),
   ]);
   const s = t(locale);
-  const L = (path: string) => href(locale, path, translated[locale]);
+  const L = (path: string) => href(locale, path, navPaths);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur-sm">
