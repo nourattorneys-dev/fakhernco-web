@@ -38,11 +38,20 @@ export function ContactForm({
     const form = new FormData(event.currentTarget);
     const payload = Object.fromEntries(form.entries());
 
+    /*
+      FormData serialises a ticked checkbox as the STRING "true" and omits an
+      unticked one entirely. The CMS stores `body.consent === true` — strict
+      equality against a boolean — so every enquiry ever submitted was recorded
+      with consent: false, whatever the enquirer actually ticked. For a law firm
+      that is not a display bug; it is the consent record being wrong.
+    */
+    const consent = payload.consent === 'true';
+
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, sourcePage: window.location.pathname, locale }),
+        body: JSON.stringify({ ...payload, consent, sourcePage: window.location.pathname, locale }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {

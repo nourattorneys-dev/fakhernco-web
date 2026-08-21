@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { describe, getAllSlugs, getDocument, localesFor } from '@/lib/content';
 import { DocumentArticle } from '@/components/DocumentArticle';
-import { alternatesFor, LOCALE_LANG_TAG } from '@/lib/locale';
+import { alternatesFor, LOCALE_OG } from '@/lib/locale';
 
 export const revalidate = 300;
 
@@ -17,7 +17,27 @@ export const revalidate = 300;
  * pure string operation, which every hreflang, sitemap and switcher decision
  * downstream depends on.
  */
-export const dynamicParams = false;
+/*
+  dynamicParams stays at its default (true), matching (en) and (ar), and this
+  was a reversal. It was `false`, which looked like hardening and cost two real
+  behaviours:
+
+  - An unknown /de/<slug> never reached this route, so it served Next's bare
+    built-in 404 — unstyled, English, outside the site shell — instead of the
+    German LocaleNotFound. The (de)/not-found.tsx file was dead code.
+  - A German page published between deploys could NEVER appear. The webhook
+    revalidated its path, the path was not in the build, and dynamicParams=false
+    refuses to render params that were not prerendered. German batches would
+    have needed a redeploy each, and nothing anywhere said so.
+
+  The cost of true is that an unknown /de/* URL probes the CMS before 404ing —
+  exactly what (en) and (ar) already accept, and what the WAF's wp-* rule and
+  Vercel's own mitigation exist to keep cheap.
+
+  The build-time assertion below is untouched: it runs in generateStaticParams
+  regardless of dynamicParams, and it is the thing that catches an empty German
+  locale at build time.
+*/
 
 /**
  * Slugs owned by a literal route inside this group, so [slug] must not also
@@ -95,7 +115,7 @@ export async function generateMetadata({
     openGraph: {
       title: doc.seo?.metaTitle || doc.title,
       description,
-      locale: LOCALE_LANG_TAG.de,
+      locale: LOCALE_OG.de,
       url: `/de/${doc.slug}`,
       type: 'website',
       siteName: 'Fakher & Co',

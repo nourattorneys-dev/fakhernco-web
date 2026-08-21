@@ -117,6 +117,22 @@ export const LOCALE_HREFLANG: Record<Locale, string> = {
 };
 
 /**
+ * openGraph locale values — language_TERRITORY, per the OG spec.
+ *
+ * NOT the same table as LOCALE_HREFLANG or LOCALE_LANG_TAG. og:locale requires
+ * the underscore-territory form; a bare "de" is invalid OG and consumers fall
+ * back to en_US. A page-level openGraph REPLACES the layout's, so a page that
+ * writes og:locale itself must use this table, not the hreflang one — reusing
+ * LOCALE_LANG_TAG.de ("de") is exactly how /de shipped an invalid value while
+ * its own layout carried a correct de_DE eight lines away.
+ */
+export const LOCALE_OG: Record<Locale, string> = {
+  en: 'en_US',
+  ar: 'ar_AE',
+  de: 'de_DE',
+};
+
+/**
  * schema.org `inLanguage` tags.
  *
  * A separate table from LOCALE_HREFLANG on purpose. Today Arabic is `ar` in
@@ -203,8 +219,22 @@ export function pathIn(pathname: string, locale: Locale): string {
  */
 export function alternatesFor(path: string, available: Iterable<Locale>) {
   const set = new Set(available);
-  // A page always exists in its own locale, whatever the caller passed.
-  set.add(localeOf(path));
+
+  /*
+    A page whose OWN locale is not in the available set is an untranslated
+    shell — the German routes before any German content exists. It must not
+    join a cluster at all: the siblings compute their clusters from the same
+    availability data, so they will never reciprocate, and hreflang that is not
+    confirmed from both sides is discarded wholesale. Worse, the one-way claims
+    degrade the siblings' otherwise-valid cluster.
+
+    This replaces an unconditional `set.add(localeOf(path))`, which force-joined
+    the shell into a cluster nobody else acknowledged. For English and Arabic
+    pages the change is a no-op — their own locale is always in the set — and
+    the moment a locale's content is published, localesFor() includes it and the
+    full cluster becomes reciprocal on every side by itself.
+  */
+  if (!set.has(localeOf(path))) return { canonical: path };
 
   // Nothing to cluster with. A one-entry hreflang set is not wrong so much as
   // meaningless, and emitting it invites Google to treat a page as its own

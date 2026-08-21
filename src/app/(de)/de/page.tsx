@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Homepage } from '@/components/home/Homepage';
-import { getPage, localesFor } from '@/lib/content';
-import { alternatesFor, LOCALE_LANG_TAG } from '@/lib/locale';
+import { describe, getPage, localesFor } from '@/lib/content';
+import { alternatesFor, LOCALE_OG } from '@/lib/locale';
 
 export const revalidate = 300;
 
@@ -9,9 +9,21 @@ export const revalidate = 300;
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPage('home', 'de');
 
+  /*
+    The keys are OMITTED when there is no page, not set to undefined.
+
+    `title: undefined` does not mean "inherit" — it suppresses the layout's
+    title.default entirely, and /de shipped with NO <title> and no description
+    at all. Spreading a conditional object leaves the keys absent, which is the
+    state Next actually treats as "fall back to the layout".
+  */
   return {
-    title: page?.seo?.metaTitle ?? page?.title ?? undefined,
-    description: page?.seo?.metaDescription ?? undefined,
+    ...(page
+      ? {
+          title: page.seo?.metaTitle ?? page.title,
+          description: page.seo?.metaDescription ?? describe(page),
+        }
+      : {}),
     /*
       noindex until there is a German homepage to index.
 
@@ -28,15 +40,19 @@ export async function generateMetadata(): Promise<Metadata> {
     robots: page ? undefined : { index: false, follow: true },
     alternates: alternatesFor('/de', await localesFor('/')),
     openGraph: {
-      title: page?.seo?.metaTitle ?? page?.title ?? undefined,
-      description: page?.seo?.metaDescription ?? undefined,
+      ...(page
+        ? {
+            title: page.seo?.metaTitle ?? page.title,
+            description: page.seo?.metaDescription ?? describe(page),
+          }
+        : {}),
       /*
         A page-level openGraph object REPLACES the layout's rather than merging
         into it, so anything the layout supplied has to be restated. Without
         these, 51 of the 53 Arabic URLs emitted no og:type and 52 no
         og:site_name — the same trap, written down so German does not repeat it.
       */
-      locale: LOCALE_LANG_TAG.de,
+      locale: LOCALE_OG.de,
       type: 'website',
       siteName: 'Fakher & Co',
     },

@@ -258,13 +258,32 @@ export async function getPracticeArea(slug: string, locale = 'en'): Promise<Doc 
  * collisions — but it is a property of the content, not of the code. If two
  * collections ever share a slug, the winner is now the earlier line here.
  */
-export async function getDocument(slug: string, locale = 'en'): Promise<Doc | null> {
-  return (
-    (await getPost(slug, locale)) ??
-    (await getPage(slug, locale)) ??
-    (await getPracticeArea(slug, locale)) ??
-    (await getCaseStudy(slug, locale))
-  );
+const PROBES: Record<Locale, ((slug: string, locale: string) => Promise<Doc | null>)[]> = {
+  // Frequency order: posts are 146 of the 211 English documents.
+  en: [getPost, getPage, getPracticeArea, getCaseStudy],
+  /*
+    Arabic and German carry the scoped subset — pages and practice areas; posts
+    and case studies are empty BY SCOPE. Probing posts first was a guaranteed
+    miss on every one of the ~50 Arabic pages, per build and per on-demand 404.
+
+    Reordered rather than removed, deliberately. Dropping the empty collections
+    entirely would be faster for 404 probes, but it plants a trap: the [slug]
+    routes' generateStaticParams still enumerates posts, so the day someone
+    translates one, the build would create its route and getDocument would 404
+    it — a page that exists and cannot render, with the cause two files away.
+    Frequency order gets the real win (a hit on the first probe for ~92% of
+    Arabic pages) without wiring the scope decision into a second place.
+  */
+  ar: [getPage, getPracticeArea, getPost, getCaseStudy],
+  de: [getPage, getPracticeArea, getPost, getCaseStudy],
+};
+
+export async function getDocument(slug: string, locale: Locale = 'en'): Promise<Doc | null> {
+  for (const probe of PROBES[locale] ?? PROBES.en) {
+    const doc = await probe(slug, locale);
+    if (doc) return doc;
+  }
+  return null;
 }
 
 export type Summary = { title: string; slug: string; excerpt?: string | null; date?: string | null };
