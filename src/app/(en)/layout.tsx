@@ -5,6 +5,7 @@ import { Footer } from '@/components/layout/Footer';
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton';
 import { GoogleTag } from '@/components/analytics/GoogleTag';
 import { JsonLd } from '@/components/JsonLd';
+import { UtilityBar } from '@/components/layout/UtilityBar';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
 import '../globals.css';
 import { SITE } from '@/lib/site';
@@ -63,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" dir="ltr" className={`${sarabun.variable} ${robotoCondensed.variable}`}>
       <body>
         <JsonLd data={graph(organizationSchema(), websiteSchema())} />
-        <UtilityBar />
+        <UtilityBar locale="en" />
         <Header />
         <main>{children}</main>
         <Footer />
@@ -73,40 +74,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <GoogleTag />
       </body>
     </html>
-  );
-}
-
-/** The dark strip above the header, as on the live site. */
-function UtilityBar() {
-  return (
-    <div className="bg-bar text-white">
-      <div className="site-container flex h-9 items-center gap-6 overflow-x-auto text-xs whitespace-nowrap">
-        <span className="flex items-center gap-2">
-          <span aria-hidden className="text-white/40">◷</span>
-          <span className="font-semibold">Saturday – Friday</span>
-          <span className="text-white/55">8AM – 8PM</span>
-        </span>
-        {/*
-          The location was `hidden sm:flex`, so on a phone it disappeared
-          entirely — the bar told you the hours of an office it would not name.
-          The full street address is too long for a 390px bar, so the city
-          shows there and the whole thing from sm up.
-
-          The "Main Office" label goes too below sm. With it, the two groups
-          need ~364px and a 390px phone offers ~350, so the address ran under
-          the edge — the bar scrolls, but all the reader sees is a word cut in
-          half. The label is the redundant part: the pin marks it as a place
-          and the text already says Abu Dhabi.
-        */}
-        <span className="flex items-center gap-2">
-          <span aria-hidden className="text-white/40">⌖</span>
-          <span className="hidden font-semibold sm:inline">Main Office</span>
-          <span className="text-white/55 sm:hidden">Abu Dhabi, UAE</span>
-          <span className="hidden text-white/55 sm:inline">
-            219 Office, Regus, 2nd Floor Court Marriot Hotel, Airport St, Abu Dhabi, UAE
-          </span>
-        </span>
-      </div>
-    </div>
   );
 }

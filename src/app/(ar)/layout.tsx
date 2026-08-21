@@ -5,6 +5,7 @@ import { Footer } from '@/components/layout/Footer';
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton';
 import { GoogleTag } from '@/components/analytics/GoogleTag';
 import { JsonLd } from '@/components/JsonLd';
+import { UtilityBar } from '@/components/layout/UtilityBar';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
 import '../globals.css';
 import { SITE } from '@/lib/site';
@@ -80,7 +81,7 @@ export default function ArabicRootLayout({ children }: { children: React.ReactNo
     <html lang="ar" dir="rtl" className={`${sarabun.variable} ${robotoCondensed.variable} ${plexArabic.variable}`}>
       <body>
         <JsonLd data={graph(organizationSchema(), websiteSchema('ar'))} />
-        <UtilityBar />
+        <UtilityBar locale="ar" />
         <Header locale="ar" />
         <main>{children}</main>
         <Footer locale="ar" />
@@ -90,30 +91,5 @@ export default function ArabicRootLayout({ children }: { children: React.ReactNo
         <GoogleTag />
       </body>
     </html>
-  );
-}
-
-/** The dark strip above the header, as on the live site. */
-function UtilityBar() {
-  return (
-    <div className="bg-bar text-white">
-      <div className="site-container flex h-9 items-center gap-6 overflow-x-auto text-xs whitespace-nowrap">
-        <span className="flex items-center gap-2">
-          <span aria-hidden className="text-white/40">◷</span>
-          <span className="font-semibold">السبت – الجمعة</span>
-          <span className="text-white/55">8 صباحاً – 8 مساءً</span>
-        </span>
-        {/* The label drops below sm so the city is not cut off — see the note
-            in the English layout. */}
-        <span className="flex items-center gap-2">
-          <span aria-hidden className="text-white/40">⌖</span>
-          <span className="hidden font-semibold sm:inline">المقر الرئيسي</span>
-          <span className="text-white/55 sm:hidden">أبوظبي، الإمارات</span>
-          <span className="hidden text-white/55 sm:inline">
-            مكتب 219، ريجس، الطابق الثاني، فندق كورتيارد ماريوت، شارع المطار، أبوظبي
-          </span>
-        </span>
-      </div>
-    </div>
   );
 }

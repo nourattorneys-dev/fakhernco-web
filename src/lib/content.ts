@@ -7,7 +7,13 @@
  */
 
 import { cache } from 'react';
-import { mediaUrl, strapiFetch, strapiFetchAll, STRUCTURE_REVALIDATE } from './strapi';
+import {
+  mediaUrl,
+  strapiFetch,
+  strapiFetchAll,
+  StrapiError,
+  STRUCTURE_REVALIDATE,
+} from './strapi';
 import { DEFAULT_LOCALE, LOCALES, pathIn, type Locale } from './locale';
 
 // ------------------------------------------------------------------- types
@@ -315,13 +321,38 @@ export type SiteSettings = {
   aboutLinks: { title: string; slug: string }[];
 };
 
+/**
+ * A single type that has no localisation in `locale` yet.
+ *
+ * Strapi answers 404 for that, not an empty 200 — unlike collections, which
+ * return an empty list. So the absence of a translation arrives as a thrown
+ * StrapiError, and untreated it fails the whole build: adding the German route
+ * group broke `next build` at /de before a single German word existed.
+ *
+ * "Not translated yet" is a normal state, so it becomes null and the caller
+ * falls back. Any other status still throws — a 500 from the CMS is not the
+ * same as a missing translation, and silently treating it as one is how a
+ * whole locale renders empty and nobody notices.
+ */
+async function optionalSingleType<T>(
+  path: string,
+  params: Record<string, string | number>,
+): Promise<T | null> {
+  try {
+    return await strapiFetch<T>(path, params);
+  } catch (err) {
+    if (err instanceof StrapiError && err.status === 404) return null;
+    throw err;
+  }
+}
+
 export async function getHomepage(locale = 'en'): Promise<Homepage | null> {
-  const res = await strapiFetch<{ data: Record<string, any> | null }>('homepage', {
+  const res = await optionalSingleType<{ data: Record<string, any> | null }>('homepage', {
     locale,
     'populate[heroImage]': 'true',
     'populate[sectionImages]': 'true',
   });
-  const d = res.data;
+  const d = res?.data;
   if (!d) return null;
   const src = mediaUrl(d.heroImage?.url);
   return {
@@ -339,11 +370,11 @@ export async function getHomepage(locale = 'en'): Promise<Homepage | null> {
 }
 
 export async function getSiteSettings(locale = 'en'): Promise<SiteSettings> {
-  const res = await strapiFetch<{ data: Record<string, any> | null }>('site-setting', {
+  const res = await optionalSingleType<{ data: Record<string, any> | null }>('site-setting', {
     locale,
     'populate[logo]': 'true',
   });
-  const d = res.data ?? {};
+  const d = res?.data ?? {};
   const src = mediaUrl(d.logo?.url);
   return {
     siteName: d.siteName ?? 'Fakher & Co',

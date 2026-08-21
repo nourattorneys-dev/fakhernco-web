@@ -54,6 +54,8 @@ export const UI = {
     officeHours: 'Office hours',
     hoursValue: 'Saturday – Friday, 8AM – 8PM (GST). Closed Sunday.',
     mainOffice: 'Main Office',
+    officeCity: 'Abu Dhabi, UAE',
+    officeAddress: '219 Office, Regus, 2nd Floor Court Marriot Hotel, Airport St, Abu Dhabi, UAE',
     weekdays: 'Saturday – Friday',
     hours: '8AM – 8PM',
 
@@ -214,6 +216,8 @@ export const UI = {
     officeHours: 'ساعات العمل',
     hoursValue: 'من السبت إلى الجمعة، 8 صباحاً – 8 مساءً. الأحد إجازة.',
     mainOffice: 'المقر الرئيسي',
+    officeCity: 'أبوظبي، الإمارات',
+    officeAddress: 'مكتب 219، ريجس، الطابق الثاني، فندق كورتيارد ماريوت، شارع المطار، أبوظبي',
     weekdays: 'السبت – الجمعة',
     hours: '8 صباحاً – 8 مساءً',
 
@@ -366,6 +370,8 @@ export const UI = {
     officeHours: 'Öffnungszeiten',
     hoursValue: 'Samstag – Freitag, 8:00 – 20:00 Uhr (GST). Sonntags geschlossen.',
     mainOffice: 'Hauptbüro',
+    officeCity: 'Abu Dhabi, VAE',
+    officeAddress: 'Büro 219, Regus, 2. Etage, Courtyard Marriott Hotel, Airport St, Abu Dhabi, VAE',
     weekdays: 'Samstag – Freitag',
     hours: '8:00 – 20:00 Uhr',
 
