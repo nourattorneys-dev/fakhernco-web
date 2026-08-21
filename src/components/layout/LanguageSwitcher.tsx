@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import {
   DEFAULT_LOCALE,
   LOCALES,
-  LOCALE_CODE,
   LOCALE_DIR,
   LOCALE_HREFLANG,
   LOCALE_LABEL,
@@ -17,20 +17,65 @@ import {
 } from '@/lib/locale';
 
 /**
- * Language switcher.
+ * Language switcher — a dropdown showing the current language, opening a menu
+ * of the others.
  *
- * Renders nothing unless the current page genuinely has a version in another
- * locale. `translated` is the set of paths that do, resolved on the server —
- * so this never offers a link into a 404, which is what the WordPress site
- * does today for every page TranslatePress has not covered.
+ * The menu items are real <Link>s rendered in the DOM, not a <select> that
+ * navigates from JavaScript. That keeps the two virtues the old link-row had:
+ * crawlable alternate URLs, and staying on the page being read rather than
+ * dumping the reader on a homepage.
  *
- * Real links, not a JavaScript toggle: crawlable, and they keep the reader on
- * the page they were looking at rather than dumping them on the homepage.
+ * Only locales the CURRENT PAGE genuinely exists in are offered. `translated`
+ * is resolved on the server from the CMS, so the menu never links into a 404 —
+ * a German page that does not exist yet is simply not listed.
  *
- * One link per available locale rather than a dropdown. With three locales a
- * menu would cost a click and a focus trap to save perhaps 40px, and every
- * destination would stop being a crawlable href.
+ * FLAGS ARE INLINE SVG, NOT EMOJI. Windows renders flag emoji as bare letter
+ * pairs ("GB", "DE"), which reads as broken on a law firm's site. Three tiny
+ * hand-drawn rects cost nothing and render identically everywhere. England's
+ * St George's cross for English (per the design brief), UAE for Arabic,
+ * Germany for German.
  */
+
+function Flag({ locale }: { locale: Locale }) {
+  const common = {
+    width: 20,
+    height: 14,
+    viewBox: '0 0 20 14',
+    'aria-hidden': true as const,
+    className: 'shrink-0 rounded-[2px] ring-1 ring-black/10',
+  };
+  switch (locale) {
+    case 'en':
+      // England — St George's cross.
+      return (
+        <svg {...common}>
+          <rect width="20" height="14" fill="#fff" />
+          <rect x="8" width="4" height="14" fill="#CE1124" />
+          <rect y="5" width="20" height="4" fill="#CE1124" />
+        </svg>
+      );
+    case 'ar':
+      // United Arab Emirates.
+      return (
+        <svg {...common}>
+          <rect width="20" height="14" fill="#00732F" />
+          <rect y="4.67" width="20" height="4.66" fill="#fff" />
+          <rect y="9.33" width="20" height="4.67" fill="#000" />
+          <rect width="5" height="14" fill="#FF0000" />
+        </svg>
+      );
+    case 'de':
+      // Germany.
+      return (
+        <svg {...common}>
+          <rect width="20" height="4.67" fill="#000" />
+          <rect y="4.67" width="20" height="4.66" fill="#DD0000" />
+          <rect y="9.33" width="20" height="4.67" fill="#FFCE00" />
+        </svg>
+      );
+  }
+}
+
 export function LanguageSwitcher({
   translated,
 }: {
@@ -38,12 +83,33 @@ export function LanguageSwitcher({
 }) {
   const pathname = usePathname() ?? '/';
   const current = localeOf(pathname);
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   /*
-    The default locale is always reachable: every page exists in English, which
-    is the baseline the others are translations of. Every other locale has to
-    prove the target exists before it is offered.
+    Close on outside click and on Escape. Deliberately plain listeners rather
+    than a focus-trap library: the menu is two or three links, and Tab moving
+    beyond them closing the menu is acceptable dropdown behaviour.
   */
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
+
+  // Close when the route changes — the reader picked a language.
+  useEffect(() => setOpen(false), [pathname]);
+
   const others = LOCALES.filter((locale) => locale !== current)
     .map((locale) => ({ locale, target: pathIn(pathname, locale) }))
     .filter(
@@ -54,35 +120,50 @@ export function LanguageSwitcher({
   if (!others.length) return null;
 
   return (
-    <div
-      role="group"
-      aria-label={LOCALE_NAV_ARIA[current]}
-      className="flex shrink-0 items-center gap-1.5"
-    >
-      {others.map(({ locale, target }) => (
-        <Link
-          key={locale}
-          href={target}
-          hrefLang={LOCALE_HREFLANG[locale]}
-          lang={locale}
-          dir={LOCALE_DIR[locale]}
-          aria-label={LOCALE_SWITCH_ARIA[current][locale]}
-          /*
-            Visible at every width. It used to be `hidden lg:inline-block`, and
-            the footer has no switcher of its own, so below 1024px there was no
-            way to change language from any page on the site — on a bilingual
-            firm's site whose Arabic readers are mostly on phones.
-
-            Below `sm` it shows the locale CODE rather than the name. One full
-            name fitted the mobile header row beside the wordmark and the
-            contact link; two will not.
-          */
-          className="shrink-0 border border-line px-2.5 py-1.5 font-display text-xs font-600 text-ink transition-colors hover:border-ink sm:px-3 lg:px-3.5 lg:py-2 lg:text-sm"
+    <div ref={rootRef} className="relative shrink-0">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={LOCALE_NAV_ARIA[current]}
+        onClick={() => setOpen((value) => !value)}
+        className="flex items-center gap-2 border border-line px-2.5 py-1.5 font-display text-xs font-600 text-ink transition-colors hover:border-ink sm:px-3 lg:px-3.5 lg:py-2 lg:text-sm"
+      >
+        <Flag locale={current} />
+        <span className="hidden sm:inline">{LOCALE_LABEL[current]}</span>
+        <svg
+          width="8"
+          height="5"
+          viewBox="0 0 8 5"
+          aria-hidden
+          className={`transition-transform ${open ? 'rotate-180' : ''}`}
         >
-          <span className="sm:hidden">{LOCALE_CODE[locale]}</span>
-          <span className="hidden sm:inline">{LOCALE_LABEL[locale]}</span>
-        </Link>
-      ))}
+          <path d="M0 0l4 5 4-5z" fill="currentColor" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute end-0 top-full z-50 mt-1 min-w-[10rem] border border-line bg-surface py-1 shadow-lg"
+        >
+          {others.map(({ locale, target }) => (
+            <Link
+              key={locale}
+              role="menuitem"
+              href={target}
+              hrefLang={LOCALE_HREFLANG[locale]}
+              lang={locale}
+              dir={LOCALE_DIR[locale]}
+              aria-label={LOCALE_SWITCH_ARIA[current][locale]}
+              className="flex items-center gap-2.5 px-3.5 py-2 font-display text-sm font-600 text-ink transition-colors hover:bg-surface-alt"
+            >
+              <Flag locale={locale} />
+              {LOCALE_LABEL[locale]}
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
