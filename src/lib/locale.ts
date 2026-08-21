@@ -18,6 +18,39 @@ export const LOCALE_LABEL: Record<Locale, string> = {
   ar: 'العربية',
 };
 
+/**
+ * Compact codes, for the switcher on narrow screens.
+ *
+ * The header row at mobile widths already carries the wordmark and the contact
+ * link. One full language name fitted; with a third locale, two do not — so
+ * below the `sm` breakpoint the control shows codes instead of names.
+ */
+export const LOCALE_CODE: Record<Locale, string> = {
+  en: 'EN',
+  ar: 'ع',
+};
+
+/**
+ * Accessible names for the switcher, written IN the language of the page the
+ * reader is currently on.
+ *
+ * The previous version built `Switch to Arabic` in English prose regardless of
+ * page. On an Arabic page a screen reader announced English words using Arabic
+ * phonetics, which is close to unintelligible — and it would do the same to a
+ * German reader. The outer key is the CURRENT locale, the inner key is the
+ * destination.
+ */
+export const LOCALE_SWITCH_ARIA: Record<Locale, Record<Locale, string>> = {
+  en: { en: 'Switch to English', ar: 'Switch to Arabic' },
+  ar: { en: 'التبديل إلى الإنجليزية', ar: 'التبديل إلى العربية' },
+};
+
+/** Accessible name for the switcher as a whole, in the current language. */
+export const LOCALE_NAV_ARIA: Record<Locale, string> = {
+  en: 'Language',
+  ar: 'اللغة',
+};
+
 export const LOCALE_DIR: Record<Locale, 'ltr' | 'rtl'> = {
   en: 'ltr',
   ar: 'rtl',

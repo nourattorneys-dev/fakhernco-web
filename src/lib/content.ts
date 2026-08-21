@@ -405,69 +405,92 @@ export async function getPostsByCategory(slug: string): Promise<Summary[]> {
 export const getTranslatedPaths = cache(async (locale: Locale): Promise<string[]> => {
   // The default locale is the baseline, not a translation of anything.
   if (locale === DEFAULT_LOCALE) return [];
-  try {
-    const [pages, posts, areas, caseStudies, landings] = await Promise.all([
-      strapiFetchAll<{ slug: string }>('pages', { 'fields[0]': 'slug', locale }),
-      strapiFetchAll<{ slug: string }>('posts', { 'fields[0]': 'slug', locale }),
-      strapiFetchAll<{ slug: string }>('practice-areas', { 'fields[0]': 'slug', locale }),
-      strapiFetchAll<{ slug: string }>('case-studies', { 'fields[0]': 'slug', locale }),
-      strapiFetchAll<{ slug: string }>('landing-pages', { 'fields[0]': 'slug', locale }),
-    ]);
-    const slugs = [...pages, ...posts, ...areas, ...caseStudies]
-      .map((r) => r.slug)
-      .filter(Boolean);
-    const paths = [...new Set(slugs)].map((s) =>
-      s === 'home' ? pathIn('/', locale) : pathIn(`/${s}`, locale),
-    );
 
-    /*
-      Landing pages sit under their own prefix, so they cannot go through the
-      mapping above — /ar/contract-drafting is not a page, /ar/legal-services/
-      contract-drafting is.
-
-      Until this was added the switcher was hidden on every landing page: it
-      only appears where it knows an Arabic version exists, and these were not
-      in the list it checks. The Arabic pages existed and were reachable; no
-      reader could find them.
-
-      The index itself is listed only when at least one translated page exists
-      behind it, which keeps the same promise the rest of this function makes —
-      never offer a switch into an empty page.
-    */
-    const landingSlugs = [...new Set(landings.map((r) => r.slug).filter(Boolean))];
-    if (landingSlugs.length) {
-      paths.push(
-        pathIn('/legal-services', locale),
-        ...landingSlugs.map((s) => pathIn(`/legal-services/${s}`, locale)),
-      );
+  /*
+    One retry, then give up loudly. See the failure note below for why giving up
+    QUIETLY was the bug — the retry exists so that the loud version does not fire
+    on every CMS hiccup, which on a 2GB box measured 29.7s on one endpoint.
+  */
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 750));
+    try {
+      return await fetchTranslatedPaths(locale);
+    } catch (err) {
+      lastError = err;
     }
-    return paths;
-  } catch (err) {
-    /*
-      A missing locale must not take the header down with it — but it must not
-      be silent either.
-
-      This catch cost the live site its language switcher on the homepage, and
-      nobody noticed. A transient CMS failure during one page's prerender
-      returns [], the switcher decides no Arabic version exists, and it renders
-      nothing. Every other page built fine, so the site looked healthy while the
-      most important page in the Arabic cluster had no way to reach it — until
-      the next rebuild, which might not fix it either.
-
-      The 2GB CMS makes this likely rather than theoretical: /api/landing-pages
-      has been measured at 29.7s against 1.6s for /api/pages.
-
-      Logging turns an invisible degradation into a line in the build output.
-    */
-    console.warn(
-      `[content] getTranslatedPaths(${locale}) failed — the language switcher ` +
-        `will be hidden on pages built in this window. Cause: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-    );
-    return [];
   }
+
+  /*
+    THROW, rather than returning [].
+
+    Returning an empty list looked defensive and was the opposite. The switcher
+    reads it as "no translation exists", renders nothing, and that page — with
+    no route into the Arabic site — is what gets CACHED, at build time or at ISR
+    regeneration. It then persists until something happens to rebuild it.
+
+    It shipped twice. Both times the homepage, which makes sense: it is the most
+    requested page, so it revalidates most often, so it has the most chances to
+    lose. Every other page kept its switcher, so nothing looked wrong.
+
+    Throwing is strictly better at both stages. At build time it fails visibly
+    instead of shipping a degraded site. At runtime Next serves the last good
+    version rather than replacing it with a worse one — which is exactly what
+    stale-while-revalidate is for.
+
+    And this catch cannot be hiding a missing locale, which is what the original
+    comment worried about: Strapi answers an unknown locale with an empty 200,
+    not an error. Verified — ?locale=zz returns the same empty list as ?locale=de.
+    So the only thing reaching here is a genuine failure.
+  */
+  console.error(
+    `[content] getTranslatedPaths(${locale}) failed twice — refusing to cache a ` +
+      `page with no language switcher. Cause: ${
+        lastError instanceof Error ? lastError.message : String(lastError)
+      }`,
+  );
+  throw lastError;
 });
+
+async function fetchTranslatedPaths(locale: Locale): Promise<string[]> {
+  const [pages, posts, areas, caseStudies, landings] = await Promise.all([
+    strapiFetchAll<{ slug: string }>('pages', { 'fields[0]': 'slug', locale }),
+    strapiFetchAll<{ slug: string }>('posts', { 'fields[0]': 'slug', locale }),
+    strapiFetchAll<{ slug: string }>('practice-areas', { 'fields[0]': 'slug', locale }),
+    strapiFetchAll<{ slug: string }>('case-studies', { 'fields[0]': 'slug', locale }),
+    strapiFetchAll<{ slug: string }>('landing-pages', { 'fields[0]': 'slug', locale }),
+  ]);
+  const slugs = [...pages, ...posts, ...areas, ...caseStudies]
+    .map((r) => r.slug)
+    .filter(Boolean);
+  const paths = [...new Set(slugs)].map((s) =>
+    s === 'home' ? pathIn('/', locale) : pathIn(`/${s}`, locale),
+  );
+
+  /*
+    Landing pages sit under their own prefix, so they cannot go through the
+    mapping above — /ar/contract-drafting is not a page, /ar/legal-services/
+    contract-drafting is.
+
+    Until this was added the switcher was hidden on every landing page: it
+    only appears where it knows an Arabic version exists, and these were not
+    in the list it checks. The Arabic pages existed and were reachable; no
+    reader could find them.
+
+    The index itself is listed only when at least one translated page exists
+    behind it, which keeps the same promise the rest of this function makes —
+    never offer a switch into an empty page.
+  */
+  const landingSlugs = [...new Set(landings.map((r) => r.slug).filter(Boolean))];
+  if (landingSlugs.length) {
+    paths.push(
+      pathIn('/legal-services', locale),
+      ...landingSlugs.map((s) => pathIn(`/legal-services/${s}`, locale)),
+    );
+  }
+  return paths;
+}
+
 
 /**
  * Every non-default locale's translated paths, in one object.

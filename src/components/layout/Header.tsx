@@ -169,7 +169,7 @@ export async function Header({ locale = 'en' }: { locale?: Locale } = {}) {
             Ordering it visually with CSS instead would have pinned it to one
             physical side in both languages.
           */}
-          <LanguageSwitcher translated={translated.ar ?? []} />
+          <LanguageSwitcher translated={translated} />
         </div>
       </div>
 
