@@ -3,7 +3,7 @@ import type { Landing } from '@/lib/content';
 import { PHONE, TEL_HREF, WHATSAPP_URL } from '@/lib/contact';
 import { WhatsAppGlyph } from '@/components/icons/WhatsAppGlyph';
 import { t } from '@/lib/ui';
-import type { Locale } from '@/lib/locale';
+import { pathIn, type Locale } from '@/lib/locale';
 
 /**
  * The hub at /legal-services, in either language.
@@ -26,9 +26,9 @@ export function LandingIndex({
   locale: Locale;
 }) {
   const s = t(locale).landing;
-  const base = locale === 'ar' ? '/ar/legal-services' : '/legal-services';
-  const servicesHref = locale === 'ar' ? '/ar/services' : '/services';
-  const contactHref = locale === 'ar' ? '/ar/contact-us' : '/contact-us';
+  const base = pathIn('/legal-services', locale);
+  const servicesHref = pathIn('/services', locale);
+  const contactHref = pathIn('/contact-us', locale);
 
   return (
     <article>

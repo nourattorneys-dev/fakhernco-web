@@ -45,6 +45,20 @@ export const LOCALE_SWITCH_ARIA: Record<Locale, Record<Locale, string>> = {
   ar: { en: 'التبديل إلى الإنجليزية', ar: 'التبديل إلى العربية' },
 };
 
+/**
+ * BCP-47 tags for date formatting.
+ *
+ * Separate from LOCALE_HREFLANG and LOCALE_LANG_TAG because it answers a
+ * different question — how Intl should render a date, not how a search engine
+ * or a knowledge graph should label the page. Arabic wants ar-AE for its
+ * numerals; English wants en-GB for day-month order rather than the American
+ * default.
+ */
+export const LOCALE_DATE: Record<Locale, string> = {
+  en: 'en-GB',
+  ar: 'ar-AE',
+};
+
 /** Accessible name for the switcher as a whole, in the current language. */
 export const LOCALE_NAV_ARIA: Record<Locale, string> = {
   en: 'Language',

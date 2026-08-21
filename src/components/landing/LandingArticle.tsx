@@ -6,7 +6,7 @@ import { PHONE, TEL_HREF, WHATSAPP_URL } from '@/lib/contact';
 import { WhatsAppGlyph } from '@/components/icons/WhatsAppGlyph';
 import { StickyActionBar } from '@/components/layout/StickyActionBar';
 import { t } from '@/lib/ui';
-import type { Locale } from '@/lib/locale';
+import { pathIn, type Locale } from '@/lib/locale';
 
 /**
  * A campaign landing page, in either language.
@@ -153,7 +153,7 @@ export function LandingArticle({
 }) {
   const s = t(locale).landing;
   /** '/legal-services' or '/ar/legal-services'. */
-  const base = locale === 'ar' ? '/ar/legal-services' : '/legal-services';
+  const base = pathIn('/legal-services', locale);
   const photo = page.heroImage;
 
   return (

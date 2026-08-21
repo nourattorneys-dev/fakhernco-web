@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getHomepage, getPage, getPracticeAreas, getPosts } from '@/lib/content';
+import { getHomepage, getPage, getPracticeAreas, getPosts, getTranslatedPaths } from '@/lib/content';
 import { HomeSections } from '@/components/home/HomeSections';
-import type { Locale } from '@/lib/locale';
+import { LOCALE_DATE, type Locale } from '@/lib/locale';
 import { t, href } from '@/lib/ui';
 
 /**
@@ -37,11 +37,18 @@ export async function Homepage({ locale = 'en' }: { locale?: Locale }) {
   const [titleHead, ...titleTail] = (hero?.heroTitle ?? '').split(s.heroSplit);
 
   /*
-    Arabic pages exist for both of these, so the CTAs stay in-locale. The
-    helper falls back to the English URL if that ever stops being true, rather
-    than linking somewhere that 404s.
+    Which of these exist in the current locale, asked rather than assumed.
+
+    This was the literal ['/ar/contact-us', '/ar/services'], which no search for
+    `'ar'` as a locale would ever surface. It is correct for Arabic and wrong for
+    anything else: href() checks membership, a German target is not in an Arabic
+    list, and all three hero CTAs would have fallen back to English on the German
+    homepage — quietly, since falling back is the helper's designed behaviour.
+
+    getTranslatedPaths is cache()d and the header already calls it on every
+    render, so this costs no extra requests.
   */
-  const arPaths = ['/ar/contact-us', '/ar/services'];
+  const localePaths = await getTranslatedPaths(locale);
 
   return (
     <>
@@ -100,13 +107,13 @@ export async function Homepage({ locale = 'en' }: { locale?: Locale }) {
 
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <Link
-              href={href(locale, '/contact-us', arPaths)}
+              href={href(locale, '/contact-us', localePaths)}
               className="bg-white px-7 py-3.5 font-display text-sm font-700 text-ink transition-colors hover:bg-white/85"
             >
               {s.requestConsultation}
             </Link>
             <Link
-              href={href(locale, '/services', arPaths)}
+              href={href(locale, '/services', localePaths)}
               className="border border-white/70 px-7 py-3.5 font-display text-sm font-700 text-white transition-colors hover:bg-white hover:text-ink"
             >
               {s.exploreServices(serviceCount)}
@@ -143,7 +150,7 @@ export async function Homepage({ locale = 'en' }: { locale?: Locale }) {
                 <h2 className="mt-4 text-display">{s.insightsHeading}</h2>
               </div>
               <Link
-                href={href(locale, '/legal-insights', arPaths)}
+                href={href(locale, '/legal-insights', localePaths)}
                 className="font-display text-sm font-600 underline decoration-faint underline-offset-4 hover:decoration-ink"
               >
                 {s.allArticles(posts.length)}
@@ -162,10 +169,11 @@ export async function Homepage({ locale = 'en' }: { locale?: Locale }) {
                       dateTime={post.date}
                       className="text-xs uppercase tracking-[0.08em] text-muted"
                     >
-                      {new Date(post.date).toLocaleDateString(
-                        locale === 'ar' ? 'ar-AE' : 'en-GB',
-                        { day: 'numeric', month: 'short', year: 'numeric' },
-                      )}
+                      {new Date(post.date).toLocaleDateString(LOCALE_DATE[locale], {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
                     </time>
                   )}
                   <h3 className="mt-3 text-lg leading-snug">{post.title}</h3>

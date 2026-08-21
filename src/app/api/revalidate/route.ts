@@ -1,5 +1,6 @@
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
+import { DEFAULT_LOCALE, LOCALES, LOCALE_PREFIX, type Locale } from '@/lib/locale';
 
 /**
  * Strapi webhook target.
@@ -21,7 +22,28 @@ export const dynamic = 'force-dynamic';
 
 /** Which paths a change to each model invalidates. */
 function pathsFor(model: string, slug: string | undefined, locale: string | undefined): string[] {
-  const prefix = locale === 'ar' ? '/ar' : '';
+  /*
+    `locale === 'ar' ? '/ar' : ''` meant "Arabic, or else the root" — so a
+    German publish would have revalidated the ENGLISH paths, purging pages that
+    did not change and never purging the ones that did. Silently, and in the
+    direction that looks like nothing happening.
+
+    An unrecognised locale now refreshes nothing rather than guessing, which is
+    the safe direction: a stale page for one revalidation window beats wiping
+    another language's cache on every publish.
+
+    `!locale` stays: it is legitimately undefined for non-localised models and
+    for hand-made curl calls, and those mean the default locale.
+  */
+  const prefix =
+    !locale || locale === DEFAULT_LOCALE
+      ? ''
+      : (LOCALES as readonly string[]).includes(locale)
+        ? LOCALE_PREFIX[locale as Locale]
+        : null;
+
+  if (prefix === null) return [];
+
   const page = slug ? [`${prefix}/${slug}`] : [];
 
   switch (model) {
@@ -103,6 +125,16 @@ export async function POST(request: Request) {
   const model = body.model ?? '';
   const paths = pathsFor(model, body.entry?.slug, body.entry?.locale);
 
+  /*
+    The sitemap and feed list every slug, so any create or delete changes them —
+    including for a model this route has no page mapping for, and including an
+    unrecognised locale. They are refreshed BEFORE the early return below for
+    that reason; hanging them off the mapped-paths branch meant an unmapped
+    event silently stopped refreshing the feed too.
+  */
+  revalidatePath('/sitemap.xml');
+  revalidatePath('/rss.xml');
+
   // Return 200 for models we do not map. A non-2xx makes Strapi flag the
   // webhook as failing and eventually stop calling it, which would silently
   // break revalidation for the models we DO care about.
@@ -120,10 +152,6 @@ export async function POST(request: Request) {
       revalidated.push(path);
     }
   }
-
-  // The sitemap lists every slug, so any create or delete changes it.
-  revalidatePath('/sitemap.xml');
-  revalidatePath('/rss.xml');
 
   return NextResponse.json({ ok: true, model, revalidated });
 }
