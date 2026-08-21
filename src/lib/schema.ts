@@ -131,6 +131,12 @@ const langTag = (locale: Locale) => LOCALE_LANG_TAG[locale];
 const SITE_NAME: Record<Locale, string> = {
   en: 'Fakher & Co',
   ar: 'مكتب فاخر ومشاركوه',
+  /*
+    The same as English, deliberately — the firm has no German trading name.
+    Spelled out rather than defaulted so the next reader does not mistake it for
+    an unfilled placeholder and invent one.
+  */
+  de: 'Fakher & Co',
 };
 
 export function articleSchema(doc: Doc, description: string, locale: Locale = 'en') {

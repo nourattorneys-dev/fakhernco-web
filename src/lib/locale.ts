@@ -7,7 +7,7 @@
  * and keeps every legacy Arabic URL working after cutover.
  */
 
-export const LOCALES = ['en', 'ar'] as const;
+export const LOCALES = ['en', 'ar', 'de'] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = 'en';
@@ -16,6 +16,7 @@ export const DEFAULT_LOCALE: Locale = 'en';
 export const LOCALE_LABEL: Record<Locale, string> = {
   en: 'English',
   ar: 'العربية',
+  de: 'Deutsch',
 };
 
 /**
@@ -28,6 +29,7 @@ export const LOCALE_LABEL: Record<Locale, string> = {
 export const LOCALE_CODE: Record<Locale, string> = {
   en: 'EN',
   ar: 'ع',
+  de: 'DE',
 };
 
 /**
@@ -41,8 +43,13 @@ export const LOCALE_CODE: Record<Locale, string> = {
  * destination.
  */
 export const LOCALE_SWITCH_ARIA: Record<Locale, Record<Locale, string>> = {
-  en: { en: 'Switch to English', ar: 'Switch to Arabic' },
-  ar: { en: 'التبديل إلى الإنجليزية', ar: 'التبديل إلى العربية' },
+  en: { en: 'Switch to English', ar: 'Switch to Arabic', de: 'Switch to German' },
+  ar: {
+    en: 'التبديل إلى الإنجليزية',
+    ar: 'التبديل إلى العربية',
+    de: 'التبديل إلى الألمانية',
+  },
+  de: { en: 'Zu Englisch wechseln', ar: 'Zu Arabisch wechseln', de: 'Zu Deutsch wechseln' },
 };
 
 /**
@@ -57,17 +64,20 @@ export const LOCALE_SWITCH_ARIA: Record<Locale, Record<Locale, string>> = {
 export const LOCALE_DATE: Record<Locale, string> = {
   en: 'en-GB',
   ar: 'ar-AE',
+  de: 'de-DE',
 };
 
 /** Accessible name for the switcher as a whole, in the current language. */
 export const LOCALE_NAV_ARIA: Record<Locale, string> = {
   en: 'Language',
   ar: 'اللغة',
+  de: 'Sprache',
 };
 
 export const LOCALE_DIR: Record<Locale, 'ltr' | 'rtl'> = {
   en: 'ltr',
   ar: 'rtl',
+  de: 'ltr',
 };
 
 /**
@@ -82,6 +92,7 @@ export const LOCALE_DIR: Record<Locale, 'ltr' | 'rtl'> = {
 export const LOCALE_PREFIX: Record<Locale, string> = {
   en: '',
   ar: '/ar',
+  de: '/de',
 };
 
 /**
@@ -95,6 +106,14 @@ export const LOCALE_PREFIX: Record<Locale, string> = {
 export const LOCALE_HREFLANG: Record<Locale, string> = {
   en: 'en-AE',
   ar: 'ar',
+  /*
+    Bare `de`, not `de-DE`. The German pages are a UAE law firm addressing
+    German speakers wherever they are — clients in the Emirates, and enquiries
+    from Germany, Austria and Switzerland alike. Region-qualifying it would tell
+    Google this content is for Germany specifically, which is narrower than the
+    audience.
+  */
+  de: 'de',
 };
 
 /**
@@ -108,6 +127,7 @@ export const LOCALE_HREFLANG: Record<Locale, string> = {
 export const LOCALE_LANG_TAG: Record<Locale, string> = {
   en: 'en-AE',
   ar: 'ar-AE',
+  de: 'de',
 };
 
 /** Which locale a pathname belongs to. */

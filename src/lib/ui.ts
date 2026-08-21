@@ -314,6 +314,161 @@ export const UI = {
       helloLawyer: 'مرحباً، أودّ التحدث إلى محامٍ.',
     },
   },
+  /*
+    German.
+
+    WRITTEN BY A NON-NATIVE HAND. Have a German speaker read this before the
+    German routes are made public — it is the firm's voice, not plumbing, and a
+    law firm that reads as machine-translated undermines the thing it is selling.
+
+    Formal register throughout (Sie, never du), which is what a UAE law firm
+    addressing German-speaking clients would use. Terms of art are the German
+    legal ones rather than literal translations: Mandatsverhältnis for the
+    lawyer-client relationship, Rechtsgebiet for practice area, Prozessführung
+    for litigation.
+
+    This is CHROME only — navigation, buttons, form labels. Page copy comes from
+    the CMS and is translated there.
+  */
+  de: {
+    about: 'Über uns',
+    services: 'Leistungen',
+    insights: 'Rechtliche Einblicke',
+    contact: 'Kontakt',
+    home: 'Startseite',
+
+    requestConsultation: 'Beratung anfragen',
+    speakToLawyer: 'Mit einem Anwalt sprechen',
+    contactUs: 'Kontakt aufnehmen',
+    readArticle: 'Beitrag lesen',
+    viewPracticeArea: 'Rechtsgebiet ansehen',
+    allServices: 'Alle Leistungen',
+    relatedServices: 'Verwandte Leistungen',
+    servicesInThisArea: 'Leistungen in diesem Bereich',
+    exploreServices: (n: number) => `${n} Leistungen entdecken`,
+
+    officeLocations: 'Unsere Standorte',
+    step: 'SCHRITT',
+
+    cities: { abuDhabi: 'Abu Dhabi', mansoura: 'Mansura', newDelhi: 'Neu-Delhi' },
+    countries: { uae: 'VAE', egypt: 'Ägypten', india: 'Indien' },
+
+    // 404
+    errorCode: 'Fehler 404',
+    notFoundTitle: 'Diese Seite wurde nicht gefunden',
+    notFoundBody:
+      'Die Seite wurde möglicherweise verschoben. Sehen Sie sich unsere Leistungen an oder nehmen Sie Kontakt auf — wir weisen Ihnen gern den richtigen Weg.',
+    backToHome: 'Zurück zur Startseite',
+
+    whatsappLabel: 'Schreiben Sie uns auf WhatsApp',
+    whatsappPrefill:
+      'Guten Tag, ich möchte mit einem Anwalt über eine rechtliche Angelegenheit sprechen.',
+    officeHours: 'Öffnungszeiten',
+    hoursValue: 'Samstag – Freitag, 8:00 – 20:00 Uhr (GST). Sonntags geschlossen.',
+    mainOffice: 'Hauptbüro',
+    weekdays: 'Samstag – Freitag',
+    hours: '8:00 – 20:00 Uhr',
+
+    firm: 'Kanzlei',
+    federation: 'SKP Federation',
+    offices: 'Standorte',
+    privacy: 'Datenschutzerklärung',
+    rightsReserved: 'Alle Rechte vorbehalten.',
+
+    respondWithinDay:
+      'Schildern Sie uns Ihr Anliegen — ein Mitglied unseres Teams meldet sich innerhalb eines Werktages bei Ihnen.',
+    notSureWhere: 'Unsicher, wohin Ihr Anliegen gehört? Fragen Sie uns.',
+    noContent: 'Für diese Seite liegen noch keine Inhalte vor.',
+    kindLabel: {
+      page: null,
+      post: 'Rechtlicher Einblick',
+      'case-study': 'Fallstudie',
+      'practice-area': 'Rechtsgebiet',
+    } as Record<'page' | 'post' | 'case-study' | 'practice-area', string | null>,
+    readyToProtect: 'Bereit, Ihre rechtlichen Interessen zu schützen?',
+    breadcrumb: 'Navigationspfad',
+    mainNav: 'Hauptnavigation',
+    sections: 'Abschnitte',
+
+    // Contact form
+    formHeading: 'Anfrageformular',
+    fullName: 'Vollständiger Name',
+    email: 'E-Mail',
+    phone: 'Telefon',
+    howCanWeHelp: 'Wie können wir helfen?',
+    selectService: 'Leistung auswählen',
+    other: 'Sonstiges',
+    yourMessage: 'Ihre Nachricht',
+    messagePlaceholder: 'Schildern Sie uns Ihr Anliegen kurz.',
+    sendEnquiry: 'Anfrage senden',
+    sending: 'Wird gesendet…',
+    consent:
+      'Ich stimme zu, dass Fakher & Co diese Anfrage speichert, um mir antworten zu können. Das Absenden dieses Formulars begründet kein Mandatsverhältnis.',
+    thanksTitle: 'Vielen Dank — wir haben Ihre Anfrage erhalten.',
+    thanksBody:
+      'Ein Mitglied unseres Teams meldet sich innerhalb eines Werktages. Eine Bestätigung haben wir an Ihre E-Mail-Adresse gesendet. In dringenden Fällen erreichen Sie uns unter',
+    genericError: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+    contactLead:
+      'Schildern Sie uns Ihr Anliegen — ein Mitglied unseres Teams meldet sich innerhalb eines Werktages bei Ihnen.',
+
+    // Homepage
+    insightsHeading: 'Orientierung im Recht der VAE',
+    allArticles: (n: number) => `Alle ${n} Beiträge`,
+    /** German puts the place after the same preposition as English here. */
+    heroSplit: ' in ',
+
+    landing: {
+      eyebrow: 'Fakher & Co · Abu Dhabi & Dubai',
+      askAbout: (s: string) => `Guten Tag, ich habe eine Frage zu: ${s}.`,
+      whatsapp: 'WhatsApp',
+      call: 'Anrufen',
+      callAria: (n: string) => `${n} anrufen`,
+
+      ctas: [
+        {
+          line: 'Unsicher, ob Sie einen Fall haben oder ob er sich lohnt?',
+          sub: 'Ein vertrauliches Beratungsgespräch klärt das — unverbindlich.',
+        },
+        {
+          line: 'Arbeiten Sie auf eine Frist hin?',
+          sub: 'Sagen Sie es uns bei der Kontaktaufnahme, und wir sagen Ihnen ehrlich, ob sie zu halten ist.',
+        },
+        {
+          line: 'Wäre ein Gespräch einfacher?',
+          sub: 'Wir beraten auf Arabisch, Englisch und Deutsch — persönlich in Abu Dhabi und Dubai oder telefonisch.',
+        },
+      ],
+
+      ratherNotFormLead: 'Lieber kein Formular ausfüllen?',
+      ratherNotFormBody: 'Rufen Sie an oder schreiben Sie uns — wir melden uns zurück.',
+
+      getInTouch: 'Kontakt aufnehmen',
+      formLead:
+        'Schildern Sie uns Ihr Anliegen — ein Mitglied unseres Teams meldet sich innerhalb eines Werktages. Alles, was Sie uns mitteilen, bleibt vertraulich.',
+
+      otherServices: 'Weitere Leistungen',
+      howElse: 'Womit wir sonst helfen können',
+      readMore: 'Mehr erfahren',
+
+      readyTitle: 'Bereit, Ihre Position zu sichern?',
+      readyBody:
+        'Ein vertrauliches Beratungsgespräch, unverbindlich. Wir sagen Ihnen, wo Sie stehen und was Ihre Optionen kosten, bevor Sie sich zu etwas verpflichten.',
+
+      indexTitle: 'Rechtsberatung in den VAE',
+      indexLead:
+        'Tätig seit 2011, mit Büros in Abu Dhabi und Dubai. Worum es auch geht — der erste Schritt ist derselbe: Schildern Sie uns die Situation, und wir sagen Ihnen, wo Sie stehen.',
+      howWeHelp: 'Womit wir helfen können',
+      chooseMatter: 'Wählen Sie das Anliegen, das Ihrem am nächsten kommt',
+      chooseLead:
+        'Jede Seite erläutert, was wir tun, wie der Ablauf aussieht, wie viel Zeit es üblicherweise kostet und welche Fragen Mandanten am häufigsten stellen. Betrifft Ihr Anliegen mehrere Bereiche, beginnen Sie irgendwo — dasselbe Team betreut sie alle.',
+      notSureTitle: 'Unsicher, was zutrifft?',
+      notSureBody: (n: number) =>
+        `Schildern Sie uns die Situation, und wir verweisen Sie an die richtige Stelle — auch dann, wenn Sie keinen Anwalt brauchen. Darüber hinaus veröffentlichen wir ${n} ausführliche Leistungsseiten zu unserem gesamten Tätigkeitsbereich.`,
+      browseAll: 'Alle Leistungen ansehen',
+      helloLawyer: 'Guten Tag, ich möchte mit einem Anwalt sprechen.',
+    },
+  },
+
 } as const;
 
 export const t = (locale: Locale) => UI[locale];

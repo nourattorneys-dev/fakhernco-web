@@ -1,22 +1,38 @@
 import type { MetadataRoute } from 'next';
 import { getAllSlugs, getCategories } from '@/lib/content';
 import { SITE } from '@/lib/site';
+import { DEFAULT_LOCALE, LOCALES, pathIn } from '@/lib/locale';
 
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [pages, posts, caseStudies, areas, categories, arPages, arAreas] = await Promise.all([
+  const [pages, posts, caseStudies, areas, categories] = await Promise.all([
     getAllSlugs('pages'),
     getAllSlugs('posts'),
     getAllSlugs('case-studies'),
     getAllSlugs('practice-areas'),
     getCategories(),
-    // The WordPress sitemap contains ZERO Arabic URLs — Google has to discover
-    // ~60 pages by crawling alone. Listing them is half of fixing that; the
-    // hreflang alternates are the other half.
-    getAllSlugs('pages', 'ar'),
-    getAllSlugs('practice-areas', 'ar'),
   ]);
+
+  /*
+    Every non-default locale, rather than Arabic by name.
+
+    The WordPress sitemap contained ZERO Arabic URLs — Google had to discover
+    ~60 pages by crawling alone. Listing them is half of fixing that; the
+    hreflang alternates are the other half. A third language must not have to
+    rediscover that lesson.
+
+    Two awaits rather than one destructured Promise.all with a spread: spreading
+    a non-tuple collapses the variadic inference to a union and `pages` stops
+    being usable as a string[].
+  */
+  const translated = await Promise.all(
+    LOCALES.filter((locale) => locale !== DEFAULT_LOCALE).map(async (locale) => {
+      const localePages = await getAllSlugs('pages', locale);
+      const localeAreas = await getAllSlugs('practice-areas', locale);
+      return { locale, pages: localePages, areas: localeAreas };
+    }),
+  );
 
   const entry = (path: string, priority: number): MetadataRoute.Sitemap[number] => ({
     url: `${SITE}${path}`,
@@ -40,14 +56,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .map((s) => entry(`/${s}`, 0.7)),
     ...caseStudies.map((s) => entry(`/${s}`, 0.6)),
     ...posts.map((s) => entry(`/${s}`, 0.5)),
-    // The Arabic homepage, listed only once it genuinely exists. Both slug
-    // lists filter out 'home' because that record is the homepage rather than
-    // a /<slug> page — English gets it back via entry('/') above, and without
-    // this line the Arabic one was silently absent from the sitemap despite
-    // being a real, indexable page.
-    ...(arPages.includes('home') ? [entry('/ar', 0.9)] : []),
-    ...[...new Set([...arAreas, ...arPages])]
-      .filter((s) => s !== 'home')
-      .map((s) => entry(`/ar/${s}`, 0.7)),
+    /*
+      Each translated locale's homepage, listed only once it genuinely exists.
+      The slug lists filter out 'home' because that record IS the homepage
+      rather than a /<slug> page — English gets it back via entry('/') above,
+      and without this guard the Arabic one was silently absent from the
+      sitemap despite being a real, indexable page.
+
+      The guard matters more now, not less: German will sit at zero translated
+      pages for a while, and this is what keeps it out of the sitemap until it
+      has something to list.
+    */
+    ...translated.flatMap(({ locale, pages: localePages, areas: localeAreas }) => [
+      ...(localePages.includes('home') ? [entry(pathIn('/', locale), 0.9)] : []),
+      ...[...new Set([...localeAreas, ...localePages])]
+        .filter((slug) => slug !== 'home')
+        .map((slug) => entry(pathIn(`/${slug}`, locale), 0.7)),
+    ]),
   ];
 }
