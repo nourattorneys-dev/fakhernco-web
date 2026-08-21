@@ -1,12 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { describe, getAllSlugs, getDocument, type Doc } from '@/lib/content';
-import { BlockRenderer } from '@/components/blocks/BlockRenderer';
-import { JsonLd } from '@/components/JsonLd';
-import { articleSchema, breadcrumbSchema, faqSchema, graph, serviceSchema } from '@/lib/schema';
+import { describe, getAllSlugs, getDocument, localesFor } from '@/lib/content';
+import { DocumentArticle } from '@/components/DocumentArticle';
 import { alternatesFor } from '@/lib/locale';
-import { localesFor } from '@/lib/content';
 
 export const revalidate = 300;
 
@@ -67,82 +63,10 @@ export async function generateMetadata({
   };
 }
 
-const LABEL: Record<Doc['kind'], string | null> = {
-  page: null,
-  post: 'رؤية قانونية',
-  'case-study': 'دراسة حالة',
-  'practice-area': 'مجال الممارسة',
-};
-
 export default async function ArabicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const doc = await getDocument(slug, 'ar');
   if (!doc) notFound();
 
-  const description = describe(doc);
-  const label = LABEL[doc.kind];
-
-  return (
-    <article>
-      <JsonLd
-        data={graph(
-          breadcrumbSchema([
-            { name: 'الرئيسية', path: '/ar' },
-            { name: doc.title, path: `/ar/${doc.slug}` },
-          ]),
-          // Same branch the English route uses. Applying serviceSchema to
-          // every kind typed translated posts as Service in Arabic and Article
-          // in English, and typed informational pages — meet-your-advocates,
-          // our-unwavering-principles, why-choose-fakherco — as services.
-          doc.kind === 'post' || doc.kind === 'case-study'
-            ? articleSchema(doc, description, 'ar')
-            : serviceSchema(doc, description, 'ar'),
-          faqSchema(doc.blocks),
-        )}
-      />
-
-      <header className="border-b border-line bg-surface-alt">
-        <div className="site-container section-tight">
-          <nav aria-label="مسار التنقل" className="text-xs text-muted">
-            <Link href="/" className="hover:text-ink">English</Link>
-            <span aria-hidden className="mx-2">/</span>
-            <span className="text-body">{doc.title}</span>
-          </nav>
-
-          {label && <p className="eyebrow mt-6 text-muted">{label}</p>}
-
-          {/* The single H1. */}
-          <h1 className="mt-4 max-w-[24ch] text-display">{doc.title}</h1>
-
-          {description && (
-            <p className="mt-5 max-w-[62ch] text-lead text-body">{description}</p>
-          )}
-        </div>
-      </header>
-
-      <div className="site-container section">
-        <div className="max-w-[46rem]">
-          {doc.blocks.length > 0 ? (
-            <BlockRenderer blocks={doc.blocks} />
-          ) : (
-            <p className="text-muted">لا يوجد محتوى لهذه الصفحة بعد.</p>
-          )}
-        </div>
-      </div>
-
-      <section className="bg-ink">
-        <div className="site-container section-tight flex flex-wrap items-center justify-between gap-8">
-          <h2 className="max-w-[26ch] text-section text-white">
-            هل أنت مستعد لحماية مصالحك القانونية؟
-          </h2>
-          <Link
-            href="/ar/contact-us"
-            className="bg-white px-8 py-4 font-display text-sm font-700 text-ink transition-colors hover:bg-white/85"
-          >
-            تواصل معنا
-          </Link>
-        </div>
-      </section>
-    </article>
-  );
+  return <DocumentArticle doc={doc} description={describe(doc)} locale="ar" />;
 }

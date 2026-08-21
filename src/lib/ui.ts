@@ -67,6 +67,18 @@ export const UI = {
       'Tell us about your matter and a member of our team will respond within one business day.',
     notSureWhere: 'Not sure where your matter fits? Ask us.',
     noContent: 'This page has no content yet.',
+    /*
+      Eyebrow above the H1 on a document page. `page` is null on purpose — an
+      ordinary page needs no label, and rendering one would put a meaningless
+      word above every heading on the site.
+    */
+    kindLabel: {
+      page: null,
+      post: 'Legal insight',
+      'case-study': 'Case study',
+      'practice-area': 'Practice area',
+    } as Record<'page' | 'post' | 'case-study' | 'practice-area', string | null>,
+    readyToProtect: 'Ready to protect your legal interests?',
     breadcrumb: 'Breadcrumb',
     mainNav: 'Main',
     sections: 'Sections',
@@ -215,6 +227,13 @@ export const UI = {
       'أخبرنا بتفاصيل قضيتك وسيتواصل معك أحد أعضاء فريقنا خلال يوم عمل واحد.',
     notSureWhere: 'لست متأكداً أين تندرج قضيتك؟ اسألنا.',
     noContent: 'لا يوجد محتوى لهذه الصفحة بعد.',
+    kindLabel: {
+      page: null,
+      post: 'رؤية قانونية',
+      'case-study': 'دراسة حالة',
+      'practice-area': 'مجال الممارسة',
+    } as Record<'page' | 'post' | 'case-study' | 'practice-area', string | null>,
+    readyToProtect: 'هل أنت مستعد لحماية مصالحك القانونية؟',
     breadcrumb: 'مسار التنقل',
     mainNav: 'التنقل الرئيسي',
     sections: 'الأقسام',
