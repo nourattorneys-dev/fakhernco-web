@@ -14,7 +14,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: 'Rechtsberatung in den VAE',
   description:
-    'Prozessführung, Unternehmensgründung, Vertragsgestaltung, Gesellschafterstreitigkeiten, Arbeits- und Immobilienrecht — betreut von zugelassenen Anwälten in Abu Dhabi und Dubai.',
+    'Prozessführung, Unternehmensgründung, Vertragsgestaltung, Arbeits- und Immobilienrecht — zugelassene Anwälte in Abu Dhabi und Dubai.',
   robots: { index: false, follow: true },
   alternates: { canonical: '/de/legal-services' },
 };

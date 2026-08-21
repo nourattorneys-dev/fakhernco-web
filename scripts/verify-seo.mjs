@@ -81,6 +81,17 @@ async function checkPage(path, { expectTitle } = {}) {
   // can never regress.
   if (h1s !== 1) fail(path, `${h1s} <h1> elements, expected exactly 1`);
 
+  /*
+    ...and it must SAY something. Counting tags let the German homepage ship
+    with one perfectly-formed, perfectly-empty <h1> — the heading text comes
+    from the CMS, the locale had no content, and every structural check here
+    passed. An empty heading is a blank page wearing a valid outline.
+  */
+  const h1Text = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? '')
+    .replace(/<[^>]+>/g, '')
+    .trim();
+  if (h1s === 1 && !h1Text) fail(path, 'the <h1> is empty');
+
   // Alt text must never be a URL — WordPress fills the field with the src.
   const urlAlts = count(html, /alt="https?:\/\//g);
   if (urlAlts) fail(path, `${urlAlts} image(s) with a URL as alt text`);
@@ -189,9 +200,9 @@ async function main() {
     consensus. Keep it in step by hand, on purpose.
   */
   const LOCALES = [
-    { code: 'en', prefix: '', hreflang: 'en-AE' },
-    { code: 'ar', prefix: '/ar', hreflang: 'ar' },
-    { code: 'de', prefix: '/de', hreflang: 'de' },
+    { code: 'en', prefix: '', hreflang: 'en-AE', statics: [] },
+    { code: 'ar', prefix: '/ar', hreflang: 'ar', statics: ['', '/contact-us', '/legal-services'] },
+    { code: 'de', prefix: '/de', hreflang: 'de', statics: ['', '/contact-us', '/legal-services'] },
   ];
   const DEFAULT_LOCALE = LOCALES[0];
 
@@ -244,6 +255,48 @@ async function main() {
     const m = head.match(/rel="canonical" href="([^"]+)"/);
     return m ? new URL(m[1]).pathname : null;
   };
+
+  /*
+    Every locale's literal routes get the full page check — the routes that
+    exist because a FILE exists, which no CMS-derived list will ever surface.
+
+    This is the hole the German launch went through: the gate walks the sitemap
+    and the en/xx pairs, both of which are built from CMS content, so a locale
+    with no content had ZERO pages checked — and /de shipped blank, with no
+    title and an empty <h1>, while the gate printed PASS.
+
+    A noindex shell is exempt from the content checks by design: that is the
+    declared "not launched yet" state, and failing it would just teach people
+    to delete the assertion. It still must be a 200 — a broken route is broken
+    whether or not it is indexed.
+  */
+  for (const locale of LOCALES) {
+    for (const bare of locale.statics) {
+      const path = `${locale.prefix}${bare}` || '/';
+      const { status, html } = await get(`${SITE}${path}`);
+      if (status !== 200) {
+        fail(path, `HTTP ${status} on a literal locale route`);
+        continue;
+      }
+      /*
+        noindex alone is not a reason to skip — the landing hubs are noindex BY
+        DESIGN, permanently, and they are ad destinations that still need real
+        titles and headings. The state that earns an exemption is the
+        unlaunched SHELL: noindex and an empty <h1>, which is a locale whose
+        content has not arrived yet. That warning retires itself on launch;
+        a permanent warning would just train people to ignore the list.
+      */
+      const noindex = /<meta name="robots" content="[^"]*noindex/.test(html);
+      const h1 = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? '')
+        .replace(/<[^>]+>/g, '')
+        .trim();
+      if (noindex && !h1) {
+        warn(path, 'unlaunched shell (noindex, empty h1) — content checks skipped');
+        continue;
+      }
+      await checkPage(path);
+    }
+  }
 
   let pairCount = 0;
   const pairSummary = [];
