@@ -31,9 +31,8 @@ import {
  *
  * FLAGS ARE INLINE SVG, NOT EMOJI. Windows renders flag emoji as bare letter
  * pairs ("GB", "DE"), which reads as broken on a law firm's site. Three tiny
- * hand-drawn rects cost nothing and render identically everywhere. England's
- * St George's cross for English (per the design brief), UAE for Arabic,
- * Germany for German.
+ * hand-drawn rects cost nothing and render identically everywhere. The Union Jack for
+ * English, UAE for Arabic, Germany for German.
  */
 
 function Flag({ locale }: { locale: Locale }) {
@@ -46,12 +45,15 @@ function Flag({ locale }: { locale: Locale }) {
   };
   switch (locale) {
     case 'en':
-      // England — St George's cross.
+      // United Kingdom — a simplified Union Jack; at 20px the fimbriation
+      // detail of the real ensign would just smear.
       return (
         <svg {...common}>
-          <rect width="20" height="14" fill="#fff" />
-          <rect x="8" width="4" height="14" fill="#CE1124" />
-          <rect y="5" width="20" height="4" fill="#CE1124" />
+          <rect width="20" height="14" fill="#012169" />
+          <path d="M0 0l20 14M20 0L0 14" stroke="#fff" strokeWidth="2.8" />
+          <path d="M0 0l20 14M20 0L0 14" stroke="#C8102E" strokeWidth="1.2" />
+          <path d="M10 0v14M0 7h20" stroke="#fff" strokeWidth="4.6" />
+          <path d="M10 0v14M0 7h20" stroke="#C8102E" strokeWidth="2.8" />
         </svg>
       );
     case 'ar':
@@ -121,16 +123,24 @@ export function LanguageSwitcher({
 
   return (
     <div ref={rootRef} className="relative shrink-0">
+      {/*
+        dir="ltr" on the rows, deliberately: without it the flex order mirrors
+        on Arabic pages, so the flag sat on the opposite side of the name
+        depending on which language you were reading. The row order is fixed —
+        name, then flag, then chevron — on every locale; only the name itself
+        still renders in its own script direction.
+      */}
       <button
         type="button"
+        dir="ltr"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={LOCALE_NAV_ARIA[current]}
         onClick={() => setOpen((value) => !value)}
         className="flex items-center gap-2 border border-line px-2.5 py-1.5 font-display text-xs font-600 text-ink transition-colors hover:border-ink sm:px-3 lg:px-3.5 lg:py-2 lg:text-sm"
       >
-        <Flag locale={current} />
         <span className="hidden sm:inline">{LOCALE_LABEL[current]}</span>
+        <Flag locale={current} />
         <svg
           width="8"
           height="5"
@@ -154,12 +164,14 @@ export function LanguageSwitcher({
               href={target}
               hrefLang={LOCALE_HREFLANG[locale]}
               lang={locale}
-              dir={LOCALE_DIR[locale]}
+              dir="ltr"
               aria-label={LOCALE_SWITCH_ARIA[current][locale]}
-              className="flex items-center gap-2.5 px-3.5 py-2 font-display text-sm font-600 text-ink transition-colors hover:bg-surface-alt"
+              className="flex items-center justify-between gap-2.5 px-3.5 py-2 font-display text-sm font-600 text-ink transition-colors hover:bg-surface-alt"
             >
+              <span lang={locale} dir={LOCALE_DIR[locale]}>
+                {LOCALE_LABEL[locale]}
+              </span>
               <Flag locale={locale} />
-              {LOCALE_LABEL[locale]}
             </Link>
           ))}
         </div>
