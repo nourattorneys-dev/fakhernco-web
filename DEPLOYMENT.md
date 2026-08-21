@@ -257,6 +257,65 @@ can no longer renew it because validation now goes to Vercel — so rollback
 after that date needs Cloudflare SSL/TLS set to Full (non-strict); Full
 (strict) returns 526.
 
+## Languages
+
+English at the root, Arabic under `/ar`, German under `/de`. Slugs are
+identical across all three — `/ar/criminal-cases` and `/de/criminal-cases` are
+the same page as `/criminal-cases`. That is what keeps `pathIn()` a pure string
+operation, and every hreflang, sitemap and switcher decision downstream depends
+on it. Do not translate slugs without reading `src/lib/locale.ts` first.
+
+German is scoped to the same subset Arabic covers: pages, practice areas and
+the nine landing pages. No `legal-insights` — there is no `/ar/legal-insights`
+either.
+
+### Adding a locale
+
+Widen `LOCALES` in `src/lib/locale.ts` and let the compiler find the rest. Every
+lookup table is `Record<Locale, …>` precisely so that adding a language is a
+list of compile errors rather than a silent English fallback appearing in a
+dozen places. Adding German produced exactly twelve.
+
+Then: a route group under `src/app/(xx)/`, the locale in the CMS bootstrap
+(`fakhernco-cms/src/index.ts`), and a reply block in the contact controller.
+
+### ⚠️ ALLOW_EMPTY_DE — delete this
+
+`(de)/de/[slug]/page.tsx` refuses to build when Strapi returns no German
+content. That assertion is the whole safety net: without it an empty locale is
+entirely legal — `generateStaticParams` returns `[]`, the build goes **green**,
+and every `/de/*` URL 404s at runtime with nothing anywhere to say so.
+
+`ALLOW_EMPTY_DE=1` is set in the Vercel project to suppress it for the window
+before the first German batch is published.
+
+**Delete it the moment German content exists.** While it is set the net is
+disabled, and a genuinely broken German locale — a CMS timeout mid-build, the
+locale dropped from `src/index.ts` — would ship green and silent. After the
+first batch, confirm the build still passes without it; that is what proves the
+net is armed.
+
+### Translating in batches
+
+Content goes in through the Strapi admin panel; no deploy is needed for it. Do
+it in batches — the first around three pages, then seven to ten.
+
+The first batch is a test of the pipeline, not of the translation. It should
+confirm: `/de/<slug>` renders, direction is `ltr`, the switcher offers all three
+languages and hides where a page is missing, hreflang is reciprocal, the contact
+form sends the German auto-reply, and the build stays green.
+
+Batch size is not fussiness. The build is CMS-bound, and every translated page
+adds routes and Strapi round trips to it.
+
+### The German copy needs a native reader
+
+The UI strings in `src/lib/ui.ts` and the auto-reply in the CMS controller were
+written by a non-native hand, and both say so where they are defined. They are
+chrome and transactional email rather than page copy, but they are still the
+firm's voice — have a German speaker read them before any paid traffic points at
+`/de`.
+
 ## Adding a route or a redirect
 
 Both `generateStaticParams` and the redirect map are build-time. `[slug]` uses

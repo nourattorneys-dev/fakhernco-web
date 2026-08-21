@@ -154,9 +154,11 @@ async function main() {
   }
 
   /*
-    ---- bilingual wiring ----
+    ---- multilingual wiring ----
 
-    Every en/ar pair must point at each other and canonicalise to itself.
+    Every English page and each of its translations must point at each other
+    and canonicalise to itself. Runs per locale, so German is covered the day
+    its first page is published rather than whenever someone remembers.
 
     Both halves of this have already been shipped broken once. alternatesFor()
     returned the English URL as the canonical for EVERY caller, which was
@@ -171,22 +173,66 @@ async function main() {
     document therefore finds "ar" on pages that emit no alternates whatsoever.
     The match below is anchored to <link rel="alternate"> for that reason.
 
-    Second trap: "/articles-of-association-uae".startsWith("/ar") is true, so
-    the Arabic test has to be an exact segment test.
+    Second trap: "/articles-of-association-uae".startsWith("/ar") is true, and
+    so is "/debt-recovery".startsWith("/de") — both are real English pages. The
+    locale test has to be an exact segment test, and that is two bugs now, not
+    one.
   */
-  const isAr = (u) => u === '/ar' || u.startsWith('/ar/');
+  /*
+    The locale table, DELIBERATELY duplicated from src/lib/locale.ts rather than
+    imported.
+
+    This is a checker. If it derived its expectations from the same table the
+    site renders from, a wrong entry there would produce wrong output AND a
+    check that agrees with it — the two would move together and the gate would
+    pass. Written out independently, a mismatch is a failure rather than a
+    consensus. Keep it in step by hand, on purpose.
+  */
+  const LOCALES = [
+    { code: 'en', prefix: '', hreflang: 'en-AE' },
+    { code: 'ar', prefix: '/ar', hreflang: 'ar' },
+    { code: 'de', prefix: '/de', hreflang: 'de' },
+  ];
+  const DEFAULT_LOCALE = LOCALES[0];
+
+  /*
+    Exact-segment test. "/articles-of-association-uae".startsWith("/ar") is
+    true, so a prefix test alone files a real English page under Arabic — and
+    "/debt-recovery".startsWith("/de") is the same trap for German, which is
+    live now and makes this two bugs rather than one.
+  */
+  const localeOfPath = (u) =>
+    LOCALES.find((l) => l.prefix && (u === l.prefix || u.startsWith(`${l.prefix}/`))) ??
+    DEFAULT_LOCALE;
+  const pathIn = (bare, l) => (l.prefix ? (bare === '/' ? l.prefix : `${l.prefix}${bare}`) : bare);
+
   const sitemapXml = (await get(`${SITE}/sitemap.xml`)).html;
   const sitemapPaths = [
     ...new Set(
       [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname),
     ),
   ];
-  const arPaths = new Set(sitemapPaths.filter(isAr));
-  const enPaths = sitemapPaths.filter((u) => !isAr(u));
+  const pathsByLocale = new Map(
+    LOCALES.map((l) => [
+      l.code,
+      new Set(sitemapPaths.filter((u) => localeOfPath(u).code === l.code)),
+    ]),
+  );
+  const enPaths = [...pathsByLocale.get('en')];
 
+  /*
+    Memoised. headOf is a full GET, and the obvious loop-over-locales rewrite
+    fetches every English page once per translated locale — three passes over
+    ~324 URLs where one will do. The cache is what keeps this gate cheap enough
+    to run on every deploy.
+  */
+  const headCache = new Map();
   const headOf = async (p) => {
+    if (headCache.has(p)) return headCache.get(p);
     const { html } = await get(`${SITE}${p}`);
-    return html.slice(0, html.indexOf('</head>'));
+    const head = html.slice(0, html.indexOf('</head>'));
+    headCache.set(p, head);
+    return head;
   };
   const alternatesOf = (head) =>
     Object.fromEntries(
@@ -199,38 +245,52 @@ async function main() {
     return m ? new URL(m[1]).pathname : null;
   };
 
-  const localePairs = enPaths
-    .map((en) => ({ en, ar: en === '/' ? '/ar' : `/ar${en}` }))
-    .filter((p) => arPaths.has(p.ar));
+  let pairCount = 0;
+  const pairSummary = [];
 
-  for (const { en, ar } of localePairs) {
-    const [headEn, headAr] = [await headOf(en), await headOf(ar)];
-    const [altEn, altAr] = [alternatesOf(headEn), alternatesOf(headAr)];
+  for (const locale of LOCALES.filter((l) => l !== DEFAULT_LOCALE)) {
+    const localePaths = pathsByLocale.get(locale.code);
+    const pairs = enPaths
+      .map((en) => ({ en, other: pathIn(en, locale) }))
+      .filter((p) => localePaths.has(p.other));
 
-    if (altEn.ar !== ar) fail(en, `hreflang="ar" is ${altEn.ar ?? 'MISSING'}, expected ${ar}`);
-    if (altAr['en-AE'] !== en)
-      fail(ar, `hreflang="en-AE" is ${altAr['en-AE'] ?? 'MISSING'}, expected ${en}`);
-    if (altEn['x-default'] !== en) fail(en, `x-default is ${altEn['x-default'] ?? 'MISSING'}`);
-    if (altAr['x-default'] !== en) fail(ar, `x-default is ${altAr['x-default'] ?? 'MISSING'}`);
+    pairSummary.push(`${pairs.length} en/${locale.code}`);
+    pairCount += pairs.length;
 
-    if (canonicalOf(headEn) !== en) fail(en, `canonical points at ${canonicalOf(headEn)}`);
-    if (canonicalOf(headAr) !== ar)
-      fail(ar, `canonical points at ${canonicalOf(headAr)} — an Arabic page that canonicalises elsewhere will be dropped from the index`);
-  }
+    for (const { en, other } of pairs) {
+      const [headEn, headOther] = [await headOf(en), await headOf(other)];
+      const [altEn, altOther] = [alternatesOf(headEn), alternatesOf(headOther)];
 
-  // An Arabic page missing from the sitemap is one Google must find by
-  // crawling. The live WordPress site lists zero of them; regressing to that
-  // is the specific thing this catches.
-  const arInCms = await cms('pages', { locale: 'ar', 'fields[0]': 'slug', 'pagination[pageSize]': '200' });
-  for (const row of arInCms.data ?? []) {
-    const p = row.slug === 'home' ? '/ar' : `/ar/${row.slug}`;
-    if (!arPaths.has(p)) fail(p, 'exists in the CMS but is absent from sitemap.xml');
+      if (altEn[locale.hreflang] !== other)
+        fail(en, `hreflang="${locale.hreflang}" is ${altEn[locale.hreflang] ?? 'MISSING'}, expected ${other}`);
+      if (altOther[DEFAULT_LOCALE.hreflang] !== en)
+        fail(other, `hreflang="${DEFAULT_LOCALE.hreflang}" is ${altOther[DEFAULT_LOCALE.hreflang] ?? 'MISSING'}, expected ${en}`);
+      if (altEn['x-default'] !== en) fail(en, `x-default is ${altEn['x-default'] ?? 'MISSING'}`);
+      if (altOther['x-default'] !== en) fail(other, `x-default is ${altOther['x-default'] ?? 'MISSING'}`);
+
+      if (canonicalOf(headEn) !== en) fail(en, `canonical points at ${canonicalOf(headEn)}`);
+      if (canonicalOf(headOther) !== other)
+        fail(other, `canonical points at ${canonicalOf(headOther)} — a ${locale.code} page that canonicalises elsewhere will be dropped from the index`);
+    }
+
+    // A translated page missing from the sitemap is one Google must find by
+    // crawling. The live WordPress site listed zero Arabic URLs; regressing to
+    // that is the specific thing this catches, now for every locale.
+    const inCms = await cms('pages', {
+      locale: locale.code,
+      'fields[0]': 'slug',
+      'pagination[pageSize]': '200',
+    });
+    for (const row of inCms.data ?? []) {
+      const p = row.slug === 'home' ? locale.prefix : pathIn(`/${row.slug}`, locale);
+      if (!localePaths.has(p)) fail(p, 'exists in the CMS but is absent from sitemap.xml');
+    }
   }
 
   // ---- report ----
   console.log(
     `checked ${hubs.length + pages.data.length + posts.data.length} pages, ` +
-      `${rules.length} redirects, ${localePairs.length} en/ar pairs\n`,
+      `${rules.length} redirects, ${pairCount} locale pairs (${pairSummary.join(', ')})\n`,
   );
   if (warnings.length) {
     console.log(`${warnings.length} warning(s):`);
