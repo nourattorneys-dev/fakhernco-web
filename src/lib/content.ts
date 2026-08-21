@@ -7,7 +7,7 @@
  */
 
 import { cache } from 'react';
-import { mediaUrl, strapiFetch, strapiFetchAll } from './strapi';
+import { mediaUrl, strapiFetch, strapiFetchAll, STRUCTURE_REVALIDATE } from './strapi';
 import { DEFAULT_LOCALE, LOCALES, pathIn, type Locale } from './locale';
 
 // ------------------------------------------------------------------- types
@@ -453,12 +453,25 @@ export const getTranslatedPaths = cache(async (locale: Locale): Promise<string[]
 });
 
 async function fetchTranslatedPaths(locale: Locale): Promise<string[]> {
+  /*
+    Cached on a 30-minute window rather than the 300s the rest of the site
+    uses. This answer is structural — which pages exist, in which language —
+    and changes when something is published, not on a timer.
+
+    The window is the mitigation, not a preference. Every regeneration is
+    another chance for a CMS hiccup to yield a page with no language switcher,
+    which then gets cached; that has happened repeatedly, always on the
+    homepage, because it is requested most and so revalidates most.
+
+    See STRUCTURE_REVALIDATE for what this trades away.
+  */
+  const opts = { revalidate: STRUCTURE_REVALIDATE };
   const [pages, posts, areas, caseStudies, landings] = await Promise.all([
-    strapiFetchAll<{ slug: string }>('pages', { 'fields[0]': 'slug', locale }),
-    strapiFetchAll<{ slug: string }>('posts', { 'fields[0]': 'slug', locale }),
-    strapiFetchAll<{ slug: string }>('practice-areas', { 'fields[0]': 'slug', locale }),
-    strapiFetchAll<{ slug: string }>('case-studies', { 'fields[0]': 'slug', locale }),
-    strapiFetchAll<{ slug: string }>('landing-pages', { 'fields[0]': 'slug', locale }),
+    strapiFetchAll<{ slug: string }>('pages', { 'fields[0]': 'slug', locale }, 100, opts),
+    strapiFetchAll<{ slug: string }>('posts', { 'fields[0]': 'slug', locale }, 100, opts),
+    strapiFetchAll<{ slug: string }>('practice-areas', { 'fields[0]': 'slug', locale }, 100, opts),
+    strapiFetchAll<{ slug: string }>('case-studies', { 'fields[0]': 'slug', locale }, 100, opts),
+    strapiFetchAll<{ slug: string }>('landing-pages', { 'fields[0]': 'slug', locale }, 100, opts),
   ]);
   const slugs = [...pages, ...posts, ...areas, ...caseStudies]
     .map((r) => r.slug)

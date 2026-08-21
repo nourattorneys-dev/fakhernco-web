@@ -135,6 +135,7 @@ export async function POST(request: Request) {
   revalidatePath('/sitemap.xml');
   revalidatePath('/rss.xml');
 
+
   // Return 200 for models we do not map. A non-2xx makes Strapi flag the
   // webhook as failing and eventually stop calling it, which would silently
   // break revalidation for the models we DO care about.

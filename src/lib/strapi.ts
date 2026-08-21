@@ -54,9 +54,35 @@ export function mediaUrl(url?: string | null): string | null {
   return /^https?:\/\//.test(url) ? url : `${BASE}${url}`;
 }
 
+/**
+ * How long "which pages exist, in which locale" stays fresh: 30 minutes,
+ * against 300s for page content.
+ *
+ * The language switcher is built from this, and every revalidation is another
+ * chance for a CMS hiccup to produce a page with no switcher on it — which is
+ * then cached until something regenerates it. That has happened repeatedly, and
+ * always on the homepage, because it is requested most and so revalidates most.
+ * Six times fewer regenerations is six times less exposure.
+ *
+ * The cost is bounded and small: a newly translated page can take up to half an
+ * hour to start being OFFERED by the switcher. The page itself is reachable
+ * immediately, and its content still follows the 300s window — only the "does a
+ * translation exist" answer lags.
+ *
+ * Tagging these queries and purging on publish would remove even that lag.
+ * Next 16's revalidateTag now requires a cache-life profile, which ties it to
+ * the `use cache` model this app does not use, and it was not worth shipping a
+ * cache-invalidation path that could not be verified from outside. Revisit if
+ * the lag ever actually bites.
+ */
+export const STRUCTURE_REVALIDATE = Number(process.env.STRAPI_STRUCTURE_REVALIDATE ?? 1800);
+
+type FetchOpts = { revalidate?: number; tags?: string[] };
+
 export async function strapiFetch<T>(
   path: string,
   params: Record<string, string | number> = {},
+  opts: FetchOpts = {},
 ): Promise<T> {
   const url = new URL(`/api/${path}`, BASE);
   // Strapi's bracket syntax is passed through verbatim — no qs dependency.
@@ -64,7 +90,10 @@ export async function strapiFetch<T>(
 
   const res = await fetch(url, {
     headers: TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {},
-    next: { revalidate: REVALIDATE },
+    next: {
+      revalidate: opts.revalidate ?? REVALIDATE,
+      ...(opts.tags ? { tags: opts.tags } : {}),
+    },
   });
 
   if (!res.ok) throw new StrapiError(res.status, url.pathname + url.search);
@@ -76,13 +105,18 @@ export async function strapiFetchAll<T>(
   path: string,
   params: Record<string, string | number> = {},
   pageSize = 100,
+  opts: FetchOpts = {},
 ): Promise<T[]> {
   const out: T[] = [];
   for (let page = 1; ; page += 1) {
     const res = await strapiFetch<{
       data: T[];
       meta?: { pagination?: { pageCount?: number } };
-    }>(path, { ...params, 'pagination[page]': page, 'pagination[pageSize]': pageSize });
+    }>(
+      path,
+      { ...params, 'pagination[page]': page, 'pagination[pageSize]': pageSize },
+      opts,
+    );
 
     out.push(...(res.data ?? []));
     const pageCount = res.meta?.pagination?.pageCount ?? 1;
