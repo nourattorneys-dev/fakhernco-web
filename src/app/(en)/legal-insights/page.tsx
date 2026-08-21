@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/locale';
+import { localesFor } from '@/lib/content';
 import Link from 'next/link';
 import { getCaseStudies, getCategories, getPosts } from '@/lib/content';
 import { CategoryFilter, InsightGrid, Pagination } from '@/components/InsightGrid';
@@ -6,12 +8,26 @@ import { PER_PAGE } from './per-page';
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
+/*
+  generateMetadata rather than a static object, because the hreflang cluster is
+  data-dependent: the German legal-insights PAGE exists (the index copy is
+  translated; the articles themselves are not), so /de/legal-insights is a real
+  URL and this hub must claim it back — a one-way cluster is discarded and
+  degrades the German side's annotations. localesFor() answers from the CMS, so
+  if Arabic ever gains the page too, the cluster widens by itself.
+*/
+export async function generateMetadata(): Promise<Metadata> {
+  const base: Metadata = {
   title: 'Legal Insights',
   description:
     'Guides and commentary on UAE law from Fakher & Co — litigation, contracts, company formation, employment, real estate and private notary services.',
   alternates: { canonical: '/legal-insights' },
 };
+  return {
+    ...base,
+    alternates: alternatesFor('/legal-insights', await localesFor('/legal-insights')),
+  };
+}
 
 export default async function InsightsPage() {
   const [posts, categories, caseStudies] = await Promise.all([
