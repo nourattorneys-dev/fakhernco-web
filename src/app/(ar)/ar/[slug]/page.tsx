@@ -6,6 +6,7 @@ import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { JsonLd } from '@/components/JsonLd';
 import { articleSchema, breadcrumbSchema, faqSchema, graph, serviceSchema } from '@/lib/schema';
 import { alternatesFor } from '@/lib/locale';
+import { localesFor } from '@/lib/content';
 
 export const revalidate = 300;
 
@@ -46,15 +47,11 @@ export async function generateMetadata({
   return {
     title: doc.seo?.metaTitle || doc.title,
     description,
-    // Both directions: the Arabic page points back at the English one.
-    alternates: {
-      canonical: `/ar/${doc.slug}`,
-      languages: {
-        'en-AE': `/${doc.slug}`,
-        ar: `/ar/${doc.slug}`,
-        'x-default': `/${doc.slug}`,
-      },
-    },
+    // Both directions, via the shared builder. This was a hand-written map —
+    // it never imported alternatesFor, so a grep for that name missed it
+    // entirely and it would have kept emitting a two-language cluster after a
+    // third locale shipped.
+    alternates: alternatesFor(`/ar/${doc.slug}`, await localesFor(`/${doc.slug}`)),
     openGraph: {
       title: doc.seo?.metaTitle || doc.title,
       description,

@@ -1,5 +1,6 @@
 import { Homepage } from '@/components/home/Homepage';
 import { alternatesFor } from '@/lib/locale';
+import { localesFor } from '@/lib/content';
 
 export const revalidate = 300;
 
@@ -10,7 +11,7 @@ export const revalidate = 300;
  */
 export const metadata = {
   // The Arabic homepage now genuinely exists, so this can finally claim it.
-  alternates: alternatesFor('/', true),
+  alternates: alternatesFor('/', await localesFor('/')),
 };
 
 export default function HomePage() {

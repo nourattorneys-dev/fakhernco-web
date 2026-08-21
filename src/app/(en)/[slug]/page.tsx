@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import {
   describe,
   getAllSlugs,
-  getTranslatedPaths,
+  localesFor,
   getDocument,
   getPracticeAreas,
   type Doc,
@@ -52,12 +52,10 @@ export async function generateMetadata({
   if (!doc) return {};
 
   const description = describe(doc);
-  const hasArabic = (await getTranslatedPaths('ar')).includes(`/ar/${doc.slug}`);
-
   return {
     title: doc.seo?.metaTitle || doc.title,
     description,
-    alternates: alternatesFor(`/${doc.slug}`, hasArabic),
+    alternates: alternatesFor(`/${doc.slug}`, await localesFor(`/${doc.slug}`)),
     robots: doc.seo?.noIndex ? { index: false, follow: true } : undefined,
     openGraph: {
       title: doc.seo?.metaTitle || doc.title,

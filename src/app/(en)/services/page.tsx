@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { describe, getPage, getPracticeAreas } from '@/lib/content';
 import { alternatesFor } from '@/lib/locale';
+import { localesFor } from '@/lib/content';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 
 export const revalidate = 300;
@@ -19,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: page
       ? describe(page)
       : 'Litigation, contracts, company formation and private notary services across the UAE.',
-    alternates: alternatesFor('/services', true),  // /ar/services exists in Arabic
+    alternates: alternatesFor('/services', await localesFor('/services')),
   };
 }
 

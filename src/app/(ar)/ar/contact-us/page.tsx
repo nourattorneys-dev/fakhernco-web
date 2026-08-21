@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { describe, getPage, getPracticeAreas } from '@/lib/content';
+import { describe, getPage, getPracticeAreas, localesFor } from '@/lib/content';
+import { alternatesFor } from '@/lib/locale';
 import { ContactForm } from '@/components/ContactForm';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, graph } from '@/lib/schema';
@@ -45,10 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seo?.metaTitle || page?.title || 'تواصل معنا',
     description: page ? describe(page) : 'تواصل مع مكتب فاخر ومشاركوه بشأن قضيتك القانونية.',
-    alternates: {
-      canonical: '/ar/contact-us',
-      languages: { 'en-AE': '/contact-us', ar: '/ar/contact-us', 'x-default': '/contact-us' },
-    },
+    alternates: alternatesFor('/ar/contact-us', await localesFor('/contact-us')),
   };
 }
 

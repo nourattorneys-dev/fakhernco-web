@@ -8,7 +8,7 @@
  * actually carries an FAQ block.
  */
 
-import type { Locale } from './locale';
+import { DEFAULT_LOCALE, LOCALE_LANG_TAG, pathIn, type Locale } from './locale';
 import { PHONE } from './contact';
 import type { Block, Doc } from './content';
 import { SITE } from './site';
@@ -77,14 +77,14 @@ export function organizationSchema() {
  * which tells search engines the Arabic site is English and undercuts the
  * hreflang cluster it sits in.
  */
-export function websiteSchema(locale: 'en' | 'ar' = 'en') {
+export function websiteSchema(locale: Locale = DEFAULT_LOCALE) {
   return {
     '@type': 'WebSite',
     '@id': SITE_ID,
     url: SITE,
-    name: locale === 'ar' ? 'مكتب فاخر ومشاركوه' : 'Fakher & Co',
+    name: SITE_NAME[locale],
     publisher: { '@id': ORG_ID },
-    inLanguage: locale === 'ar' ? 'ar-AE' : 'en-AE',
+    inLanguage: LOCALE_LANG_TAG[locale],
   };
 }
 
@@ -113,10 +113,25 @@ export function breadcrumbSchema(items: { name: string; path: string }[]) {
  * `url` is set for the same reason: without it @id was the only URL a consumer
  * could attach the node to.
  */
-const localePath = (slug: string, locale: Locale) =>
-  locale === 'ar' ? `/ar/${slug}` : `/${slug}`;
+/*
+  Tables, not ternaries.
 
-const langTag = (locale: Locale) => (locale === 'ar' ? 'ar-AE' : 'en-AE');
+  `locale === 'ar' ? … : …` reads as a choice between two languages and is
+  actually "Arabic, or else English" — so a third locale silently inherits every
+  English value. For @id that is not a cosmetic bug: two locales sharing an @id
+  tells a consumer they are the same entity, which is the exact mistake the
+  inLanguage comment above records having already been made once.
+
+  Record<Locale, …> turns adding a locale into a compile error here instead.
+*/
+const localePath = (slug: string, locale: Locale) => pathIn(`/${slug}`, locale);
+
+const langTag = (locale: Locale) => LOCALE_LANG_TAG[locale];
+
+const SITE_NAME: Record<Locale, string> = {
+  en: 'Fakher & Co',
+  ar: 'مكتب فاخر ومشاركوه',
+};
 
 export function articleSchema(doc: Doc, description: string, locale: Locale = 'en') {
   const path = localePath(doc.slug, locale);

@@ -50,6 +50,19 @@ export const LOCALE_HREFLANG: Record<Locale, string> = {
   ar: 'ar',
 };
 
+/**
+ * schema.org `inLanguage` tags.
+ *
+ * A separate table from LOCALE_HREFLANG on purpose. Today Arabic is `ar` in
+ * hreflang and `ar-AE` in JSON-LD — both correct for their own spec, and
+ * sharing one table would mean a considered change to hreflang silently
+ * rewriting structured data too.
+ */
+export const LOCALE_LANG_TAG: Record<Locale, string> = {
+  en: 'en-AE',
+  ar: 'ar-AE',
+};
+
 /** Which locale a pathname belongs to. */
 export function localeOf(pathname: string): Locale {
   /*
@@ -90,24 +103,32 @@ export function pathIn(pathname: string, locale: Locale): string {
  * both directions plus x-default is half of fixing that; the locale-aware
  * sitemap is the other half.
  *
- * Only pass `hasArabic` as true when the Arabic page genuinely exists —
- * pointing hreflang at a 404 is worse than omitting it.
+ * Pass only the locales the page genuinely exists in — pointing hreflang at a
+ * 404 is worse than omitting it. `localesFor()` in content.ts computes that
+ * from the CMS.
  */
-export function alternatesFor(path: string, hasArabic: boolean) {
-  const en = pathIn(path, 'en');
-  // Self-canonical. Every caller used to be an English route, where the
-  // canonical and the English URL are the same string, so returning `en`
-  // looked correct. The moment an Arabic route called this — /ar — it
-  // canonicalised the Arabic homepage to the English one, which tells Google
-  // the two are duplicates and drops the Arabic page from the index. Pages in
-  // an hreflang cluster must each canonicalise to themselves.
-  if (!hasArabic) return { canonical: path };
-  return {
-    canonical: path,
-    languages: {
-      'en-AE': en,
-      ar: pathIn(path, 'ar'),
-      'x-default': en,
-    },
-  };
+export function alternatesFor(path: string, available: Iterable<Locale>) {
+  const set = new Set(available);
+  // A page always exists in its own locale, whatever the caller passed.
+  set.add(localeOf(path));
+
+  // Nothing to cluster with. A one-entry hreflang set is not wrong so much as
+  // meaningless, and emitting it invites Google to treat a page as its own
+  // alternate.
+  if (set.size < 2) return { canonical: path };
+
+  const languages: Record<string, string> = {};
+  for (const locale of LOCALES) {
+    if (set.has(locale)) languages[LOCALE_HREFLANG[locale]] = pathIn(path, locale);
+  }
+  languages['x-default'] = pathIn(path, DEFAULT_LOCALE);
+
+  // Self-canonical, and `path` verbatim. Every caller used to be an English
+  // route, where the canonical and the English URL are the same string, so
+  // returning the English one looked correct. The moment an Arabic route
+  // called this — /ar — it canonicalised the Arabic homepage to the English
+  // one, which tells Google the two are duplicates and drops the Arabic page
+  // from the index. Pages in an hreflang cluster must each canonicalise to
+  // themselves.
+  return { canonical: path, languages };
 }

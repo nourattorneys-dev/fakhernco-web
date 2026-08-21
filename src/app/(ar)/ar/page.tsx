@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Homepage } from '@/components/home/Homepage';
 import { getPage } from '@/lib/content';
 import { alternatesFor } from '@/lib/locale';
+import { localesFor } from '@/lib/content';
 
 export const revalidate = 300;
 
@@ -22,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: page?.seo?.metaTitle ?? page?.title ?? undefined,
     description: page?.seo?.metaDescription ?? undefined,
-    alternates: alternatesFor('/ar', true),
+    alternates: alternatesFor('/ar', await localesFor('/')),
     openGraph: {
       title: page?.seo?.metaTitle ?? page?.title ?? undefined,
       description: page?.seo?.metaDescription ?? undefined,
