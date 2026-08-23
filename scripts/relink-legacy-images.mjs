@@ -6,6 +6,7 @@
  *   node scripts/relink-legacy-images.mjs --apply         # write
  *   node scripts/relink-legacy-images.mjs --apply --limit 1   # canary first
  *   node scripts/relink-legacy-images.mjs --include-edited    # see below
+ *   node scripts/relink-legacy-images.mjs --substitute        # see below
  *
  * WHAT IS BROKEN
  *
@@ -18,22 +19,26 @@
  *
  * Many of those files were in fact migrated — they are sitting in the Strapi
  * media library, just never attached to the block. This script attaches them,
- * matching on filename. No files are uploaded and no images are substituted:
- * a block is only touched when the media library already holds a file of the
- * same name.
+ * matching on filename. Nothing is ever uploaded.
  *
- * THE --include-edited FLAG
+ * Three degrees of confidence, each behind its own flag, because they are not
+ * equally safe and should not be approved in one gesture:
  *
- * WordPress writes an edited (cropped or rotated) derivative as
- * `name-e1772931703989.jpg`. Those exact names are NOT in the library, but the
- * un-edited `name.jpg` often is. Matching them means accepting a possibly
- * different crop, so it is opt-in rather than default.
+ *   (default)          exact filename match. The same photograph. 26 blocks.
+ *   --include-edited   a WordPress `-e1772931703989` derivative matched to its
+ *                      un-edited original. Same photograph, possibly a
+ *                      different crop. 8 blocks.
+ *   --substitute       a DIFFERENT photograph, from the table below, for files
+ *                      the library does not hold at all. 38 blocks.
+ *
+ * All three together relink 72 of the 78 broken blocks. The remaining 6 are
+ * two bespoke graphics — see DELIBERATELY ABSENT on the table below.
  *
  * DRAFT, NOT PUBLISHED
  *
  * Strapi 5's REST update writes the DRAFT. Nothing changes on the live site
  * until each entry is published in the admin — which is deliberate here: it
- * gives you a review step in the CMS before 34 edits go out.
+ * gives you a review step in the CMS before the edits go out.
  *
  * SAFETY
  *
@@ -71,6 +76,7 @@ const val = (f) => argv.find((a) => a.startsWith(`${f}=`))?.slice(f.length + 1);
 
 const APPLY = has('--apply');
 const INCLUDE_EDITED = has('--include-edited');
+const SUBSTITUTE = has('--substitute');
 const LIMIT = Number(val('--limit') ?? Infinity);
 const TOKEN = val('--token') ?? process.env.STRAPI_API_TOKEN ?? '';
 
@@ -80,6 +86,40 @@ const BACKUP_DIR = `.backups/relink-${STAMP}`;
 
 /** WordPress' edited-derivative suffix: blog-post-13-e1772931703989.jpg */
 const EDITED = /-e\d{10,}(?=\.[a-z0-9]+$)/i;
+
+/**
+ * Stand-ins for files the media library does not have at all (--substitute).
+ *
+ * These are NOT the original photographs. They are interchangeable stock legal
+ * photography standing in for interchangeable stock legal photography, which
+ * is the only reason this is acceptable: nothing here carries meaning that the
+ * replacement fails to carry.
+ *
+ * Mapped by filename rather than id so the same table works against a local or
+ * staging CMS, where the ids differ.
+ *
+ * Chosen so no page repeats an image. The three pages that show a strip of six
+ * (legal-consultations, our-unwavering-principles, why-choose-fakherco) each
+ * relink blog-post-12 and blog-post-05 and take the four below, so all six
+ * remain distinct. about-us relinks four and takes three others.
+ *
+ * DELIBERATELY ABSENT — do not add without asking:
+ *   Fakher-Logo-new.png  the logo; it is not filler.
+ *   img-about-me.png     a portrait of a named person, not stock.
+ *   img-map-cover.png    a MAP, on the contact page, immediately above the
+ *                        enquiry form. A photograph of strangers shaking hands
+ *                        does not stand in for directions to an office.
+ *   img-experience-*.png a bespoke graphic on the homepage, not a photograph.
+ */
+const SUBSTITUTIONS = {
+  'blog-post-23.jpg': 'business-and-lawyers-discussing-contract-papers-wi-2025-12-22-14-21-12-utc-scaled.jpg',
+  'blog-post-18.jpg': 'group-business-people-and-lawyers-legal-contract-2025-03-08-13-26-33-utc-scaled.jpg',
+  'blog-post-14-e1772931697417.jpg': 'close-up-photo-of-business-woman-and-man-signing-a-2025-04-10-00-26-29-utc-scaled.jpg',
+  'blog-post-14.jpg': 'close-up-photo-of-business-woman-and-man-signing-a-2025-04-10-00-26-29-utc-scaled.jpg',
+  'blog-post-15-e1772931709523.jpg': 'business-team-in-dubai-2025-03-18-15-08-40-utc-scaled.jpg',
+  'blog-post-26.jpg': 'business-team-in-dubai-2025-03-18-15-08-40-utc-scaled.jpg',
+  'blog-post-06.jpg': 'hand-man-stamping-documents-notary-public-in-offic-2025-03-09-13-11-43-utc-scaled.jpg',
+};
 
 /*
   A bad token is worse than no token, and silently so.
@@ -178,11 +218,16 @@ function imageComponents(blocks) {
 function matchFor(legacySrc, lib) {
   const base = decodeURIComponent(legacySrc.split('/').pop() ?? '');
   const exact = lib.get(base);
-  if (exact) return { file: exact, base, edited: false };
+  if (exact) return { file: exact, base, kind: 'exact' };
   if (EDITED.test(base)) {
     const stripped = base.replace(EDITED, '');
     const f = lib.get(stripped);
-    if (f) return { file: f, base, edited: true, via: stripped };
+    if (f) return { file: f, base, kind: 'edited', via: stripped };
+  }
+  const sub = SUBSTITUTIONS[base];
+  if (sub) {
+    const f = lib.get(sub);
+    if (f) return { file: f, base, kind: 'substitute', via: sub };
   }
   return null;
 }
@@ -204,10 +249,12 @@ async function scan(lib) {
         const m = matchFor(String(component.legacySrc), lib);
         if (!m) {
           unfixable.push(String(component.legacySrc).split('/').pop());
-        } else if (m.edited && !INCLUDE_EDITED) {
+        } else if (m.kind === 'edited' && !INCLUDE_EDITED) {
           unfixable.push(`${m.base}  (edited derivative — --include-edited to use ${m.via})`);
+        } else if (m.kind === 'substitute' && !SUBSTITUTE) {
+          unfixable.push(`${m.base}  (--substitute would stand in ${m.via})`);
         } else {
-          fixes.push({ componentId: component.id, base: m.base, file: m.file, edited: !!m.edited });
+          fixes.push({ componentId: component.id, base: m.base, file: m.file, kind: m.kind, via: m.via });
         }
       }
       if (fixes.length || unfixable.length) {
@@ -315,7 +362,8 @@ async function applyEntry(entry) {
 async function main() {
   console.log(`cms:  ${CMS}`);
   console.log(`mode: ${APPLY ? 'APPLY (writes drafts)' : 'dry run'}`);
-  console.log(`edited derivatives: ${INCLUDE_EDITED ? 'included' : 'skipped (--include-edited)'}\n`);
+  console.log(`edited derivatives: ${INCLUDE_EDITED ? 'included' : 'skipped (--include-edited)'}`);
+  console.log(`substitutes:        ${SUBSTITUTE ? 'INCLUDED — different photographs' : 'skipped (--substitute)'}\n`);
 
   const lib = await mediaLibrary();
   if (authFailed) {
@@ -344,7 +392,11 @@ async function main() {
   for (const e of fixable) {
     console.log(`  [${e.locale}] /${e.slug}`);
     for (const f of e.fixes) {
-      console.log(`      block ${f.componentId}  ${f.base}  ->  file ${f.file.id} (${f.file.width}x${f.file.height})${f.edited ? '  [edited derivative]' : ''}`);
+      const note =
+        f.kind === 'substitute' ? `  [SUBSTITUTE -> ${f.via}]`
+        : f.kind === 'edited' ? `  [edited derivative -> ${f.via}]`
+        : '';
+      console.log(`      block ${f.componentId}  ${f.base}  ->  file ${f.file.id} (${f.file.width}x${f.file.height})${note}`);
     }
   }
 
