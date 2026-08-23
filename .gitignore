@@ -19,3 +19,8 @@ next-env.d.ts
 # whole purpose is to be the version under review.
 content/landing/docx/
 content/landing/pdf/
+
+# Pre-write snapshots from scripts/relink-legacy-images.mjs. Local safety net
+# for a script that rewrites a Strapi dynamic zone; useless to anyone else and
+# a copy of live CMS content, so it stays out of the repo.
+.backups/
