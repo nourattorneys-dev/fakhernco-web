@@ -89,6 +89,42 @@ It is also fragile on purpose-of-record: the paths carry Strapi's content
 hashes, so a file re-uploaded under the same name gets a new URL and stops
 matching, silently.
 
+**`tidyBlocks()` in the same file is the other half of that shim.** The
+/about-us timeline stores each year as its own bare paragraph before the
+section heading — "2008", then "The Foundation of Expertise" — which reads as
+a stray number. It merges them, structurally, so it holds in every locale.
+It also drops orphaned control labels: paragraphs that are nothing but the
+caption of a button whose link did not survive the import ("Expand",
+"Mehr anzeigen"). Matched by exact text, never by index, which differs per
+locale. **"Why Choose Fakher & Co" and "Meet Your Advocates" are deliberately
+NOT dropped** — same kind of orphan, but they name real pages, so the fix is
+to restore the link, which is a content decision.
+
+## Missing Arabic pages
+
+`/ar/about-us` and `/ar/legal-consultations` are 404s. 49 slugs have an Arabic
+localisation; those two never got one.
+
+Nothing is broken-linked by this — `getNavPaths` builds from CMS content, so
+the Arabic header simply omits them (verified: 47 `/ar/*` links, neither of
+those among them), and `getTranslatedPaths` keeps the language switcher from
+offering a locale that does not exist. Both availability sets behave exactly
+as designed. The cost is narrower and quieter: an Arabic reader on the English
+/about-us is offered no Arabic at all, and the two URLs 404 if reached
+directly.
+
+`content/translations/ar/*.json` holds the copy, keyed by block index; the
+structure is cloned live from the English entry at run time, so images and
+block order cannot drift. Apply with:
+
+```bash
+STRAPI_URL=https://cms.fakhernco.com npm run import:translation -- --apply --token=…
+```
+
+**That Arabic is machine-assisted and has not been read by a native speaker.**
+It lands as a draft for exactly that reason — same standing caveat as the
+German UI strings above. Do not publish it before someone reads it.
+
 ## Release gates
 
 ```bash
