@@ -86,6 +86,83 @@ function altText(raw: string, src: string): string {
     .trim();
 }
 
+/**
+ * Legacy WordPress image URLs, remapped onto files that exist in the CMS.
+ *
+ * TEMPORARY. Delete this table and `legacyImage()` once the CMS blocks carry
+ * real `file` relations — `scripts/relink-legacy-images.mjs` does exactly that
+ * and needs only a write token. This shim exists because there was no token
+ * available and the pages were live and visibly broken.
+ *
+ * 78 image blocks across 18 entries carry a `legacySrc` at
+ * fakhernco.com/wp-content and no uploaded file. That origin is now this app
+ * on Vercel, which has no /wp-content, so each one rendered a broken image.
+ *
+ * Two kinds of entry here, and the difference matters if you ever reconcile
+ * this against the CMS:
+ *
+ *   SAME PHOTOGRAPH  the file was migrated, just never attached to the block.
+ *   STAND-IN         the original is gone with the WordPress box. Generic
+ *                    legal stock standing in for generic legal stock.
+ *
+ * Assignments avoid repeating an image within a page. Hashes are Strapi's, so
+ * a file RE-uploaded under the same name gets a new URL and silently stops
+ * matching here — another reason this should not outlive the CMS fix.
+ */
+const LEGACY_IMAGES: Record<string, string> = {
+  // -- same photograph, already in the media library
+  'blog-post-04.jpg': '/uploads/blog_post_04_7ce6d605c2.jpg',
+  'blog-post-05.jpg': '/uploads/blog_post_05_fa98295c2d.jpg',
+  'blog-post-10.jpg': '/uploads/blog_post_10_59b2cd128b.jpg',
+  'blog-post-12.jpg': '/uploads/blog_post_12_49d1c7e497.jpg',
+  'blog-post-13.jpg': '/uploads/blog_post_13_c97e0ab271.jpg',
+  // WordPress' edited derivative of blog-post-13; same photo, maybe a crop.
+  'blog-post-13-e1772931703989.jpg': '/uploads/blog_post_13_c97e0ab271.jpg',
+  'img-about-me.png': '/uploads/img_about_me_9781e41d5f.png',
+
+  // -- stand-ins; the originals died with the WordPress box
+  'blog-post-23.jpg':
+    '/uploads/business_and_lawyers_discussing_contract_papers_wi_2025_12_22_14_21_12_utc_scaled_0d1710f159.jpg',
+  'blog-post-18.jpg':
+    '/uploads/group_business_people_and_lawyers_legal_contract_2025_03_08_13_26_33_utc_scaled_41bb5c9765.jpg',
+  'blog-post-14.jpg':
+    '/uploads/close_up_photo_of_business_woman_and_man_signing_a_2025_04_10_00_26_29_utc_scaled_a79e1018ca.jpg',
+  'blog-post-14-e1772931697417.jpg':
+    '/uploads/close_up_photo_of_business_woman_and_man_signing_a_2025_04_10_00_26_29_utc_scaled_a79e1018ca.jpg',
+  'blog-post-15-e1772931709523.jpg':
+    '/uploads/business_team_in_dubai_2025_03_18_15_08_40_utc_scaled_ba576c12b4.jpg',
+  'blog-post-26.jpg':
+    '/uploads/business_team_in_dubai_2025_03_18_15_08_40_utc_scaled_ba576c12b4.jpg',
+  'blog-post-06.jpg':
+    '/uploads/hand_man_stamping_documents_notary_public_in_offic_2025_03_09_13_11_43_utc_scaled_dc87951a09.jpg',
+  /*
+    These two are graphics, not photographs, and no graphic stands in for
+    another. img-map-cover sat above the enquiry form on /contact-us — a Dubai
+    office photograph is the closest thing available, but it is not a map, and
+    img-experience was a bespoke homepage panel. Both are placeholders chosen
+    over leaving a hole, not equivalents.
+  */
+  'img-map-cover.png':
+    '/uploads/business_team_in_dubai_2025_03_18_15_08_40_utc_scaled_ba576c12b4.jpg',
+  'img-experience-e1772931770930.png':
+    '/uploads/business_and_lawyers_discussing_contract_papers_wi_2025_12_22_14_21_12_utc_scaled_0d1710f159.jpg',
+};
+
+/**
+ * A CMS URL for a legacy WordPress src, or null.
+ *
+ * null DROPS the block. That is deliberate and is a change from the previous
+ * behaviour, which passed the dead URL through and rendered a broken image on
+ * a live page. An image that is absent is better than one that is visibly
+ * broken, and a gap is the honest signal that something needs attention.
+ */
+function legacyImage(legacySrc: unknown): string | null {
+  if (typeof legacySrc !== 'string' || !legacySrc) return null;
+  const base = decodeURIComponent(legacySrc.split('/').pop() ?? '');
+  const path = LEGACY_IMAGES[base];
+  return path ? mediaUrl(path) : null;
+}
+
 // ----------------------------------------------------------------- mapping
 
 function toBlock(c: StrapiComponent): Block | null {
@@ -123,10 +200,12 @@ function toBlock(c: StrapiComponent): Block | null {
           .filter((i) => i.title),
       };
     case 'blocks.image': {
-      // Prefer the migrated Strapi file; fall back to the legacy WordPress URL
-      // so an unmigrated image still renders rather than disappearing.
+      // Prefer the migrated Strapi file; otherwise remap the legacy WordPress
+      // URL onto a CMS file via LEGACY_IMAGES. The old behaviour — passing the
+      // legacy URL straight through — was correct only while WordPress still
+      // served the domain, and has been rendering broken images since cutover.
       const file = c.file as { url?: string; alternativeText?: string } | null;
-      const src = mediaUrl(file?.url) ?? (c.legacySrc ? String(c.legacySrc) : null);
+      const src = mediaUrl(file?.url) ?? legacyImage(c.legacySrc);
       if (!src) return null;
       return {
         type: 'image',
@@ -138,7 +217,7 @@ function toBlock(c: StrapiComponent): Block | null {
       const items = ((c.items ?? []) as any[])
         .map((i) => {
           const file = i.file as { url?: string; alternativeText?: string } | null;
-          const src = mediaUrl(file?.url) ?? (i.legacySrc ? String(i.legacySrc) : null);
+          const src = mediaUrl(file?.url) ?? legacyImage(i.legacySrc);
           return src
             ? { src, alt: altText(String(i.alt ?? file?.alternativeText ?? ''), String(i.legacySrc ?? src)) }
             : null;

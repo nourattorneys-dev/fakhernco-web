@@ -74,6 +74,21 @@ unreadable and at 16px it is a grey smear. **Replace all three with a monogram
 when one exists** — neither this repo nor the CMS has a square mark today, only
 the bilingual wordmark.
 
+**`LEGACY_IMAGES` in `src/lib/content.ts` is a shim, and it should not last.**
+78 image blocks across 18 CMS entries point at the dead
+`fakhernco.com/wp-content` origin with no uploaded `file`, so they rendered
+broken. The table remaps them onto files that exist in the media library —
+seven are the same photograph, the rest are generic stock standing in for
+originals that died with the WordPress box.
+
+The real fix is `npm run fix:images -- --include-edited --substitute --apply
+--token=…`, which writes the `file` relations into the CMS; it was not run
+because no write token was available. **Once it has been, delete the table and
+`legacyImage()`** — the `file` branch takes over and the shim is dead weight.
+It is also fragile on purpose-of-record: the paths carry Strapi's content
+hashes, so a file re-uploaded under the same name gets a new URL and stops
+matching, silently.
+
 ## Release gates
 
 ```bash
