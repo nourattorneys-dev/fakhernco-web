@@ -163,6 +163,77 @@ function legacyImage(legacySrc: unknown): string | null {
   return path ? mediaUrl(path) : null;
 }
 
+/** Tag-free, entity-decoded text, for comparing a block's content. */
+function plainText(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#8217;|&rsquo;/g, '’')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Orphaned control labels, left behind by the WordPress migration.
+ *
+ * These are `blocks.paragraph` whose entire content is the caption of a button
+ * or accordion toggle whose link did not survive the import — bare words in the
+ * middle of prose, going nowhere. "Expand" on /about-us is the obvious one.
+ *
+ * Matched by text and not by index, because the index differs per locale and
+ * would silently drift the moment anyone edits the page. Matched EXACTLY, in
+ * every locale the label exists in, rather than by a heuristic like "a short
+ * paragraph with no full stop" — that rule also catches the bare years, the
+ * pull quote on /about-us, and any legitimately terse line anywhere else.
+ *
+ * NOT listed, deliberately: "Why Choose Fakher & Co" and "Meet Your Advocates"
+ * (and their German counterparts). Those are the same kind of orphan, but they
+ * name real pages — /why-choose-fakherco and /meet-your-advocates — so they
+ * were probably links, and the fix is to restore the link rather than delete
+ * the text. That is a content decision, not this function's call.
+ */
+const ORPHAN_LABELS = new Set(['expand', 'mehr anzeigen', 'توسّع']);
+
+/** A paragraph that is nothing but a year: "2008". */
+const BARE_YEAR = /^(?:19|20)\d{2}$/;
+
+/**
+ * Fold the /about-us timeline into shape.
+ *
+ * That page tells the firm's history as a bare year in its own paragraph
+ * followed by the section heading — "2008", then "The Foundation of
+ * Expertise" — which reads as a stray number rather than a date, and gives the
+ * heading no anchor in time. The year is merged into the heading it introduces.
+ *
+ * Structural, so it holds in every locale: the German page has the same shape
+ * with German headings, and the Arabic one will too.
+ *
+ * Belongs in the CMS, like LEGACY_IMAGES above. It is here for the same reason
+ * — no write token — and should go the same way once there is one.
+ */
+function tidyBlocks(blocks: Block[]): Block[] {
+  const out: Block[] = [];
+  for (let i = 0; i < blocks.length; i += 1) {
+    const b = blocks[i];
+    if (b.type !== 'paragraph') {
+      out.push(b);
+      continue;
+    }
+    const text = plainText(b.html);
+    if (ORPHAN_LABELS.has(text.toLowerCase())) continue;
+
+    const next = blocks[i + 1];
+    if (BARE_YEAR.test(text) && next?.type === 'heading') {
+      out.push({ ...next, text: `${text} — ${next.text}` });
+      i += 1; // the heading has been consumed
+      continue;
+    }
+    out.push(b);
+  }
+  return out;
+}
+
 // ----------------------------------------------------------------- mapping
 
 function toBlock(c: StrapiComponent): Block | null {
@@ -247,7 +318,7 @@ const mapDoc = (raw: Record<string, any>, kind: Doc['kind']): Doc => ({
   kind,
   categories: (raw.categories ?? []).map((c: any) => ({ name: c.name, slug: c.slug })),
   practiceArea: raw.practiceArea ? { title: raw.practiceArea.title, slug: raw.practiceArea.slug } : null,
-  blocks: ((raw.blocks ?? []) as StrapiComponent[]).map(toBlock).filter(Boolean) as Block[],
+  blocks: tidyBlocks(((raw.blocks ?? []) as StrapiComponent[]).map(toBlock).filter(Boolean) as Block[]),
 });
 
 /**
@@ -755,7 +826,7 @@ function toLanding(raw: Record<string, any>): Landing {
     subhead: String(raw.subhead ?? ''),
     description: String(raw.seo?.metaDescription ?? ''),
     heroImage: src ? { src, alt: raw.heroImage?.alternativeText ?? '' } : null,
-    blocks: ((raw.blocks ?? []) as StrapiComponent[]).map(toBlock).filter(Boolean) as Block[],
+    blocks: tidyBlocks(((raw.blocks ?? []) as StrapiComponent[]).map(toBlock).filter(Boolean) as Block[]),
   };
 }
 
