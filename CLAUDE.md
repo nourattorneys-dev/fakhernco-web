@@ -51,6 +51,21 @@ variable when the first German pages are published**, then confirm the build
 still passes. German UI strings (`src/lib/ui.ts`) and the CMS auto-reply are
 marked non-native and need a German reader before paid traffic.
 
+## Brand assets
+
+`public/logo.png` is the square mark in the JSON-LD `logo`/`image` on the
+organisation node, so it must stay at that exact crawlable URL — Google
+re-fetches it long after the page that referenced it was rendered.
+
+**The favicons are a deliberate stopgap.** `src/app/{favicon.ico,icon.png,
+apple-icon.png}` are generated from that same wordmark, and a wordmark does
+not survive being a favicon: the ink is a 1579×424 strip, 3.7:1, so in a
+square box it can never be more than 27% taller than it already is. At 32px
+it is unreadable and at 16px it is a grey smear. **Replace all three with a
+monogram when one exists** — neither this repo nor the CMS has a square mark
+today, only the bilingual wordmark. Regenerate at 192/180/48; 48 is a
+multiple of Google's 48px favicon step.
+
 ## Release gates
 
 ```bash
