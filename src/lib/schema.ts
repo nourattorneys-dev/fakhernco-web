@@ -15,6 +15,34 @@ import { SITE } from './site';
 
 const ORG_ID = `${SITE}/#organization`;
 const SITE_ID = `${SITE}/#website`;
+const LOGO_ID = `${SITE}/#logo`;
+
+/**
+ * The brand mark Google shows beside the firm in a knowledge panel.
+ *
+ * Served from `public/`, NOT from the CMS. The header wordmark is a CMS upload
+ * and changes with the locale; this one is fixed, because a logo referenced
+ * from structured data has to stay at a stable, crawlable URL — Google
+ * re-fetches it long after the page that pointed at it was rendered, and a
+ * CMS-hosted URL would move the moment someone re-uploads the file.
+ *
+ * `/api/` is the only Disallow in robots.ts, so `/logo.png` is crawlable.
+ * Google drops the logo silently if it is not, with no Search Console error to
+ * find — the property is simply absent from the rich result.
+ *
+ * Dimensions are stated because they are cheap and consumers that lay out the
+ * image without fetching it first would otherwise guess. 2000×2000 is far above
+ * Google's 112×112 floor.
+ */
+const LOGO = {
+  '@type': 'ImageObject',
+  '@id': LOGO_ID,
+  url: `${SITE}/logo.png`,
+  contentUrl: `${SITE}/logo.png`,
+  width: 2000,
+  height: 2000,
+  caption: 'Fakher & Co',
+} as const;
 
 export const OFFICES = [
   {
@@ -41,6 +69,19 @@ export function organizationSchema() {
     name: 'Fakher & Co',
     alternateName: 'مكتب فاخر ومشاركوه',
     url: SITE,
+    /*
+      `logo` is the property Google reads for the organisation logo; `image` is
+      a separate one it reads for the entity's picture, and several validators
+      warn when an Organization has no `image` at all. They point at the same
+      node by @id rather than repeating the object, so there is one ImageObject
+      in the graph and no chance of the two drifting apart.
+
+      Both stay on the organisation node in EVERY locale. The graph is emitted
+      once per root layout, and a logo declared only on the English one would
+      leave /ar and /de describing a firm with no mark.
+    */
+    logo: LOGO,
+    image: { '@id': LOGO_ID },
     description:
       'Trusted litigation specialists in the UAE since 2011, providing dispute resolution, contract drafting, company formation and private notary services.',
     foundingDate: '2011',
