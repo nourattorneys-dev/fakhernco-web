@@ -58,13 +58,21 @@ organisation node, so it must stay at that exact crawlable URL — Google
 re-fetches it long after the page that referenced it was rendered.
 
 **The favicons are a deliberate stopgap.** `src/app/{favicon.ico,icon.png,
-apple-icon.png}` are generated from that same wordmark, and a wordmark does
-not survive being a favicon: the ink is a 1579×424 strip, 3.7:1, so in a
-square box it can never be more than 27% taller than it already is. At 32px
-it is unreadable and at 16px it is a grey smear. **Replace all three with a
-monogram when one exists** — neither this repo nor the CMS has a square mark
-today, only the bilingual wordmark. Regenerate at 192/180/48; 48 is a
-multiple of Google's 48px favicon step.
+apple-icon.png}` are generated from that same wordmark by
+`node scripts/make-icons.mjs` — run it after replacing the logo and commit the
+results; they are build inputs, not build output.
+
+`icon.png` and `favicon.ico` are masked to a circle, transparent corners.
+`apple-icon.png` is square and full-bleed **on purpose**: iOS applies its own
+squircle mask to the touch icon, and transparent corners under it render black.
+
+A wordmark does not survive being a favicon at any shape. The ink is a 1579×424
+strip, 3.7:1, so in a square box it can never be more than 27% taller than it
+already is, and a circle does not help — the chord at that height is 96% of the
+diameter, so masking trims the corners and not the mark. At 32px it is
+unreadable and at 16px it is a grey smear. **Replace all three with a monogram
+when one exists** — neither this repo nor the CMS has a square mark today, only
+the bilingual wordmark.
 
 ## Release gates
 

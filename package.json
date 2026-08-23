@@ -12,6 +12,7 @@
     "verify:seo": "node scripts/verify-seo.mjs",
     "check:cms": "node scripts/check-cms.mjs",
     "fix:images": "node scripts/relink-legacy-images.mjs",
+    "make:icons": "node scripts/make-icons.mjs",
     "verify:links": "node scripts/verify-links.mjs",
     "export:lp-docx": "python3 scripts/export-landing-docx.py",
     "export:lp-pdf": "bash scripts/export-landing-pdf.sh"
