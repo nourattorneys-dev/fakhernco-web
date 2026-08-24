@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import {
   DEFAULT_LOCALE,
-  LOCALES,
   LOCALE_DIR,
   LOCALE_HREFLANG,
   LOCALE_LABEL,
@@ -34,6 +33,16 @@ import {
  * hand-drawn rects cost nothing and render identically everywhere. The Union Jack for
  * English, UAE for Arabic, Germany for German.
  */
+
+/**
+ * The languages the header offers.
+ *
+ * Deliberately NOT `LOCALES`. German pages still exist and stay reachable by
+ * URL, in the sitemap and via hreflang - they are simply not advertised in the
+ * header, which the site offers as an English/Arabic choice. Re-adding German
+ * to the menu is a one-word change here; nothing else needs touching.
+ */
+const SWITCHER_LOCALES = ['en', 'ar'] as const satisfies readonly Locale[];
 
 function Flag({ locale }: { locale: Locale }) {
   const common = {
@@ -112,7 +121,7 @@ export function LanguageSwitcher({
   // Close when the route changes — the reader picked a language.
   useEffect(() => setOpen(false), [pathname]);
 
-  const others = LOCALES.filter((locale) => locale !== current)
+  const others = SWITCHER_LOCALES.filter((locale) => locale !== current)
     .map((locale) => ({ locale, target: pathIn(pathname, locale) }))
     .filter(
       ({ locale, target }) =>
